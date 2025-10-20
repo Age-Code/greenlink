@@ -17,18 +17,23 @@ public class User extends AuditingFields {
     String username;
     String password;
     String email;
-    String university;
     String nickname;
+    String phoneNumber;
+    String address;
+    String role;
 
     protected User(){}
-    private User(String username, String password, String email, String university, String nickname) {
+    private User(String username, String password, String email, String nickname, String phoneNumber, String address, String role) {
         this.username = username;
         this.password = password;
         this.email = email;
-        this.university = university;
         this.nickname = nickname;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.role = role;
     }
-    public static User of(String username, String password, String email, String university, String nickname) { return new User(username, password, email, university, nickname); }
+    public static User of(String username, String password, String email, String nickname, String phoneNumber, String address, String role) {
+        return new User(username, password, email, nickname, phoneNumber, address, role); }
 
     public UserDto.SignupResDto toSignupResDto() { return UserDto.SignupResDto.builder().id(getId()).build(); }
     public AdminUserDto.CreateResDto toCreateResDto() { return AdminUserDto.CreateResDto.builder().id(getId()).build(); }

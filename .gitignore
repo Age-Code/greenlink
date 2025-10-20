@@ -6,7 +6,7 @@ build/
 !**/src/test/**/build/
 
 ### for external properties ###
-application-keys.yaml
+*.yaml
 
 ### STS ###
 .apt_generated
