@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head -->
+<th:block th:replace="~{/includes/admin/head}" />
+
+<script id="list-template" type="text/x-handlebars-template">
+    <tr>
+        <td>{{id}}</td>
+        <td class='cursor_pointer' onclick='location.href = "/admin/user/detail/{{id}}"'>{{username}}</td>
+        <td>{{deleted}}</td>
+        <td>{{createdAt}}</td>
+        <td>{{modifiedAt}}</td>
+    </tr>
+</script>
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <th:block th:replace="~{/includes/admin/sidebar}" />
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topper -->
+                <th:block th:replace="~{/includes/admin/topper}" />
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- Page Heading -->
+                    <h1 class="h3 mb-2 text-gray-800">User List</h1>
+                    <p class="mb-4">User List example</p>
+
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <a class="btn btn-primary m-1" href="#" style="float: right" data-toggle="modal" data-target="#createModal">Create</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable">
+                                    <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Deleted</th>
+                                        <th>Create Date</th>
+                                        <th>Modified date</th>
+                                    </tr>
+                                    </thead>
+                                    <tfoot>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Deleted</th>
+                                        <th>Create Date</th>
+                                        <th>Modified date</th>
+                                    </tr>
+                                    </tfoot>
+                                    <tbody id = "table_body">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <th:block th:replace="~{/includes/admin/footer}" />
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Create Modal-->
+    <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">User Create</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+
+                        <div class="col-sm-6 mb-3 mb-sm-0">
+                            <input type="text" class="form-control form-control-user" id="user_username" placeholder="Username" required>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <input type="password" class="form-control form-control-user" id="user_password" placeholder="Password" required>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+                        <input type="email" class="form-control form-control-user" id="user_email" placeholder="Email Address" required>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-sm-6 mb-3 mb-sm-0">
+                            <input type="text" class="form-control form-control-user" id="user_university" placeholder="University" required>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control form-control-user" id="user_nickname" placeholder="Nickname" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary" id="create_user_btn" onclick="create_user()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <th:block th:replace="~{/includes/admin/logout}" />
+
+    <!-- Script-->
+    <th:block th:replace="~{/includes/admin/script}" />
+
+
+    <!-- Page level plugins -->
+    <script src="/sb-admin/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/sb-admin/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Function-->
+    <script>
+        $(document).ready(function(){
+            list_role();
+        });
+
+        var list_source = $("#list-template").html();
+        var list_template = Handlebars.compile(list_source);
+
+        function create_user() {
+            $.ajax({
+                url: "/api/adminUser",
+                method: "POST",
+                contentType: 'application/json; charset=utf-8',
+                headers:{
+                    "Authorization" : localStorage.getItem("Authorization")
+                },
+                data:JSON.stringify({
+                    username: $('#user_username').val(),
+                    password: $('#user_password').val(),
+                    email: $('#user_email').val(),
+                    university: $('#user_university').val(),
+                    nickname: $('#user_nickname').val()
+                }),
+                success: (data, status, xhr)=>{
+                    alert(JSON.stringify(data));
+                    list_role();
+                },
+                error: (data, status, xhr)=>{
+                    alert(JSON.stringify(data));
+                }
+            });
+        }
+
+        function list_role() {
+            $.ajax({
+                url: "/api/adminUser/list",
+                method: "GET",
+                contentType : 'application/json; charset=utf-8',
+                headers:{
+                    "Authorization" : localStorage.getItem("Authorization")
+                },
+                success: (data, status, xhr)=>{
+                    if ($.fn.DataTable.isDataTable('#dataTable')) {
+                        $('#dataTable').DataTable().clear().destroy();
+                    }
+                    $("#table_body").html("");
+                    for(let each of data){
+                        $("#table_body").append(list_template(each));
+                    }
+                    $('#dataTable').DataTable();
+                },
+                error: (data, status, xhr)=>{
+                    alert(JSON.stringify(data));
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>
