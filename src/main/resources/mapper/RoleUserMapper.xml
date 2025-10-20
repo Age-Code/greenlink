@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0/EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.greenlink.mapper.admin.RoleUserMapper">
+
+    <!--Permit-->
+    <select id="permit" parameterType="hashMap" resultType="long">
+        SELECT count(DISTINCT role.id)
+        FROM role_user
+        JOIN role ON role.id = role_user.role_id
+                 AND role.deleted = 0
+        JOIN permission ON permission.role_id = role.id
+                        AND permission.deleted = 0
+                        AND permission.permission = #{permission}
+                        AND permission.func = #{func}
+        WHERE role_user.user_id = #{reqUserId}
+          AND role_user.deleted = 0
+    </select>
+
+    <!--UserList-->
+    <select id="userList" parameterType="hashMap" resultType="org.example.greenlink.dto.admin.RoleUserDto$ListResDto">
+        SELECT role_user.user_id as resId,
+               role_user.modified_at as addedAt,
+               role_user.add_user_id as addUserId,
+               user.username as resName,
+               user.deleted as resDeleted
+        FROM role_user
+        JOIN user ON role_user.user_id = user.id
+        WHERE role_user.role_id = #{reqId}
+        <if test = "deleted != null">AND role_user.deleted = #{deleted}</if>
+    </select>
+
+    <!--AddUserList-->
+    <select id="addUserList" parameterType="hashMap" resultType="org.example.greenlink.dto.admin.RoleUserDto$AddListResDto">
+        SELECT user.id as resId,
+               user.username as resName,
+               user.deleted as resDeleted
+        FROM user
+        LEFT JOIN role_user ON user.id = role_user.user_id
+                           AND role_user.role_id = #{reqId}
+        WHERE (role_user.user_id IS NULL
+        <if test = "deleted != null">OR role_user.deleted = #{deleted}</if>)
+    </select>
+
+    <!--RoleList-->
+    <select id="roleList" parameterType="hashMap" resultType="org.example.greenlink.dto.admin.RoleUserDto$ListResDto">
+        SELECT role_user.role_id as resId,
+        role_user.modified_at as addedAt,
+        role_user.add_user_id as addUserId,
+        role.role_name as resName,
+        role.deleted as resDeleted
+        FROM role_user
+        JOIN role ON role_user.role_id = role.id
+        WHERE role_user.user_id = #{reqId}
+        <if test = "deleted != null">AND role_user.deleted = #{deleted}</if>
+    </select>
+
+    <!--AddRoleList-->
+    <select id="addRoleList" parameterType="hashMap" resultType="org.example.greenlink.dto.admin.RoleUserDto$AddListResDto">
+        SELECT role.id as resId,
+               role.role_name as resName,
+               role.deleted as resDeleted
+        FROM role
+        LEFT JOIN role_user ON role.id = role_user.role_id
+                           AND role_user.user_id = #{reqId}
+        WHERE (role_user.role_id IS NULL
+        <if test = "deleted != null">OR role_user.deleted = #{deleted}</if>)
+    </select>
+
+</mapper>
