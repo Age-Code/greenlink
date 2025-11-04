@@ -2,7 +2,7 @@ package org.example.greenlink.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.example.greenlink.repository.user.UserRepository;
+import org.example.greenlink.repository.UserRepository;
 import org.example.greenlink.security.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

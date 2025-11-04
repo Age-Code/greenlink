@@ -1,9 +1,9 @@
 package org.example.greenlink.security;
 
 import lombok.RequiredArgsConstructor;
-import org.example.greenlink.domain.user.User;
+import org.example.greenlink.domain.User;
 import org.example.greenlink.exception.NoMatchingDataException;
-import org.example.greenlink.repository.user.UserRepository;
+import org.example.greenlink.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

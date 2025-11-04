@@ -3,7 +3,7 @@ package org.example.greenlink.dto.admin;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.example.greenlink.domain.user.User;
+import org.example.greenlink.domain.User;
 import org.example.greenlink.dto.DefaultDto;
 
 import java.time.LocalDateTime;

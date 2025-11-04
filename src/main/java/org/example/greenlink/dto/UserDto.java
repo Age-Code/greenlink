@@ -1,7 +1,7 @@
-package org.example.greenlink.dto.user;
+package org.example.greenlink.dto;
 
 import lombok.*;
-import org.example.greenlink.domain.user.User;
+import org.example.greenlink.domain.User;
 
 public class UserDto {
 

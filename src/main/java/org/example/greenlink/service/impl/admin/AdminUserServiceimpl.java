@@ -1,7 +1,7 @@
 package org.example.greenlink.service.impl.admin;
 
 import lombok.RequiredArgsConstructor;
-import org.example.greenlink.domain.user.User;
+import org.example.greenlink.domain.User;
 import org.example.greenlink.dto.admin.AdminUserDto;
 import org.example.greenlink.dto.admin.RoleUserDto;
 import org.example.greenlink.mapper.admin.AdminUserMapper;
