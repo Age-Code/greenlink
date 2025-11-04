@@ -2,7 +2,7 @@ package org.example.greenlink.security;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.example.greenlink.domain.user.User;
+import org.example.greenlink.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

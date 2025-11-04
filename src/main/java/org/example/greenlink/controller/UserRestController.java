@@ -1,8 +1,8 @@
-package org.example.greenlink.controller.user;
+package org.example.greenlink.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.greenlink.dto.user.UserDto;
-import org.example.greenlink.service.user.UserService;
+import org.example.greenlink.dto.UserDto;
+import org.example.greenlink.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

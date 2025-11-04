@@ -1,7 +1,7 @@
-package org.example.greenlink.dto.user;
+package org.example.greenlink.dto;
 
 import lombok.*;
-import org.example.greenlink.domain.user.User;
+import org.example.greenlink.domain.User;
 
 public class UserDto {
 
@@ -11,10 +11,12 @@ public class UserDto {
         public String username;
         public String password;
         public String email;
-        public String university;
         public String nickname;
+        public String phoneNumber;
+        public String address;
+        public String role;
 
-        public User toEntity() { return User.of(getUsername(), getPassword(), getEmail(), getUniversity(), getNickname()); }
+        public User toEntity() { return User.of(getUsername(), getPassword(), getEmail(), getNickname(), getPhoneNumber(), getAddress(), getRole()); }
     }
 
     // Signup Response Dto

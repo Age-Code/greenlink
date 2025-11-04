@@ -1,6 +1,6 @@
-package org.example.greenlink.service.user;
+package org.example.greenlink.service;
 
-import org.example.greenlink.dto.user.UserDto;
+import org.example.greenlink.dto.UserDto;
 import org.springframework.stereotype.Service;
 
 @Service

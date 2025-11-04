@@ -1,10 +1,10 @@
-package org.example.greenlink.service.impl.user;
+package org.example.greenlink.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.greenlink.domain.user.User;
-import org.example.greenlink.dto.user.UserDto;
-import org.example.greenlink.repository.user.UserRepository;
-import org.example.greenlink.service.user.UserService;
+import org.example.greenlink.domain.User;
+import org.example.greenlink.dto.UserDto;
+import org.example.greenlink.repository.UserRepository;
+import org.example.greenlink.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
