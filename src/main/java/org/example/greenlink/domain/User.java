@@ -2,11 +2,13 @@ package org.example.greenlink.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
-import org.example.greenlink.dto.admin.AdminUserDto;
-import org.example.greenlink.dto.UserDto;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,21 +21,19 @@ public class User extends AuditingFields {
     String nickname;
     String phoneNumber;
     String address;
-    String role;
+
+    @OneToMany(mappedBy = "user")
+    private List<Attend> attends = new ArrayList<>();
 
     protected User(){}
-    private User(String username, String password, String email, String nickname, String phoneNumber, String address, String role) {
+    private User(String username, String password, String email, String nickname, String phoneNumber, String address) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.address = address;
-        this.role = role;
     }
-    public static User of(String username, String password, String email, String nickname, String phoneNumber, String address, String role) {
-        return new User(username, password, email, nickname, phoneNumber, address, role); }
-
-    public UserDto.SignupResDto toSignupResDto() { return UserDto.SignupResDto.builder().id(getId()).build(); }
-    public AdminUserDto.CreateResDto toCreateResDto() { return AdminUserDto.CreateResDto.builder().id(getId()).build(); }
+    public static User of(String username, String password, String email, String nickname, String phoneNumber, String address) {
+        return new User(username, password, email, nickname, phoneNumber, address); }
 }

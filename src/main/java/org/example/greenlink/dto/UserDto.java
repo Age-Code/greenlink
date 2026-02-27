@@ -14,15 +14,18 @@ public class UserDto {
         public String nickname;
         public String phoneNumber;
         public String address;
-        public String role;
 
-        public User toEntity() { return User.of(getUsername(), getPassword(), getEmail(), getNickname(), getPhoneNumber(), getAddress(), getRole()); }
+        public User toEntity() { return User.of(getUsername(), getPassword(), getEmail(), getNickname(), getPhoneNumber(), getAddress()); }
     }
 
-    // Signup Response Dto
+    // UserId Response Dto
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-    public static class SignupResDto {
-        Long id;
+    public static class UserIdResDto {
+        Long userId;
+
+        public static UserIdResDto toUserIdResDto(User user) {
+            return UserIdResDto.builder().userId(user.getId()).build();
+        }
     }
 
     // Login Request Dto

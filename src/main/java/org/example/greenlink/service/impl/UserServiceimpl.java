@@ -17,7 +17,7 @@ public class UserServiceimpl implements UserService {
 
     // Signup
     @Override
-    public UserDto.SignupResDto signup(UserDto.SignupReqDto signupReqDto){
+    public UserDto.UserIdResDto signup(UserDto.SignupReqDto signupReqDto){
 
         User user = userRepository.findByUsername(signupReqDto.getUsername()).orElse(null);
         if(user != null) {
@@ -27,7 +27,7 @@ public class UserServiceimpl implements UserService {
         signupReqDto.setPassword(bCryptPasswordEncoder.encode(signupReqDto.getPassword()));
         user = userRepository.save(signupReqDto.toEntity());
 
-        return user.toSignupResDto();
+        return UserDto.UserIdResDto.toUserIdResDto(user);
     }
 
 }
