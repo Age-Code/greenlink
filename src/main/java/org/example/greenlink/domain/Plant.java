@@ -20,13 +20,16 @@ public class Plant extends AuditingFields {
     String category;
     DomainEnum.Difficulty difficulty;
     Long growthPeriodDays;
-    DomainEnum.lightPref lightPref;
+    DomainEnum.LightPref lightPref;
     Long waterPrefMlPerDay;
     String imageUrl;
     String unlockCondition;
 
+    @OneToMany(mappedBy = "plant")
+    private List<Plant> plants = new ArrayList<>();
+
     protected Plant(){}
-    private Plant(String name, String description, String category, DomainEnum.Difficulty difficulty, Long growthPeriodDays, DomainEnum.lightPref lightPref, String imageUrl, String unlockCondition) {
+    private Plant(String name, String description, String category, DomainEnum.Difficulty difficulty, Long growthPeriodDays, DomainEnum.LightPref lightPref, String imageUrl, String unlockCondition) {
         this.name = name;
         this.description = description;
         this.category = category;
@@ -36,6 +39,6 @@ public class Plant extends AuditingFields {
         this.imageUrl = imageUrl;
         this.unlockCondition = unlockCondition;
     }
-    public static Plant of(String name, String description, String category, DomainEnum.Difficulty difficulty, Long growthPeriodDays, DomainEnum.lightPref lightPref, String imageUrl, String unlockCondition) {
+    public static Plant of(String name, String description, String category, DomainEnum.Difficulty difficulty, Long growthPeriodDays, DomainEnum.LightPref lightPref, String imageUrl, String unlockCondition) {
         return new Plant(name, description, category, difficulty, growthPeriodDays, lightPref, imageUrl, unlockCondition); }
 }

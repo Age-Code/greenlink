@@ -25,6 +25,12 @@ public class User extends AuditingFields {
     @OneToMany(mappedBy = "user")
     private List<Attend> attends = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user")
+    private List<UserPlant> userPlants = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<UserQuest> userQuests = new ArrayList<>();
+
     protected User(){}
     private User(String username, String password, String email, String nickname, String phoneNumber, String address) {
         this.username = username;
