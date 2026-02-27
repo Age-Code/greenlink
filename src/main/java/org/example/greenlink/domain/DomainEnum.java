@@ -11,9 +11,35 @@ public final class DomainEnum {
         HARD
     }
 
-    public enum lightPref {
+    public enum LightPref {
         LOW,
         MEDIUM,
         HIGH
+    }
+
+    public enum Status {
+        GROWING, // 키우는 중(기본)
+        HARVESTABLE, // 수확 가능
+        HARVESTED, // 수확 완료
+        FAILED // 실패
+    }
+
+    public enum QuestType {
+        DAILY,
+        WEEKLY,
+        ACHIEVEMENT
+    }
+
+    public enum State {
+        ONGOING,
+        COMPLETED,
+        CLAIMED
+    }
+
+    public enum ItemType {
+        POT,
+        DECORATION,
+        NUTRIENT,
+        TITLE
     }
 }
