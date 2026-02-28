@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,25 +15,28 @@ import java.util.List;
 public class Quest extends AuditingFields {
     String title;
     String description;
+    @Enumerated(EnumType.STRING)
     DomainEnum.QuestType type;
     String targetType;
-    Long targetValue;
-
-    @OneToMany(mappedBy = "quest")
-    private List<Quest> quests = new ArrayList<>();
+    int targetValue;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reward_item_id", nullable = true)
-    private User rewardItem;
+    @JoinColumn(name = "reward_item_id")
+    private Item rewardItem;
+
+    @OneToMany(mappedBy = "quest")
+    private List<UserQuest> userQuests = new ArrayList<>();
 
     protected Quest(){}
-    private Quest(String title, String description, DomainEnum.QuestType type, Long targetValue) {
+    private Quest(String title, String description, DomainEnum.QuestType type, String targetType, int targetValue, Item rewardItem) {
         this.title = title;
         this.description = description;
         this.type = type;
+        this.targetType = targetType;
         this.targetValue = targetValue;
+        this.rewardItem = rewardItem;
     }
-    public static Quest of(String title, String description, DomainEnum.QuestType type, Long targetValue) {
-        return new Quest(title, description, type, targetValue);
+    public static Quest of(String title, String description, DomainEnum.QuestType type, String targetType, int targetValue, Item rewardItem) {
+        return new Quest(title, description, type, targetType, targetValue, rewardItem);
     }
 }

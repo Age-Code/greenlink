@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 public class UserPlantItem extends AuditingFields {
-    Long quantity;
+    int quantity;
     Boolean equipped;
     LocalDateTime appliedAt;
     LocalDateTime expiresAt;
@@ -26,7 +26,7 @@ public class UserPlantItem extends AuditingFields {
     private Item item;
 
     protected UserPlantItem(){}
-    private UserPlantItem(Long quantity, Boolean equipped, LocalDateTime appliedAt, LocalDateTime expiresAt, UserPlant userPlant, Item item) {
+    private UserPlantItem(int quantity, Boolean equipped, LocalDateTime appliedAt, LocalDateTime expiresAt, UserPlant userPlant, Item item) {
         this.quantity = quantity;
         this.equipped = equipped;
         this.appliedAt = appliedAt;
@@ -34,7 +34,7 @@ public class UserPlantItem extends AuditingFields {
         this.userPlant = userPlant;
         this.item = item;
     }
-    public static UserPlantItem of(Long quantity, Boolean equipped, LocalDateTime appliedAt, LocalDateTime expiresAt, UserPlant userPlant, Item item) {
+    public static UserPlantItem of(int quantity, Boolean equipped, LocalDateTime appliedAt, LocalDateTime expiresAt, UserPlant userPlant, Item item) {
         return new UserPlantItem(quantity, equipped, appliedAt, expiresAt, userPlant, item);
     }
 }

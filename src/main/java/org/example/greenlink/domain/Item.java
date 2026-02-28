@@ -1,8 +1,6 @@
 package org.example.greenlink.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -14,9 +12,13 @@ import java.util.List;
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 @Entity
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"code"})
+)
 public class Item extends AuditingFields {
     String code;
     String name;
+    @Enumerated(EnumType.STRING)
     DomainEnum.ItemType type;
     String description;
     String imageUrl;

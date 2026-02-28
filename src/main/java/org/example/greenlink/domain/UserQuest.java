@@ -9,8 +9,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 @Entity
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "quest_id"})
+)
 public class UserQuest extends AuditingFields {
-    Long progress;
+    int progress;
+    @Enumerated(EnumType.STRING)
     DomainEnum.State state;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -22,13 +26,13 @@ public class UserQuest extends AuditingFields {
     private Quest quest;
 
     protected UserQuest(){}
-    private UserQuest(Long progress, DomainEnum.State state, User user, Quest quest) {
+    private UserQuest(int progress, DomainEnum.State state, User user, Quest quest) {
         this.progress = progress;
         this.state = state;
         this.user = user;
         this.quest = quest;
     }
-    public static UserQuest of(Long progress, DomainEnum.State state, User user, Quest quest) {
+    public static UserQuest of(int progress, DomainEnum.State state, User user, Quest quest) {
         return new UserQuest(progress, state, user, quest);
     }
 }
