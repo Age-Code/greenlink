@@ -17,6 +17,7 @@ public class UserPlant extends AuditingFields {
     String nickname;
     String potStyle;
     String decoration;
+    @Enumerated(EnumType.STRING)
     DomainEnum.Status status;
     LocalDate startDate;
     LocalDate expectedHarvestDate;

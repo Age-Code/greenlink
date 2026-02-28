@@ -11,21 +11,24 @@ import java.time.LocalDate;
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 @Entity
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "attend_date"})
+)
 public class Attend extends AuditingFields {
     LocalDate attendDate;
-    Long streakAfter;
+    int streakAfter;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     protected Attend(){}
-    private Attend(LocalDate attendDate, Long streakAfter, User user) {
+    private Attend(LocalDate attendDate, int streakAfter, User user) {
         this.attendDate = attendDate;
         this.streakAfter = streakAfter;
         this.user = user;
     }
-    public static Attend of(LocalDate attendDate, Long streakAfter, User user) {
+    public static Attend of(LocalDate attendDate, int streakAfter, User user) {
         return new Attend(attendDate, streakAfter, user);
     }
 }
