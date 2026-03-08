@@ -18,10 +18,10 @@ public final class DomainEnum {
     }
 
     public enum Status {
-        GROWING, // 키우는 중(기본)
-        HARVESTABLE, // 수확 가능
-        HARVESTED, // 수확 완료
-        FAILED // 실패
+        GROWING,
+        HARVESTABLE,
+        HARVESTED,
+        FAILED
     }
 
     public enum QuestType {

@@ -15,8 +15,6 @@ import java.util.List;
 @Entity
 public class UserPlant extends AuditingFields {
     String nickname;
-    String potStyle;
-    String decoration;
     @Enumerated(EnumType.STRING)
     DomainEnum.Status status;
     LocalDate startDate;
@@ -39,10 +37,8 @@ public class UserPlant extends AuditingFields {
     private List<UserPlantItem> userPlantItems = new ArrayList<>();
 
     protected UserPlant(){}
-    private UserPlant(String nickname, String potStyle, String decoration, DomainEnum.Status status, LocalDate startDate, LocalDate expectedHarvestDate, LocalDate harvestDate, Double moisturePct, Double nutrientLevel, Double sunlightExposure, String lastPhotoUrl) {
+    private UserPlant(String nickname, DomainEnum.Status status, LocalDate startDate, LocalDate expectedHarvestDate, LocalDate harvestDate, Double moisturePct, Double nutrientLevel, Double sunlightExposure, String lastPhotoUrl) {
         this.nickname = nickname;
-        this.potStyle = potStyle;
-        this.decoration = decoration;
         this.status = status;
         this.startDate = startDate;
         this.expectedHarvestDate = expectedHarvestDate;
@@ -52,7 +48,7 @@ public class UserPlant extends AuditingFields {
         this.sunlightExposure = sunlightExposure;
         this.lastPhotoUrl = lastPhotoUrl;
     }
-    public static UserPlant of(String nickname, String potStyle, String decoration, DomainEnum.Status status, LocalDate startDate, LocalDate expectedHarvestDate, LocalDate harvestDate, Double moisturePct, Double nutrientLevel, Double sunlightExposure, String lastPhotoUrl) {
-        return new UserPlant(nickname, potStyle, decoration, status, startDate, expectedHarvestDate, harvestDate, moisturePct, nutrientLevel, sunlightExposure, lastPhotoUrl);
+    public static UserPlant of(String nickname, DomainEnum.Status status, LocalDate startDate, LocalDate expectedHarvestDate, LocalDate harvestDate, Double moisturePct, Double nutrientLevel, Double sunlightExposure, String lastPhotoUrl) {
+        return new UserPlant(nickname, status, startDate, expectedHarvestDate, harvestDate, moisturePct, nutrientLevel, sunlightExposure, lastPhotoUrl);
     }
 }
