@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/userPlant")
 @RestController
-public class UserUserPlantRestController {
+public class UserPlantRestController {
 
     final UserPlantService userPlantService;
 
@@ -55,7 +55,7 @@ public class UserUserPlantRestController {
     // Harvest
     @PreAuthorize("hasRole('USER')")
     @PutMapping("/{userPlantId}/harvest")
-    public ResponseEntity<UserPlantDto.UserPlantIdResDto> harvest(@PathVariable Long userPlantId, @AuthenticationPrincipal PrincipalDetails principalDetails){
+    public ResponseEntity<UserPlantDto.HarvestResDto> harvest(@PathVariable Long userPlantId, @AuthenticationPrincipal PrincipalDetails principalDetails){
         return ResponseEntity.ok(userPlantService.harvest(userPlantId, getReqUserPlantId(principalDetails)));
     }
 }

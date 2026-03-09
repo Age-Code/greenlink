@@ -38,12 +38,21 @@ public class UserDto {
     // Detail Response Dto
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
     public static class DetailResDto {
-        public Long userId;
         public String username;
         public String email;
         public String nickname;
         public String phoneNumber;
         public String address;
+
+        public static DetailResDto toDetailResDto(User user) {
+            return DetailResDto.builder()
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .nickname(user.getNickname())
+                    .phoneNumber(user.getPhoneNumber())
+                    .address(user.getAddress())
+                    .build();
+        }
     }
 
     // Update Request Dto
