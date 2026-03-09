@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0/EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.greenlink.mapper.PlantMapper">
+
+    <!--List-->
+    <select id="list" resultType="org.example.greenlink.dto.PlantDto$ListResDto">
+        SELECT plant.id as plantId,
+               plant.name as name,
+               plant.category as category,
+               plant.difficulty as difficulty,
+               plant.image_url as imageUrl
+
+        FROM plant
+        WHERE 1=1
+            AND plant.deleted = false
+
+            <if test="listReqDto.categoryList != null and listReqDto.categoryList.size() &gt; 0">
+                AND plant.categoryList IN
+                <foreach collection="listReqDto.categoryList" item="category" open="(" separator="," close=")">
+                    #{category}
+                </foreach>
+            </if>
+
+            <if test="listReqDto.difficultyList != null and listReqDto.difficultyList.size() &gt; 0">
+                AND plant.difficultyList IN
+                <foreach collection="listReqDto.difficultyList" item="difficulty" open="(" separator="," close=")">
+                    #{difficulty}
+                </foreach>
+            </if>
+
+            <if test="listReqDto.keyword != null and listReqDto.keyword.trim() != ''">
+                AND (plant.name LIKE CONCAT('%', #{listReqDto.keyword}, '%'))
+            </if>
+        ORDER BY plant.created_at DESC
+    </select>
+
+</mapper>

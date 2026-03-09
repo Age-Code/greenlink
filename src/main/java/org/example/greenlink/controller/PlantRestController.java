@@ -9,6 +9,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RequestMapping("/api/plant")
 @RestController
@@ -21,7 +23,7 @@ public class PlantRestController {
             return null;
         }
 
-        return principalDetails.getPlant().getId();
+        return principalDetails.getUser().getId();
     }
 
     // List
@@ -34,7 +36,7 @@ public class PlantRestController {
     // Detail
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/{plantId}")
-    public ResponseEntity<PlantDto.DetailResDto> detail(@PathVariable Long plantId, @AuthenticationPrincipal PrincipalDetails principalDetails){
-        return ResponseEntity.ok(plantService.detail(plantId, getReqPlantId(principalDetails)));
+    public ResponseEntity<PlantDto.DetailResDto> detail(@PathVariable Long plantId){
+        return ResponseEntity.ok(plantService.detail(plantId));
     }
 }
