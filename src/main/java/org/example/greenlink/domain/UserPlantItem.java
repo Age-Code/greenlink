@@ -11,14 +11,16 @@ import java.time.LocalDateTime;
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames={"user_plant_id","slot_key"}))
 public class UserPlantItem extends AuditingFields {
-    int quantity;
-    Boolean equipped;
-    LocalDateTime appliedAt;
-    LocalDateTime expiresAt;
+    String slotKey;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_plant_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_plant_id", nullable = true)
     private UserPlant userPlant;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -26,15 +28,13 @@ public class UserPlantItem extends AuditingFields {
     private Item item;
 
     protected UserPlantItem(){}
-    private UserPlantItem(int quantity, Boolean equipped, LocalDateTime appliedAt, LocalDateTime expiresAt, UserPlant userPlant, Item item) {
-        this.quantity = quantity;
-        this.equipped = equipped;
-        this.appliedAt = appliedAt;
-        this.expiresAt = expiresAt;
+    private UserPlantItem(String slotKey, User user, UserPlant userPlant, Item item) {
+        this.slotKey = slotKey;
+        this.user = user;
         this.userPlant = userPlant;
         this.item = item;
     }
-    public static UserPlantItem of(int quantity, Boolean equipped, LocalDateTime appliedAt, LocalDateTime expiresAt, UserPlant userPlant, Item item) {
-        return new UserPlantItem(quantity, equipped, appliedAt, expiresAt, userPlant, item);
+    public static UserPlantItem of(String slotKey, User user, UserPlant userPlant, Item item) {
+        return new UserPlantItem(slotKey, user, userPlant, item);
     }
 }

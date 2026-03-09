@@ -13,14 +13,19 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 public class Plant extends AuditingFields {
+    @Column(nullable=false)
     String name;
     String description;
     String category;
+    @Column(nullable=false)
     @Enumerated(EnumType.STRING)
     DomainEnum.Difficulty difficulty;
+    @Column(nullable=false)
     int growthPeriodDays;
+    @Column(nullable=false)
     @Enumerated(EnumType.STRING)
     DomainEnum.LightPref lightPref;
+    @Column(nullable=false)
     int waterPrefMlPerDay;
     String imageUrl;
     String unlockCondition;

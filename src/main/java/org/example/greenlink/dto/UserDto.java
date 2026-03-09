@@ -5,6 +5,23 @@ import org.example.greenlink.domain.User;
 
 public class UserDto {
 
+    // Login Request Dto
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class LoginReqDto {
+        public String username;
+        public String password;
+    }
+
+    // UserId Response Dto
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class UserIdResDto {
+        Long userId;
+
+        public static UserIdResDto toUserIdResDto(User user) {
+            return UserIdResDto.builder().userId(user.getId()).build();
+        }
+    }
+
     // Signup Request Dto
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
     public static class SignupReqDto {
@@ -18,20 +35,31 @@ public class UserDto {
         public User toEntity() { return User.of(getUsername(), getPassword(), getEmail(), getNickname(), getPhoneNumber(), getAddress()); }
     }
 
-    // UserId Response Dto
+    // Detail Response Dto
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-    public static class UserIdResDto {
-        Long userId;
+    public static class DetailResDto {
+        public String username;
+        public String email;
+        public String nickname;
+        public String phoneNumber;
+        public String address;
 
-        public static UserIdResDto toUserIdResDto(User user) {
-            return UserIdResDto.builder().userId(user.getId()).build();
+        public static DetailResDto toDetailResDto(User user) {
+            return DetailResDto.builder()
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .nickname(user.getNickname())
+                    .phoneNumber(user.getPhoneNumber())
+                    .address(user.getAddress())
+                    .build();
         }
     }
 
-    // Login Request Dto
+    // Update Request Dto
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
-    public static class LoginReqDto {
-        public String username;
-        public String password;
+    public static class UpdateReqDto {
+        public String nickname;
+        public String phoneNumber;
+        public String address;
     }
 }

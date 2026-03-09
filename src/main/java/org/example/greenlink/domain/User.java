@@ -1,5 +1,6 @@
 package org.example.greenlink.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.OneToMany;
@@ -15,12 +16,19 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 public class User extends AuditingFields {
+    @Column(unique = true, nullable = false)
     String username;
+    @Column(nullable=false)
     String password;
+    @Column(unique=true, nullable=false)
     String email;
+    @Column(nullable=false)
     String nickname;
     String phoneNumber;
     String address;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserPlantItem> userPlantItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     private List<Attend> attends = new ArrayList<>();
