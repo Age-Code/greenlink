@@ -18,7 +18,7 @@ public class PlantRestController {
 
     final PlantService plantService;
 
-    public Long getReqPlantId(PrincipalDetails principalDetails) {
+    public Long getReqUserId(PrincipalDetails principalDetails) {
         if(principalDetails == null || principalDetails.getUser() == null || principalDetails.getUser().getId() == null) {
             return null;
         }
