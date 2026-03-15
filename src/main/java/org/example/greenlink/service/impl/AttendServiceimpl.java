@@ -45,6 +45,9 @@ public class AttendServiceimpl implements AttendService {
 
     @Override
     public AttendDto.ListResDto list(int year, int month, Long userId) {
+
+        validateYearMonth(year, month);
+
         User u = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException("user not found"));
 
@@ -60,6 +63,16 @@ public class AttendServiceimpl implements AttendService {
         return AttendDto.ListResDto.builder()
                 .dates(attendDates)
                 .build();
+    }
+
+    private void validateYearMonth(int year, int month) {
+        if (year < 1000 || year > 9999) {
+            throw new IllegalArgumentException("연도는 4자리 숫자로 입력해야 합니다. (예: 2026)");
+        }
+
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException("월은 01에서 12 사이의 숫자여야 합니다.");
+        }
     }
 
 }
