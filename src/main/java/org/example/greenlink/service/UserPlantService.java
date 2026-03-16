@@ -14,5 +14,6 @@ public interface UserPlantService {
     UserPlantDto.UserPlantIdResDto create(UserPlantDto.CreateReqDto createReqDto, Long requestUserId);
     List<UserPlantDto.ListResDto> list(Long requestUserId);
     UserPlantDto.DetailResDto detail(Long userPlantId, Long requestUserId);
+    UserPlantDto.UserPlantIdResDto update(Long userPlantId, UserPlantDto.UpdateReqDto updateReqDto, Long requestUserId);
 
 }

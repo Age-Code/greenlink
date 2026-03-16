@@ -68,36 +68,44 @@ public class UserPlantDto {
     // Detail Response Dto
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
     public static class DetailResDto {
-        public String name;
-        public String description;
-        public String category;
-        public DomainEnum.Difficulty difficulty;
-        public int growthPeriodDays;
-        DomainEnum.LightPref lightPref;
-        public int waterPreMlPerDay;
-        public String imageUrl;
-        public String unlockCondition;
+        public Long userPlantId;
+        public Long plantId;
+        public String plantName;
+        public String plantCategory;
+        public String nickname;
+        public DomainEnum.Status status;
+        public LocalDate startDate;
+        public LocalDate expectedHarvestDate;
+        public LocalDate harvestDate;
+        public Double moisturePct;
+        public Double nutrientLevel;
+        public Double sunlightExposure;
+        public String lastPhotoUrl;
 
-        public static DetailResDto from(Plant plant){
+        public static DetailResDto from(UserPlant userPlant){
             return DetailResDto.builder()
-                    .name(plant.getName())
-                    .description(plant.getDescription())
-                    .category(plant.getCategory())
-                    .difficulty(plant.getDifficulty())
-                    .growthPeriodDays(plant.getGrowthPeriodDays())
-                    .lightPref(plant.getLightPref())
-                    .waterPreMlPerDay(plant.getWaterPrefMlPerDay())
-                    .imageUrl(plant.getImageUrl())
-                    .unlockCondition(plant.getUnlockCondition())
+                    .userPlantId(userPlant.getId())
+                    .plantId(userPlant.getPlant().getId())
+                    .plantName(userPlant.getPlant().getName())
+                    .plantName(userPlant.getPlant().getCategory())
+                    .nickname(userPlant.getNickname())
+                    .status(userPlant.getStatus())
+                    .startDate(userPlant.getStartDate())
+                    .expectedHarvestDate(userPlant.getExpectedHarvestDate())
+                    .harvestDate(userPlant.getHarvestDate())
+                    .moisturePct(userPlant.getMoisturePct())
+                    .nutrientLevel(userPlant.getNutrientLevel())
+                    .sunlightExposure(userPlant.getSunlightExposure())
+                    .lastPhotoUrl(userPlant.getLastPhotoUrl())
                     .build();
         }
+
     }
 
     // Update Request Dto
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
     public static class UpdateReqDto {
         public String nickname;
-        public String phoneNumber;
-        public String address;
     }
+
 }
