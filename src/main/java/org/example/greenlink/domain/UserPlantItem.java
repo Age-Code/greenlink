@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames={"user_plant_id","slot_key"}))
 public class UserPlantItem extends AuditingFields {
-    String slotKey;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -28,13 +27,13 @@ public class UserPlantItem extends AuditingFields {
     private Item item;
 
     protected UserPlantItem(){}
-    private UserPlantItem(String slotKey, User user, UserPlant userPlant, Item item) {
-        this.slotKey = slotKey;
+    private UserPlantItem(User user, UserPlant userPlant, Item item) {
         this.user = user;
         this.userPlant = userPlant;
         this.item = item;
     }
-    public static UserPlantItem of(String slotKey, User user, UserPlant userPlant, Item item) {
-        return new UserPlantItem(slotKey, user, userPlant, item);
+
+    public static UserPlantItem of(User user, UserPlant userPlant, Item item) {
+        return new UserPlantItem(user, userPlant, item);
     }
 }
