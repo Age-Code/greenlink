@@ -1,12 +1,18 @@
 package org.example.greenlink.service;
 
 import org.example.greenlink.dto.PlantDto;
+import org.example.greenlink.dto.UserPlantDto;
+import org.example.greenlink.security.PrincipalDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
 @Service
 public interface UserPlantService {
-    List<PlantDto.ListResDto> list(PlantDto.ListReqDto listReqDto);
-    PlantDto.DetailResDto detail(Long plantId);
+    UserPlantDto.UserPlantIdResDto create(UserPlantDto.CreateReqDto createReqDto, Long requestUserId);
+    List<UserPlantDto.ListResDto> list(Long requestUserId);
+    UserPlantDto.DetailResDto detail(Long userPlantId, Long requestUserId);
+
 }

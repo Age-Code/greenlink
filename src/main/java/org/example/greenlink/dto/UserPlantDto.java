@@ -3,10 +3,29 @@ package org.example.greenlink.dto;
 import lombok.*;
 import org.example.greenlink.domain.DomainEnum;
 import org.example.greenlink.domain.Plant;
+import org.example.greenlink.domain.UserPlant;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class UserPlantDto {
+
+    // UserPlantId Response Dto
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class UserPlantIdResDto {
+        public Long userPlantId;
+
+        public static UserPlantIdResDto from(UserPlant userPlant){
+            return builder().userPlantId(userPlant.getId()).build();
+        }
+    }
+
+    // Create Request Dto
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class CreateReqDto {
+        public Long plantId;
+        public String nickname;
+    }
 
     // List Request Dto
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
@@ -19,11 +38,31 @@ public class UserPlantDto {
     // List Response Dto
     @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
     public static class ListResDto {
+        public Long userPlantId;
         public Long plantId;
-        public String name;
-        public String category;
-        public String difficulty;
-        public String imageUrl;
+        public String plantName;
+        public String nickname;
+        public DomainEnum.Status status;
+        public LocalDate expectedHarvestDate;
+        public Double moisturePct;
+        public Double nutrientLevel;
+        public Double sunlightExposure;
+        public String lastPhotoUrl;
+
+        public static ListResDto from(UserPlant userPlant){
+            return ListResDto.builder()
+                    .userPlantId(userPlant.getId())
+                    .plantId(userPlant.getPlant().getId())
+                    .plantName(userPlant.getPlant().getName())
+                    .nickname(userPlant.getNickname())
+                    .status(userPlant.getStatus())
+                    .expectedHarvestDate(userPlant.getExpectedHarvestDate())
+                    .moisturePct(userPlant.getMoisturePct())
+                    .nutrientLevel(userPlant.getNutrientLevel())
+                    .sunlightExposure(userPlant.getSunlightExposure())
+                    .lastPhotoUrl(userPlant.getLastPhotoUrl())
+                    .build();
+        }
     }
 
     // Detail Response Dto
@@ -39,7 +78,7 @@ public class UserPlantDto {
         public String imageUrl;
         public String unlockCondition;
 
-        public static DetailResDto toDetailResDto(Plant plant){
+        public static DetailResDto from(Plant plant){
             return DetailResDto.builder()
                     .name(plant.getName())
                     .description(plant.getDescription())

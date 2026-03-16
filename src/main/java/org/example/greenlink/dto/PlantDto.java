@@ -39,7 +39,7 @@ public class PlantDto {
         public String imageUrl;
         public String unlockCondition;
 
-        public static DetailResDto toDetailResDto(Plant plant){
+        public static DetailResDto from(Plant plant){
             return DetailResDto.builder()
                     .name(plant.getName())
                     .description(plant.getDescription())

@@ -9,6 +9,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RequestMapping("/api/userPlant")
 @RestController
@@ -21,21 +23,21 @@ public class UserPlantRestController {
             return null;
         }
 
-        return principalDetails.getUserPlant().getId();
+        return principalDetails.getUser().getId();
     }
 
-    // Create
+    // 나의 식물 생성
     @PreAuthorize("hasRole('USER')")
     @PostMapping("")
     public ResponseEntity<UserPlantDto.UserPlantIdResDto> create(@RequestBody UserPlantDto.CreateReqDto createReqDto, @AuthenticationPrincipal PrincipalDetails principalDetails){
-        return ResponseEntity.ok(userPlantService.create(listReqDto, getReqUserPlantId(principalDetails)));
+        return ResponseEntity.ok(userPlantService.create(createReqDto, getReqUserPlantId(principalDetails)));
     }
 
-    // List
+    // 나의 식물 목록 조회
     @PreAuthorize("hasRole('USER')")
     @GetMapping("")
-    public ResponseEntity<List<UserPlantDto.ListResDto>> list(@RequestBody UserPlantDto.ListReqDto listReqDto, @AuthenticationPrincipal PrincipalDetails principalDetails){
-        return ResponseEntity.ok(userPlantService.list(listReqDto, getReqUserPlantId(principalDetails)));
+    public ResponseEntity<List<UserPlantDto.ListResDto>> list(@AuthenticationPrincipal PrincipalDetails principalDetails){
+        return ResponseEntity.ok(userPlantService.list(getReqUserPlantId(principalDetails)));
     }
 
     // Detail

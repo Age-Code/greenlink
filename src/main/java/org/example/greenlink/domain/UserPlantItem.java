@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames={"user_plant_id","slot_key"}))
 public class UserPlantItem extends AuditingFields {
 
     @ManyToOne(fetch = FetchType.LAZY)
