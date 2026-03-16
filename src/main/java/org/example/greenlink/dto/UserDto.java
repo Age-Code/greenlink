@@ -44,7 +44,7 @@ public class UserDto {
         public String phoneNumber;
         public String address;
 
-        public static DetailResDto toDetailResDto(User user) {
+        public static DetailResDto from(User user) {
             return DetailResDto.builder()
                     .username(user.getUsername())
                     .email(user.getEmail())

@@ -16,13 +16,12 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 public class User extends AuditingFields {
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     String username;
     @Column(nullable=false)
     String password;
-    @Column(unique=true, nullable=false)
+    @Column(unique=true)
     String email;
-    @Column(nullable=false)
     String nickname;
     String phoneNumber;
     String address;

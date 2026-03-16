@@ -21,17 +21,17 @@ public class UserPlantRestController {
             return null;
         }
 
-        return principalDetails.getUserPlant().getId();
+        return principalDetails.getUser().getId();
     }
 
-    // Create
+    // 나의 식물 생성
     @PreAuthorize("hasRole('USER')")
     @PostMapping("")
     public ResponseEntity<UserPlantDto.UserPlantIdResDto> create(@RequestBody UserPlantDto.CreateReqDto createReqDto, @AuthenticationPrincipal PrincipalDetails principalDetails){
-        return ResponseEntity.ok(userPlantService.create(listReqDto, getReqUserPlantId(principalDetails)));
+        return ResponseEntity.ok(userPlantService.create(createReqDto, getReqUserPlantId(principalDetails)));
     }
 
-    // List
+    // 나의 식물 목록 조회
     @PreAuthorize("hasRole('USER')")
     @GetMapping("")
     public ResponseEntity<List<UserPlantDto.ListResDto>> list(@RequestBody UserPlantDto.ListReqDto listReqDto, @AuthenticationPrincipal PrincipalDetails principalDetails){
