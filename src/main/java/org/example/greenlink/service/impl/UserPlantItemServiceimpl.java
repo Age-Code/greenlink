@@ -1,14 +1,14 @@
 package org.example.greenlink.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.greenlink.domain.User;
-import org.example.greenlink.domain.UserPlant;
-import org.example.greenlink.domain.UserPlantItem;
+import org.example.greenlink.domain.*;
 import org.example.greenlink.dto.UserPlantItemDto;
 import org.example.greenlink.repository.UserPlantItemRepository;
+import org.example.greenlink.repository.UserPlantRepository;
 import org.example.greenlink.repository.UserRepository;
 import org.example.greenlink.service.UserPlantItemService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,6 +17,7 @@ import java.util.List;
 public class UserPlantItemServiceimpl implements UserPlantItemService {
     private final UserPlantItemRepository userPlantItemRepository;
     private final UserRepository userRepository;
+    private final UserPlantRepository userPlantRepository;
 
     @Override
     public List<UserPlantItemDto.ListResDto> list(Long userId) {
@@ -40,16 +41,41 @@ public class UserPlantItemServiceimpl implements UserPlantItemService {
     }
 
     @Override
+    @Transactional
     public UserPlantItemDto.UpdateResDto updateItem(Long userPlantItemId, UserPlantItemDto.UpdateReqDto req, Long userId) {
         UserPlantItem upi = userPlantItemRepository.findByIdAndDeletedFalse(userPlantItemId)
-                .orElseThrow(()->new IllegalArgumentException("userPlantItem not found"));
+                .orElseThrow(() -> new IllegalArgumentException("userPlantItem not found"));
 
-        if(!req.getUserPlantId().equals(upi.getUserPlant().getId())) {
-            throw new IllegalStateException("userPlant's id is invalid");
+        if (!upi.getUser().getId().equals(userId)) {
+            throw new IllegalStateException("This item does not belong to the user.");
         }
 
-        if(upi.getItem().getType().)
+        UserPlant up = userPlantRepository.findByIdAndDeletedFalse(req.getUserPlantId())
+                .orElseThrow(() -> new IllegalArgumentException("userPlant not found"));
 
+        if (!up.getUser().getId().equals(userId)) {
+            throw new IllegalStateException("You do not own this plant.");
+        }
 
+        DomainEnum.ItemType type = upi.getItem().getType();
+
+        if (DomainEnum.ItemType.NUTRIENT == type) {
+            up.setNutrientLevel(up.getNutrientLevel() + 1);
+            upi.setDeleted(true);
+            upi.setUserPlant(null);
+
+        } else if (DomainEnum.ItemType.POT == type || DomainEnum.ItemType.DECORATION == type) {
+            userPlantItemRepository.findByUserPlantIdAndItemType(up.getId(), type)
+                    .ifPresent(existingItem -> {
+                        if (!existingItem.getId().equals(upi.getId())) {
+                            existingItem.setUserPlant(null);
+                        }
+                    });
+
+            upi.setUserPlant(up);
+        }
+
+        return UserPlantItemDto.UpdateResDto.from(upi);
     }
+
 }
