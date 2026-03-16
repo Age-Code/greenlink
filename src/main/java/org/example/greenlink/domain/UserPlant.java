@@ -37,7 +37,7 @@ public class UserPlant extends AuditingFields {
     private List<UserPlantItem> userPlantItems = new ArrayList<>();
 
     protected UserPlant(){}
-    private UserPlant(String nickname, DomainEnum.Status status, LocalDate startDate, LocalDate expectedHarvestDate, LocalDate harvestDate, Double moisturePct, Double nutrientLevel, Double sunlightExposure, String lastPhotoUrl) {
+    private UserPlant(String nickname, DomainEnum.Status status, LocalDate startDate, LocalDate expectedHarvestDate, LocalDate harvestDate, Double moisturePct, Double nutrientLevel, Double sunlightExposure, String lastPhotoUrl, User user, Plant plant) {
         this.nickname = nickname;
         this.status = status;
         this.startDate = startDate;
@@ -47,8 +47,10 @@ public class UserPlant extends AuditingFields {
         this.nutrientLevel = nutrientLevel;
         this.sunlightExposure = sunlightExposure;
         this.lastPhotoUrl = lastPhotoUrl;
+        this.user = user;
+        this.plant = plant;
     }
-    public static UserPlant of(String nickname, DomainEnum.Status status, LocalDate startDate, LocalDate expectedHarvestDate, LocalDate harvestDate, Double moisturePct, Double nutrientLevel, Double sunlightExposure, String lastPhotoUrl) {
-        return new UserPlant(nickname, status, startDate, expectedHarvestDate, harvestDate, moisturePct, nutrientLevel, sunlightExposure, lastPhotoUrl);
+    public static UserPlant of(String nickname, DomainEnum.Status status, LocalDate startDate, LocalDate expectedHarvestDate, LocalDate harvestDate, Double moisturePct, Double nutrientLevel, Double sunlightExposure, String lastPhotoUrl, User user, Plant plant) {
+        return new UserPlant(nickname, status, startDate, expectedHarvestDate, harvestDate, moisturePct, nutrientLevel, sunlightExposure, lastPhotoUrl, user, plant);
     }
 }

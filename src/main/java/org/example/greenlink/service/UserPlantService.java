@@ -12,8 +12,7 @@ import java.util.List;
 @Service
 public interface UserPlantService {
     UserPlantDto.UserPlantIdResDto create(UserPlantDto.CreateReqDto createReqDto, Long requestUserId);
-
-    List<PlantDto.ListResDto> list(PlantDto.ListReqDto listReqDto);
-    PlantDto.DetailResDto detail(Long plantId);
+    List<UserPlantDto.ListResDto> list(Long requestUserId);
+    UserPlantDto.DetailResDto detail(Long userPlantId, Long requestUserId);
 
 }

@@ -32,18 +32,20 @@ public class UserPlantServiceimpl implements UserPlantService {
         User requestUser = userRepository.findById(requestUserId).orElseThrow(() -> new EntityNotFoundException("UserPlant Create Error: 존재하지 않는 User입니다."));
         Plant plant = plantRepository.findById(createReqDto.getPlantId()).orElseThrow(() -> new EntityNotFoundException("UserPlant Create Error: 존재하지 않는 Plant입니다."));
 
-        return UserPlantDto.UserPlantIdResDto.from(userPlantRepository.save(UserPlant.of(createReqDto.getNickname(), DomainEnum.Status.GROWING, LocalDate.now(), LocalDate.now().plusDays(plant.getGrowthPeriodDays()), null, 0.0, 0.0, 0.0, null)));
+        return UserPlantDto.UserPlantIdResDto.from(userPlantRepository.save(UserPlant.of(createReqDto.getNickname(), DomainEnum.Status.GROWING, LocalDate.now(), LocalDate.now().plusDays(plant.getGrowthPeriodDays()), null, 0.0, 0.0, 0.0, null, requestUser, plant)));
     }
 
-    //
+    // 나의 식물 목록 조회
     @Override
-    public List<PlantDto.ListResDto> list(PlantDto.ListReqDto listReqDto){
-        return plantMapper.list(listReqDto);
+    public List<UserPlantDto.ListResDto> list(Long requestUserId) {
+        User requestUser = userRepository.findById(requestUserId).orElseThrow(() -> new EntityNotFoundException("UserPlant List Error: 존재하지 않는 User입니다."));
+        List<UserPlant> userPlantList = userPlantRepository.findByUser(requestUser);
+
+        return userPlantList.stream().map(UserPlantDto.ListResDto::from).toList();
     }
 
     @Override
-    public PlantDto.DetailResDto detail(Long plantId){
-        Plant plant = userPlantRepository.findById(plantId).orElseThrow(() -> new EntityNotFoundException("Plant Detail Error"));
+    public UserPlantDto.DetailResDto detail(Long userPlantId, Long requestUserId){
 
         return PlantDto.DetailResDto.toDetailResDto(plant);
     }

@@ -38,7 +38,7 @@ public class UserServiceimpl implements UserService {
     public UserDto.DetailResDto detail(Long requestUserId){
         User user = userRepository.findById(requestUserId).orElseThrow(() -> new EntityNotFoundException("User Detail Error"));
 
-        return UserDto.DetailResDto.toDetailResDto(user);
+        return UserDto.DetailResDto.from(user);
     }
 
     // Update
