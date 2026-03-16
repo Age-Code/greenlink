@@ -35,11 +35,11 @@ public class AttendServiceimpl implements AttendService {
                 .map(Attend::getStreakAfter)
                 .orElse(0);
 
-        Attend savedAttend = attendRepository.save(
+        Attend saved = attendRepository.save(
                 Attend.of(today, currentStreak + 1, u)
         );
 
-        return AttendDto.TodayResDto.from(savedAttend);
+        return AttendDto.TodayResDto.from(saved);
     }
 
 
