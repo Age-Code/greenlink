@@ -31,6 +31,7 @@ public class UserPlantItem extends AuditingFields {
         this.userPlant = userPlant;
         this.item = item;
     }
+
     public static UserPlantItem of(User user, UserPlant userPlant, Item item) {
         return new UserPlantItem(user, userPlant, item);
     }
