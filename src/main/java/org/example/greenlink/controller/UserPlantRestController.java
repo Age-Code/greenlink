@@ -40,14 +40,14 @@ public class UserPlantRestController {
         return ResponseEntity.ok(userPlantService.list(getReqUserPlantId(principalDetails)));
     }
 
-    // Detail
+    // 나의 식물 상세 조회
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/{userPlantId}")
     public ResponseEntity<UserPlantDto.DetailResDto> detail(@PathVariable Long userPlantId, @AuthenticationPrincipal PrincipalDetails principalDetails){
         return ResponseEntity.ok(userPlantService.detail(userPlantId, getReqUserPlantId(principalDetails)));
     }
 
-    // Update
+    // 나의 식물 별명 수정
     @PreAuthorize("hasRole('USER')")
     @PutMapping("/{userPlantId}")
     public ResponseEntity<UserPlantDto.UserPlantIdResDto> update(@PathVariable Long userPlantId, @RequestBody UserPlantDto.UpdateReqDto updateReqDto, @AuthenticationPrincipal PrincipalDetails principalDetails){

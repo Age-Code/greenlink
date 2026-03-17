@@ -2,18 +2,22 @@ package org.example.greenlink.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.websocket.AuthenticationException;
 import org.example.greenlink.domain.DomainEnum;
 import org.example.greenlink.domain.Plant;
 import org.example.greenlink.domain.User;
 import org.example.greenlink.domain.UserPlant;
 import org.example.greenlink.dto.PlantDto;
 import org.example.greenlink.dto.UserPlantDto;
+import org.example.greenlink.exception.NoPermissionException;
 import org.example.greenlink.mapper.PlantMapper;
 import org.example.greenlink.repository.PlantRepository;
 import org.example.greenlink.repository.UserPlantRepository;
 import org.example.greenlink.repository.UserRepository;
 import org.example.greenlink.service.UserPlantService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -44,10 +48,30 @@ public class UserPlantServiceimpl implements UserPlantService {
         return userPlantList.stream().map(UserPlantDto.ListResDto::from).toList();
     }
 
+    // 나의 식물 상세 조회
     @Override
     public UserPlantDto.DetailResDto detail(Long userPlantId, Long requestUserId){
+        UserPlant userPlant = userPlantRepository.findById(userPlantId).orElseThrow(() -> new EntityNotFoundException("UserPlant Detail Error: 존재하지 않는 UserPlant입니다."));
+        if(!userPlant.getUser().getId().equals(requestUserId)){
+            throw new NoPermissionException("UserPlant Detail Error: 접근 권한이 없습니다.");
+        }
 
-        return PlantDto.DetailResDto.toDetailResDto(plant);
+        return UserPlantDto.DetailResDto.from(userPlant);
+    }
+
+    @Override
+    @Transactional
+    public UserPlantDto.UserPlantIdResDto update(Long userPlantId, UserPlantDto.UpdateReqDto updateReqDto, Long requestUserId){
+        UserPlant userPlant = userPlantRepository.findById(userPlantId).orElseThrow(() -> new EntityNotFoundException("UserPlant Update Error: 존재하지 않는 UserPlant입니다."));
+        if(!userPlant.getUser().getId().equals(requestUserId)){
+            throw new NoPermissionException("UserPlant Update Error: 접근 권한이 없습니다.");
+        }
+
+        if(StringUtils.hasText(updateReqDto.getNickname()) && !updateReqDto.getNickname().equals(userPlant.getNickname())){
+            userPlant.setNickname(updateReqDto.getNickname());
+        }
+
+        return 
     }
 
 }
