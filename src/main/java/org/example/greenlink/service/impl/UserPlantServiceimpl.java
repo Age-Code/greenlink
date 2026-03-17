@@ -9,6 +9,7 @@ import org.example.greenlink.domain.User;
 import org.example.greenlink.domain.UserPlant;
 import org.example.greenlink.dto.PlantDto;
 import org.example.greenlink.dto.UserPlantDto;
+import org.example.greenlink.exception.NoMatchingDataException;
 import org.example.greenlink.exception.NoPermissionException;
 import org.example.greenlink.mapper.PlantMapper;
 import org.example.greenlink.repository.PlantRepository;
@@ -71,7 +72,50 @@ public class UserPlantServiceimpl implements UserPlantService {
             userPlant.setNickname(updateReqDto.getNickname());
         }
 
-        return 
+        return UserPlantDto.UserPlantIdResDto.from(userPlant);
     }
 
+    @Override
+    @Transactional
+    public UserPlantDto.HarvestResDto harvest(Long userPlantId, Long requestUserId){
+        UserPlant userPlant = userPlantRepository.findById(userPlantId).orElseThrow(() -> new EntityNotFoundException("UserPlant Harvest Error: 존재하지 않는 UserPlant입니다."));
+        if(!userPlant.getUser().getId().equals(requestUserId)){
+            throw new NoPermissionException("UserPlant Harvest Error: 접근 권한이 없습니다.");
+        }
+
+        if(!userPlant.getStatus().equals(DomainEnum.Status.HARVESTABLE)){
+            throw new NoMatchingDataException("UserPlant Harvest Error: 아직 수확 가능한 상태가 아닙니다.");
+        }
+
+        userPlant.setStatus(DomainEnum.Status.HARVESTED);
+        userPlant.setHarvestDate(LocalDate.now());
+
+        return UserPlantDto.HarvestResDto.from(userPlant);
+    }
+
+    @Override
+    @Transactional
+    public UserPlantDto.WaterResDto water(Long userPlantId, Long requestUserId){
+        UserPlant userPlant = userPlantRepository.findById(userPlantId).orElseThrow(() -> new EntityNotFoundException("UserPlant Water Error: 존재하지 않는 UserPlant입니다."));
+        if(!userPlant.getUser().getId().equals(requestUserId)){
+            throw new NoPermissionException("UserPlant Water Error: 접근 권한이 없습니다.");
+        }
+
+        userPlant.setMoisturePct(userPlant.getMoisturePct()+5);
+
+        return UserPlantDto.WaterResDto.from(userPlant);
+    }
+
+    @Override
+    @Transactional
+    public UserPlantDto.LightResDto light(Long userPlantId, Long requestUserId){
+        UserPlant userPlant = userPlantRepository.findById(userPlantId).orElseThrow(() -> new EntityNotFoundException("UserPlant Light Error: 존재하지 않는 UserPlant입니다."));
+        if(!userPlant.getUser().getId().equals(requestUserId)){
+            throw new NoPermissionException("UserPlant Light Error: 접근 권한이 없습니다.");
+        }
+
+        userPlant.setSunlightExposure(userPlant.getSunlightExposure()+5);
+
+        return UserPlantDto.LightResDto.from(userPlant);
+    }
 }

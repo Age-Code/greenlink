@@ -7,11 +7,9 @@ import org.example.greenlink.service.UserQuestService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ReuserUserQuestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/userQuest")
@@ -20,19 +18,33 @@ public class UserQuestRestController {
 
     final UserQuestService userQuestService;
 
-    public Long getReqUserQuestId(PrincipalDetails principalDetails) {
+    public Long getReqUserId(PrincipalDetails principalDetails) {
         if(principalDetails == null || principalDetails.getUser() == null || principalDetails.getUser().getId() == null) {
             return null;
         }
 
-        return principalDetails.getUserQuest().getId();
+        return principalDetails.getUser().getId();
     }
 
-    // List
+    // 6.3 나의 퀘스트 목록 조회
     @PreAuthorize("hasRole('USER')")
     @GetMapping("")
-    public ResponseEntity<List<UserQuestDto.ListResDto>> list(@AuthenticationPrincipal PrincipalDetails principalDetails){
-        return ResponseEntity.ok(userQuestService.list(getReqUserQuestId(principalDetails)));
+    public ResponseEntity<List<UserQuestDto.ListResDto>> list(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(userQuestService.list(getReqUserId(principalDetails)));
+    }
+
+    // 6.4 나의 퀘스트 상세 표시
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/{userQuestId}")
+    public ResponseEntity<UserQuestDto.DetailResDto> detail(@PathVariable Long userQuestId, @AuthenticationPrincipal PrincipalDetails principalDetails){
+        return ResponseEntity.ok(userQuestService.detail(userQuestId, getReqUserId(principalDetails)));
+    }
+
+    // 6.5 퀘스트 보상 수령
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/{userQuestId}/claim")
+    public ResponseEntity<UserQuestDto.ClaimResDto> claim(@PathVariable Long userQuestId, @AuthenticationPrincipal PrincipalDetails principalDetails){
+        return ResponseEntity.ok(userQuestService.claim(userQuestId, getReqUserId(principalDetails)));
     }
 
 }
