@@ -17,7 +17,7 @@ public class Quest extends AuditingFields {
     String description;
     @Enumerated(EnumType.STRING)
     DomainEnum.QuestType type;
-    String targetType;
+    DomainEnum.TargetType targetType;
     int targetValue;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,7 +28,7 @@ public class Quest extends AuditingFields {
     private List<UserQuest> userQuests = new ArrayList<>();
 
     protected Quest(){}
-    private Quest(String title, String description, DomainEnum.QuestType type, String targetType, int targetValue, Item rewardItem) {
+    private Quest(String title, String description, DomainEnum.QuestType type, DomainEnum.TargetType targetType, int targetValue, Item rewardItem) {
         this.title = title;
         this.description = description;
         this.type = type;
@@ -36,7 +36,7 @@ public class Quest extends AuditingFields {
         this.targetValue = targetValue;
         this.rewardItem = rewardItem;
     }
-    public static Quest of(String title, String description, DomainEnum.QuestType type, String targetType, int targetValue, Item rewardItem) {
+    public static Quest of(String title, String description, DomainEnum.QuestType type, DomainEnum.TargetType targetType, int targetValue, Item rewardItem) {
         return new Quest(title, description, type, targetType, targetValue, rewardItem);
     }
 }
