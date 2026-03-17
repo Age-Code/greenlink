@@ -30,6 +30,13 @@ public final class DomainEnum {
         ACHIEVEMENT
     }
 
+    public enum TargetType {
+        ATTEND,
+        WATER_ACTION,
+        HARVEST,
+        ATTEND_STREAK
+    }
+
     public enum State {
         ONGOING,
         COMPLETED,
