@@ -27,7 +27,7 @@ public class PlantServiceimpl implements PlantService {
     public PlantDto.DetailResDto detail(Long plantId){
         Plant plant = plantRepository.findById(plantId).orElseThrow(() -> new EntityNotFoundException("Plant Detail Error"));
 
-        return PlantDto.DetailResDto.toDetailResDto(plant);
+        return PlantDto.DetailResDto.from(plant);
     }
 
 }
