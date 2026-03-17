@@ -15,5 +15,7 @@ public interface UserPlantService {
     List<UserPlantDto.ListResDto> list(Long requestUserId);
     UserPlantDto.DetailResDto detail(Long userPlantId, Long requestUserId);
     UserPlantDto.UserPlantIdResDto update(Long userPlantId, UserPlantDto.UpdateReqDto updateReqDto, Long requestUserId);
-
+    UserPlantDto.HarvestResDto harvest(Long userPlantId, Long requestUserId);
+    UserPlantDto.WaterResDto water(Long userPlantId, Long requestUserId);
+    UserPlantDto.LightResDto light(Long userPlantId, Long requestUserId);
 }

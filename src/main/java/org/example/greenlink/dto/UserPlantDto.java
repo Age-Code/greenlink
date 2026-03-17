@@ -108,4 +108,47 @@ public class UserPlantDto {
         public String nickname;
     }
 
+    // Harvest Response Dto
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class HarvestResDto {
+        public Long userPlantId;
+        public DomainEnum.Status status;
+        public LocalDate harvestDate;
+
+        public static HarvestResDto from(UserPlant userPlant){
+            return builder()
+                    .userPlantId(userPlant.getId())
+                    .status(userPlant.getStatus())
+                    .harvestDate(userPlant.getHarvestDate())
+                    .build();
+        }
+    }
+
+    // Water Response Dto
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class WaterResDto {
+        public Long userPlantId;
+        public Double moisturePct;
+
+        public static WaterResDto from(UserPlant userPlant){
+            return builder()
+                    .userPlantId(userPlant.getId())
+                    .moisturePct(userPlant.getMoisturePct())
+                    .build();
+        }
+    }
+
+    // Light Response Dto
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class LightResDto {
+        public Long userPlantId;
+        public Double sunlightExposure;
+
+        public static LightResDto from(UserPlant userPlant){
+            return builder()
+                    .userPlantId(userPlant.getId())
+                    .sunlightExposure(userPlant.getSunlightExposure())
+                    .build();
+        }
+    }
 }

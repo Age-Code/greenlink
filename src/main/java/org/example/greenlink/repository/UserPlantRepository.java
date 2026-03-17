@@ -12,7 +12,5 @@ import java.util.Optional;
 @Repository
 public interface UserPlantRepository extends JpaRepository<UserPlant, Long> {
     List<UserPlant> findByUser(User user);
-
-    Long user(User user);
     Optional<UserPlant> findByIdAndDeletedFalse(Long userPlantId);
 }

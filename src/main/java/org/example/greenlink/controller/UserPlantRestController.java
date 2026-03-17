@@ -54,10 +54,24 @@ public class UserPlantRestController {
         return ResponseEntity.ok(userPlantService.update(userPlantId, updateReqDto, getReqUserPlantId(principalDetails)));
     }
 
-    // Harvest
+    // 수확하기
     @PreAuthorize("hasRole('USER')")
-    @PutMapping("/{userPlantId}/harvest")
+    @PostMapping("/{userPlantId}/harvest")
     public ResponseEntity<UserPlantDto.HarvestResDto> harvest(@PathVariable Long userPlantId, @AuthenticationPrincipal PrincipalDetails principalDetails){
         return ResponseEntity.ok(userPlantService.harvest(userPlantId, getReqUserPlantId(principalDetails)));
+    }
+
+    // 물주기
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/{userPlantId}/water")
+    public ResponseEntity<UserPlantDto.WaterResDto> water(@PathVariable Long userPlantId, @AuthenticationPrincipal PrincipalDetails principalDetails){
+        return ResponseEntity.ok(userPlantService.water(userPlantId, getReqUserPlantId(principalDetails)));
+    }
+
+    // 햇볕 쬐기
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/{userPlantId}/light")
+    public ResponseEntity<UserPlantDto.LightResDto> light(@PathVariable Long userPlantId, @AuthenticationPrincipal PrincipalDetails principalDetails){
+        return ResponseEntity.ok(userPlantService.light(userPlantId, getReqUserPlantId(principalDetails)));
     }
 }
