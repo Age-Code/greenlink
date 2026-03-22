@@ -1,0 +1,1159 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenLink Plants</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=SUIT:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f6f1e7;
+            --surface: rgba(255, 250, 240, 0.92);
+            --surface-strong: #fffdf7;
+            --line: rgba(80, 88, 65, 0.14);
+            --text: #243126;
+            --muted: #66725f;
+            --brand: #2f6f45;
+            --brand-strong: #1f5433;
+            --brand-soft: #e4f1d9;
+            --accent: #efb24f;
+            --danger: #b74d36;
+            --shadow: 0 20px 40px rgba(58, 67, 45, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "SUIT", "Noto Sans KR", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(255, 226, 165, 0.55), transparent 32%),
+                radial-gradient(circle at top right, rgba(127, 177, 121, 0.35), transparent 28%),
+                linear-gradient(180deg, #f9f5ea 0%, #eef4e6 54%, #eef1df 100%);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        .page {
+            width: min(1240px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0 36px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 22px;
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background: rgba(255, 252, 245, 0.78);
+            backdrop-filter: blur(18px);
+            box-shadow: var(--shadow);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-mark {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 18px;
+            font-size: 24px;
+            background: linear-gradient(145deg, #2f6f45, #7dad62);
+            color: #fff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        }
+
+        .brand-copy strong,
+        .hero-copy h1,
+        .section-title,
+        .stat-value,
+        .empty-emoji,
+        .hero-badge {
+            font-family: "Do Hyeon", sans-serif;
+            letter-spacing: 0.01em;
+        }
+
+        .brand-copy {
+            display: grid;
+            gap: 3px;
+        }
+
+        .brand-copy strong {
+            font-size: 1.35rem;
+            font-weight: 400;
+        }
+
+        .brand-copy span {
+            color: var(--muted);
+            font-size: 0.93rem;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: 0;
+            border-radius: 999px;
+            cursor: pointer;
+            padding: 12px 18px;
+            font-weight: 700;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+            box-shadow: 0 14px 26px rgba(47, 111, 69, 0.24);
+        }
+
+        .btn-secondary {
+            color: var(--brand-strong);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(47, 111, 69, 0.18);
+        }
+
+        .hero {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
+            gap: 18px;
+        }
+
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 30px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-panel {
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-panel::before {
+            content: "";
+            position: absolute;
+            inset: auto -40px -60px auto;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 220, 120, 0.35), transparent 68%);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(47, 111, 69, 0.11);
+            color: var(--brand-strong);
+            font-size: 1rem;
+        }
+
+        .hero-copy h1 {
+            margin: 0;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            line-height: 0.95;
+            font-weight: 400;
+        }
+
+        .hero-copy p {
+            max-width: 680px;
+            margin: 14px 0 0;
+            color: var(--muted);
+            line-height: 1.65;
+            font-size: 1rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .stat {
+            padding: 16px 18px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(47, 111, 69, 0.08);
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        .stat-value {
+            margin-top: 8px;
+            font-size: 1.95rem;
+            font-weight: 400;
+        }
+
+        .summary-panel {
+            padding: 22px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .summary-card {
+            padding: 18px;
+            border-radius: 24px;
+            color: #fff;
+            background: linear-gradient(145deg, #2b5f3d, #7aa363);
+        }
+
+        .summary-card strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .summary-card p {
+            margin: 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            opacity: 0.92;
+        }
+
+        .summary-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(47, 111, 69, 0.08);
+        }
+
+        .summary-item span {
+            color: var(--muted);
+        }
+
+        .workspace {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .sidebar,
+        .detail-panel {
+            padding: 22px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 400;
+        }
+
+        .section-sub {
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .filters {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .field {
+            width: 100%;
+            border: 1px solid rgba(47, 111, 69, 0.14);
+            border-radius: 18px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--text);
+        }
+
+        .field:focus {
+            outline: 2px solid rgba(47, 111, 69, 0.22);
+            border-color: rgba(47, 111, 69, 0.35);
+        }
+
+        .hint {
+            margin: -2px 0 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+            line-height: 1.55;
+        }
+
+        .list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .plant-card {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 68px minmax(0, 1fr);
+            gap: 14px;
+            text-align: left;
+            padding: 14px;
+            border: 1px solid transparent;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 18px rgba(51, 62, 44, 0.08);
+        }
+
+        .plant-card.active {
+            border-color: rgba(47, 111, 69, 0.28);
+            background: linear-gradient(180deg, #ffffff, #f2f9ec);
+        }
+
+        .thumb {
+            width: 68px;
+            height: 68px;
+            border-radius: 20px;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            background: linear-gradient(135deg, #dcefc7, #fff2d5);
+            color: var(--brand-strong);
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .thumb img,
+        .hero-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .plant-main {
+            min-width: 0;
+            display: grid;
+            gap: 8px;
+            align-content: center;
+        }
+
+        .plant-topline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .plant-name {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        .plant-nickname,
+        .plant-meta,
+        .meta-text,
+        .metric-label,
+        .detail-copy p,
+        .status-text,
+        .notice {
+            color: var(--muted);
+        }
+
+        .plant-nickname,
+        .plant-meta {
+            font-size: 0.9rem;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        .pill.difficulty-easy,
+        .pill.status-growing {
+            background: rgba(76, 162, 88, 0.16);
+            color: #2d7840;
+        }
+
+        .pill.difficulty-normal,
+        .pill.status-harvestable {
+            background: rgba(239, 178, 79, 0.2);
+            color: #9a6c12;
+        }
+
+        .pill.difficulty-hard,
+        .pill.status-failed {
+            background: rgba(183, 77, 54, 0.16);
+            color: #9c3d29;
+        }
+
+        .pill.status-harvested {
+            background: rgba(104, 117, 135, 0.16);
+            color: #4b5867;
+        }
+
+        .detail-panel {
+            min-height: 620px;
+            display: grid;
+        }
+
+        .detail-empty {
+            align-self: center;
+            justify-self: center;
+            width: min(460px, 100%);
+            text-align: center;
+            padding: 28px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px dashed rgba(47, 111, 69, 0.18);
+        }
+
+        .empty-emoji {
+            font-size: 4rem;
+            line-height: 1;
+        }
+
+        .detail-empty h3 {
+            margin: 14px 0 8px;
+            font-size: 1.4rem;
+        }
+
+        .detail-empty p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .detail-content {
+            display: none;
+            gap: 18px;
+        }
+
+        .detail-content.visible {
+            display: grid;
+        }
+
+        .hero-image {
+            height: 260px;
+            border-radius: 28px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #e2f0cf 0%, #fff3d0 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .hero-image.fallback {
+            display: grid;
+            place-items: center;
+            color: rgba(32, 61, 40, 0.95);
+            font-size: 5.3rem;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .detail-copy h2 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .detail-copy p {
+            margin: 10px 0 0;
+            line-height: 1.7;
+            max-width: 680px;
+        }
+
+        .detail-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .metric {
+            padding: 16px;
+            border-radius: 20px;
+            background: var(--surface-strong);
+            border: 1px solid rgba(47, 111, 69, 0.1);
+        }
+
+        .metric-label {
+            font-size: 0.86rem;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .status-panel {
+            padding: 18px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(47, 111, 69, 0.1), rgba(239, 178, 79, 0.13));
+            border: 1px solid rgba(47, 111, 69, 0.1);
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+
+        .status-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-title {
+            font-weight: 800;
+        }
+
+        .notice {
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(47, 111, 69, 0.1);
+            line-height: 1.6;
+        }
+
+        .notice.error {
+            color: var(--danger);
+            border-color: rgba(183, 77, 54, 0.16);
+            background: rgba(255, 243, 239, 0.92);
+        }
+
+        .loading {
+            padding: 18px;
+            border-radius: 20px;
+            text-align: center;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.82);
+        }
+
+        @media (max-width: 980px) {
+            .hero,
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .stats,
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                width: min(100% - 20px, 100%);
+                padding-top: 20px;
+            }
+
+            .topbar,
+            .hero-panel,
+            .summary-panel,
+            .sidebar,
+            .detail-panel {
+                padding: 18px;
+                border-radius: 24px;
+            }
+
+            .detail-header {
+                flex-direction: column;
+            }
+
+            .plant-card {
+                grid-template-columns: 56px minmax(0, 1fr);
+            }
+
+            .thumb {
+                width: 56px;
+                height: 56px;
+                border-radius: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">🌿</div>
+            <div class="brand-copy">
+                <strong>GreenLink Plant Room</strong>
+                <span>현재 계정이 보유한 식물을 기준으로 도감과 상태를 함께 보여줍니다.</span>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="btn btn-secondary" type="button" onclick="location.href='/user/login'">로그인</button>
+            <button class="btn btn-primary" type="button" onclick="location.href='/home'">홈으로</button>
+        </div>
+    </header>
+
+    <section class="hero">
+        <article class="panel hero-panel">
+            <div class="hero-badge">PlantDex Rebuilt</div>
+            <div class="hero-copy">
+                <h1>MY PLANTS,<br>REAL DATA</h1>
+                <p>
+                    현재 프로젝트의 API 구조에 맞춰 식물 페이지를 다시 연결했습니다.
+                    보유 중인 식물 목록을 불러오고, 선택한 식물의 재배 상태와 식물 기본 정보를 한 화면에서 확인할 수 있습니다.
+                </p>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">보유 식물 수</div>
+                    <div class="stat-value" id="statTotal">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">재배 중</div>
+                    <div class="stat-value" id="statGrowing">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">수확 가능</div>
+                    <div class="stat-value" id="statHarvestable">0</div>
+                </div>
+            </div>
+        </article>
+
+        <aside class="panel summary-panel">
+            <div class="summary-card">
+                <strong>인증 안내</strong>
+                <p>/api/userPlant 와 /api/plant/{id} 는 로그인 후 발급된 Authorization 토큰을 사용합니다.</p>
+            </div>
+            <div class="summary-list">
+                <div class="summary-item">
+                    <span>목록 데이터</span>
+                    <strong>내 식물 API</strong>
+                </div>
+                <div class="summary-item">
+                    <span>상세 데이터</span>
+                    <strong>식물 + 재배 상태 병합</strong>
+                </div>
+                <div class="summary-item">
+                    <span>검색 기준</span>
+                    <strong>식물명 / 별명 / 상태</strong>
+                </div>
+            </div>
+        </aside>
+    </section>
+
+    <section class="workspace">
+        <aside class="panel sidebar">
+            <div class="section-head">
+                <div>
+                    <h2 class="section-title">내 식물 목록</h2>
+                    <div class="section-sub" id="listSummary">불러오는 중입니다.</div>
+                </div>
+            </div>
+
+            <div class="filters">
+                <input id="searchInput" class="field" type="text" placeholder="식물 이름 또는 별명 검색">
+                <select id="statusFilter" class="field">
+                    <option value="">상태 전체</option>
+                    <option value="GROWING">GROWING</option>
+                    <option value="HARVESTABLE">HARVESTABLE</option>
+                    <option value="HARVESTED">HARVESTED</option>
+                    <option value="FAILED">FAILED</option>
+                </select>
+                <p class="hint">현재 코드베이스 기준으로 전체 식물 도감 API 목록 조회는 불안정해서, 보유 식물 목록을 안정적인 기준 데이터로 사용합니다.</p>
+            </div>
+
+            <div id="listNotice" class="notice" style="display:none;"></div>
+            <div id="plantList" class="list">
+                <div class="loading">식물 목록을 불러오는 중입니다.</div>
+            </div>
+        </aside>
+
+        <section class="panel detail-panel">
+            <div id="detailEmpty" class="detail-empty">
+                <div class="empty-emoji">🪴</div>
+                <h3>식물을 선택하세요</h3>
+                <p>왼쪽에서 항목을 선택하면 재배 상태, 성장 정보, 기본 식물 정보를 함께 표시합니다.</p>
+            </div>
+
+            <div id="detailContent" class="detail-content">
+                <div id="detailImage" class="hero-image fallback">🌱</div>
+
+                <div class="detail-header">
+                    <div class="detail-copy">
+                        <h2 id="detailName">-</h2>
+                        <p id="detailDescription">식물 설명이 여기에 표시됩니다.</p>
+                    </div>
+                    <div class="detail-pills">
+                        <span id="detailDifficulty" class="pill">-</span>
+                        <span id="detailStatus" class="pill">-</span>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="metric">
+                        <div class="metric-label">별명</div>
+                        <div class="metric-value" id="detailNickname">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">카테고리</div>
+                        <div class="metric-value" id="detailCategory">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">성장 기간</div>
+                        <div class="metric-value" id="detailGrowth">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">권장 광량</div>
+                        <div class="metric-value" id="detailLight">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">권장 급수</div>
+                        <div class="metric-value" id="detailWater">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">예상 수확일</div>
+                        <div class="metric-value" id="detailHarvestDate">-</div>
+                    </div>
+                </div>
+
+                <div class="status-panel">
+                    <div class="status-row">
+                        <span class="status-title">수분</span>
+                        <strong id="detailMoisture">-</strong>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-title">영양</span>
+                        <strong id="detailNutrient">-</strong>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-title">햇빛 노출</span>
+                        <strong id="detailSunlight">-</strong>
+                    </div>
+                </div>
+
+                <div id="detailUnlock" class="notice">해금 조건 정보가 없습니다.</div>
+                <div id="detailPhotoNotice" class="notice">최근 촬영 사진 정보가 없습니다.</div>
+            </div>
+        </section>
+    </section>
+</div>
+
+<script>
+const plantState = {
+    list: [],
+    filtered: [],
+    selectedUserPlantId: null
+};
+
+const plantIcons = ["🌿", "🌵", "🍀", "🌱", "🪴", "🌼", "🌻", "🌾"];
+
+function authHeaders() {
+    const token = localStorage.getItem("Authorization");
+    return token ? { Authorization: token } : {};
+}
+
+async function apiRequest(url) {
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            ...authHeaders()
+        }
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+    const payload = contentType.includes("application/json") ? await response.json() : null;
+
+    if (!response.ok) {
+        const error = new Error("request_failed");
+        error.status = response.status;
+        error.payload = payload;
+        throw error;
+    }
+
+    return payload;
+}
+
+function formatStatus(status) {
+    const map = {
+        GROWING: "재배 중",
+        HARVESTABLE: "수확 가능",
+        HARVESTED: "수확 완료",
+        FAILED: "재배 실패"
+    };
+    return map[status] || status || "-";
+}
+
+function formatDifficulty(value) {
+    const map = {
+        EASY: "EASY",
+        NORMAL: "NORMAL",
+        HARD: "HARD"
+    };
+    return map[value] || value || "-";
+}
+
+function formatLight(value) {
+    const map = {
+        LOW: "낮음",
+        MEDIUM: "보통",
+        HIGH: "높음"
+    };
+    return map[value] || value || "-";
+}
+
+function formatDate(value) {
+    if (!value) return "-";
+    return value;
+}
+
+function formatPercent(value) {
+    if (value === null || value === undefined) return "-";
+    return `${Number(value).toFixed(1)}%`;
+}
+
+function formatWater(value) {
+    if (value === null || value === undefined) return "-";
+    return `${value} ml/day`;
+}
+
+function statusClass(status) {
+    return `status-${String(status || "").toLowerCase()}`;
+}
+
+function difficultyClass(difficulty) {
+    return `difficulty-${String(difficulty || "").toLowerCase()}`;
+}
+
+function getThumbMarkup(item, index) {
+    if (item.lastPhotoUrl) {
+        return `<img src="${escapeHtml(item.lastPhotoUrl)}" alt="${escapeHtml(item.plantName || "식물 이미지")}">`;
+    }
+
+    return plantIcons[index % plantIcons.length];
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+}
+
+function setListNotice(message, isError = false) {
+    const notice = document.getElementById("listNotice");
+    if (!message) {
+        notice.style.display = "none";
+        notice.textContent = "";
+        notice.className = "notice";
+        return;
+    }
+
+    notice.style.display = "block";
+    notice.textContent = message;
+    notice.className = isError ? "notice error" : "notice";
+}
+
+function updateStats(list) {
+    document.getElementById("statTotal").textContent = String(list.length);
+    document.getElementById("statGrowing").textContent = String(list.filter(item => item.status === "GROWING").length);
+    document.getElementById("statHarvestable").textContent = String(list.filter(item => item.status === "HARVESTABLE").length);
+}
+
+function applyFilters() {
+    const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+    const status = document.getElementById("statusFilter").value;
+
+    plantState.filtered = plantState.list.filter(item => {
+        const text = `${item.plantName || ""} ${item.nickname || ""}`.toLowerCase();
+        const matchesKeyword = !keyword || text.includes(keyword);
+        const matchesStatus = !status || item.status === status;
+        return matchesKeyword && matchesStatus;
+    });
+
+    renderList();
+}
+
+function renderList() {
+    const listNode = document.getElementById("plantList");
+    const count = plantState.filtered.length;
+    const total = plantState.list.length;
+
+    document.getElementById("listSummary").textContent = total
+        ? `${count} / ${total}개의 식물을 표시 중입니다.`
+        : "등록된 보유 식물이 없습니다.";
+
+    if (!count) {
+        listNode.innerHTML = '<div class="loading">조건에 맞는 식물이 없습니다.</div>';
+        return;
+    }
+
+    listNode.innerHTML = plantState.filtered.map((item, index) => `
+        <button
+            type="button"
+            class="plant-card ${item.userPlantId === plantState.selectedUserPlantId ? "active" : ""}"
+            data-user-plant-id="${item.userPlantId}"
+        >
+            <div class="thumb">${getThumbMarkup(item, index)}</div>
+            <div class="plant-main">
+                <div class="plant-topline">
+                    <p class="plant-name">${escapeHtml(item.plantName || "-")}</p>
+                    <span class="pill ${statusClass(item.status)}">${escapeHtml(formatStatus(item.status))}</span>
+                </div>
+                <div class="plant-nickname">${escapeHtml(item.nickname || "별명 없음")}</div>
+                <div class="plant-meta">예상 수확일 ${escapeHtml(formatDate(item.expectedHarvestDate))}</div>
+            </div>
+        </button>
+    `).join("");
+
+    listNode.querySelectorAll(".plant-card").forEach(button => {
+        button.addEventListener("click", () => loadPlantDetail(Number(button.dataset.userPlantId)));
+    });
+}
+
+function showDetailEmpty() {
+    document.getElementById("detailEmpty").style.display = "block";
+    document.getElementById("detailContent").classList.remove("visible");
+}
+
+function showDetailContent() {
+    document.getElementById("detailEmpty").style.display = "none";
+    document.getElementById("detailContent").classList.add("visible");
+}
+
+function setDetailImage(plantDetail, userPlantDetail) {
+    const imageNode = document.getElementById("detailImage");
+    const imageUrl = plantDetail.imageUrl || userPlantDetail.lastPhotoUrl;
+
+    if (imageUrl) {
+        imageNode.className = "hero-image";
+        imageNode.innerHTML = `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(plantDetail.name || "식물 이미지")}">`;
+        return;
+    }
+
+    imageNode.className = "hero-image fallback";
+    imageNode.textContent = "🌱";
+}
+
+function renderDetail(plantDetail, userPlantDetail) {
+    showDetailContent();
+    setDetailImage(plantDetail, userPlantDetail);
+
+    document.getElementById("detailName").textContent = plantDetail.name || userPlantDetail.plantName || "-";
+    document.getElementById("detailDescription").textContent = plantDetail.description || "설명이 아직 등록되지 않았습니다.";
+    document.getElementById("detailNickname").textContent = userPlantDetail.nickname || "-";
+    document.getElementById("detailCategory").textContent = plantDetail.category || "-";
+    document.getElementById("detailGrowth").textContent = plantDetail.growthPeriodDays ? `${plantDetail.growthPeriodDays}일` : "-";
+    document.getElementById("detailLight").textContent = formatLight(plantDetail.lightPref);
+    document.getElementById("detailWater").textContent = formatWater(plantDetail.waterPreMlPerDay);
+    document.getElementById("detailHarvestDate").textContent = formatDate(userPlantDetail.expectedHarvestDate);
+    document.getElementById("detailMoisture").textContent = formatPercent(userPlantDetail.moisturePct);
+    document.getElementById("detailNutrient").textContent = formatPercent(userPlantDetail.nutrientLevel);
+    document.getElementById("detailSunlight").textContent = formatPercent(userPlantDetail.sunlightExposure);
+
+    const difficultyNode = document.getElementById("detailDifficulty");
+    difficultyNode.textContent = formatDifficulty(plantDetail.difficulty);
+    difficultyNode.className = `pill ${difficultyClass(plantDetail.difficulty)}`;
+
+    const statusNode = document.getElementById("detailStatus");
+    statusNode.textContent = formatStatus(userPlantDetail.status);
+    statusNode.className = `pill ${statusClass(userPlantDetail.status)}`;
+
+    const unlockNode = document.getElementById("detailUnlock");
+    unlockNode.textContent = plantDetail.unlockCondition
+        ? `해금 조건: ${plantDetail.unlockCondition}`
+        : "해금 조건 정보가 없습니다.";
+
+    const photoNoticeNode = document.getElementById("detailPhotoNotice");
+    photoNoticeNode.textContent = userPlantDetail.lastPhotoUrl
+        ? `최근 촬영 사진 URL: ${userPlantDetail.lastPhotoUrl}`
+        : "최근 촬영 사진 정보가 없습니다.";
+}
+
+function handleListError(error) {
+    updateStats([]);
+    showDetailEmpty();
+
+    if (error.status === 401 || error.status === 403) {
+        setListNotice("로그인 후 다시 시도하세요. 현재 페이지는 localStorage.Authorization 토큰을 사용합니다.", true);
+        document.getElementById("plantList").innerHTML = '<div class="loading">인증이 필요합니다.</div>';
+        return;
+    }
+
+    setListNotice("식물 목록을 불러오지 못했습니다. 백엔드 응답 상태를 확인하세요.", true);
+    document.getElementById("plantList").innerHTML = '<div class="loading">목록 조회 실패</div>';
+}
+
+async function loadPlantList() {
+    setListNotice("");
+    document.getElementById("plantList").innerHTML = '<div class="loading">식물 목록을 불러오는 중입니다.</div>';
+
+    try {
+        const list = await apiRequest("/api/userPlant");
+        plantState.list = Array.isArray(list) ? list : [];
+        updateStats(plantState.list);
+        applyFilters();
+
+        if (plantState.filtered.length) {
+            loadPlantDetail(plantState.filtered[0].userPlantId);
+        } else {
+            showDetailEmpty();
+        }
+    } catch (error) {
+        handleListError(error);
+    }
+}
+
+async function loadPlantDetail(userPlantId) {
+    plantState.selectedUserPlantId = userPlantId;
+    renderList();
+
+    document.getElementById("detailEmpty").style.display = "none";
+    document.getElementById("detailContent").classList.add("visible");
+    document.getElementById("detailContent").innerHTML = `
+        <div class="loading">상세 정보를 불러오는 중입니다.</div>
+    `;
+
+    try {
+        const userPlantDetail = await apiRequest(`/api/userPlant/${userPlantId}`);
+        const plantDetail = await apiRequest(`/api/plant/${userPlantDetail.plantId}`);
+
+        document.getElementById("detailContent").innerHTML = `
+            <div id="detailImage" class="hero-image fallback">🌱</div>
+
+            <div class="detail-header">
+                <div class="detail-copy">
+                    <h2 id="detailName">-</h2>
+                    <p id="detailDescription">식물 설명이 여기에 표시됩니다.</p>
+                </div>
+                <div class="detail-pills">
+                    <span id="detailDifficulty" class="pill">-</span>
+                    <span id="detailStatus" class="pill">-</span>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="metric">
+                    <div class="metric-label">별명</div>
+                    <div class="metric-value" id="detailNickname">-</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">카테고리</div>
+                    <div class="metric-value" id="detailCategory">-</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">성장 기간</div>
+                    <div class="metric-value" id="detailGrowth">-</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">권장 광량</div>
+                    <div class="metric-value" id="detailLight">-</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">권장 급수</div>
+                    <div class="metric-value" id="detailWater">-</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">예상 수확일</div>
+                    <div class="metric-value" id="detailHarvestDate">-</div>
+                </div>
+            </div>
+
+            <div class="status-panel">
+                <div class="status-row">
+                    <span class="status-title">수분</span>
+                    <strong id="detailMoisture">-</strong>
+                </div>
+                <div class="status-row">
+                    <span class="status-title">영양</span>
+                    <strong id="detailNutrient">-</strong>
+                </div>
+                <div class="status-row">
+                    <span class="status-title">햇빛 노출</span>
+                    <strong id="detailSunlight">-</strong>
+                </div>
+            </div>
+
+            <div id="detailUnlock" class="notice">해금 조건 정보가 없습니다.</div>
+            <div id="detailPhotoNotice" class="notice">최근 촬영 사진 정보가 없습니다.</div>
+        `;
+
+        renderDetail(plantDetail, userPlantDetail);
+    } catch (error) {
+        showDetailContent();
+        document.getElementById("detailContent").innerHTML = `
+            <div class="notice error">상세 정보를 불러오지 못했습니다. 상태 코드: ${error.status || "unknown"}</div>
+        `;
+    }
+}
+
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("statusFilter").addEventListener("change", applyFilters);
+
+loadPlantList();
+</script>
+</body>
+</html>

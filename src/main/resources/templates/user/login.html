@@ -1,178 +1,423 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!doctype html>
+<html lang="ko">
 <head>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenLink Login</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=SUIT:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --surface: rgba(255, 250, 240, 0.92);
+            --surface-strong: #fffdf7;
+            --line: rgba(80, 88, 65, 0.14);
+            --text: #243126;
+            --muted: #66725f;
+            --brand: #2f6f45;
+            --brand-strong: #1f5433;
+            --danger: #b74d36;
+            --shadow: 0 20px 40px rgba(58, 67, 45, 0.12);
+        }
 
-    <title>Login</title>
+        * { box-sizing: border-box; }
 
-    <!-- Custom fonts for this template-->
-    <link href="/sb-admin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "SUIT", "Noto Sans KR", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(255, 226, 165, 0.55), transparent 32%),
+                radial-gradient(circle at top right, rgba(127, 177, 121, 0.35), transparent 28%),
+                linear-gradient(180deg, #f9f5ea 0%, #eef4e6 54%, #eef1df 100%);
+        }
 
-    <!-- Custom styles for this template-->
-    <link href="/sb-admin/css/sb-admin-2.min.css" rel="stylesheet">
+        a { color: inherit; text-decoration: none; }
+        input, button { font: inherit; }
 
-</head>
+        .page {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0 36px;
+        }
 
-<body class="bg-gradient-primary">
+        .topbar,
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 30px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
 
-    <div class="container">
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 22px;
+            background: rgba(255, 252, 245, 0.78);
+            backdrop-filter: blur(18px);
+        }
 
-        <!-- Outer Row -->
-        <div class="row justify-content-center">
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
 
-            <div class="col-xl-10 col-lg-12 col-md-9">
+        .brand-mark {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 18px;
+            font-size: 24px;
+            background: linear-gradient(145deg, #2f6f45, #7dad62);
+            color: #fff;
+        }
 
-                <div class="card o-hidden border-0 shadow-lg my-5">
-                    <div class="card-body p-0">
-                        <!-- Nested Row within Card Body -->
-                        <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
-                            <div class="col-lg-6">
-                                <div class="p-5">
+        .brand-copy strong,
+        .hero-badge,
+        .hero-copy h1,
+        .panel-title {
+            font-family: "Do Hyeon", sans-serif;
+            letter-spacing: 0.01em;
+            font-weight: 400;
+        }
 
-                                    <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4">Welcome Back</h1>
-                                    </div>
+        .brand-copy strong {
+            font-size: 1.35rem;
+        }
 
-                                    <form class="user">
+        .brand-copy span,
+        .hero-copy p,
+        .sub,
+        .notice {
+            color: var(--muted);
+        }
 
-                                        <div class="form-group">
-                                            <input type="text" class="form-control form-control-user" id="username" placeholder="Username" >
-                                        </div>
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
 
-                                        <div class="form-group">
-                                            <input type="password" class="form-control form-control-user" id="password" placeholder="Password">
-                                        </div>
+        .btn {
+            border: 0;
+            border-radius: 999px;
+            cursor: pointer;
+            padding: 12px 18px;
+            font-weight: 700;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
 
-                                        <div class="form-group">
-                                            <div class="custom-control custom-checkbox small">
-                                                <input type="checkbox" class="custom-control-input" id="customCheck">
-                                                <label class="custom-control-label" for="customCheck">Remember Me</label>
-                                            </div>
-                                        </div>
+        .btn:hover { transform: translateY(-1px); }
 
-                                        <a onclick="Login()" class="btn btn-primary btn-user btn-block">Login</a>
+        .btn-primary {
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+            box-shadow: 0 14px 26px rgba(47, 111, 69, 0.24);
+        }
 
-                                        <a onclick="Logout()" class="btn btn-secondary btn-user btn-block">Logout</a>
+        .btn-secondary {
+            color: var(--brand-strong);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(47, 111, 69, 0.18);
+        }
 
-                                        <hr>
+        .hero {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+            gap: 18px;
+        }
 
-                                        <a href="/home" class="btn btn-google btn-user btn-block">
-                                            <i class="fab fa-google fa-fw"></i> Login with Google
-                                        </a>
-                                        <a href="/home" class="btn btn-facebook btn-user btn-block">
-                                            <i class="fab fa-facebook-f fa-fw"></i> Login with Facebook
-                                        </a>
+        .hero-panel,
+        .form-panel {
+            padding: 28px;
+        }
 
-                                    </form>
+        .hero-panel {
+            position: relative;
+            overflow: hidden;
+        }
 
-                                    <hr>
+        .hero-panel::before {
+            content: "";
+            position: absolute;
+            right: -44px;
+            bottom: -60px;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 220, 120, 0.35), transparent 68%);
+        }
 
-                                    <div class="text-center">
-                                        <a class="small" href="forgot-password.html">Forgot Password?</a>
-                                    </div>
-                                    <div class="text-center">
-                                        <a class="small" href="/user/signup">Create an Account!</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        .hero-badge {
+            display: inline-flex;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(47, 111, 69, 0.11);
+            color: var(--brand-strong);
+            margin-bottom: 14px;
+            font-size: 1rem;
+        }
 
-            </div>
+        .hero-copy h1 {
+            margin: 0;
+            font-size: clamp(2.7rem, 6vw, 4rem);
+            line-height: 0.95;
+        }
 
-        </div>
+        .hero-copy p {
+            margin: 14px 0 0;
+            line-height: 1.65;
+        }
 
-    </div>
+        .feature-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 22px;
+        }
 
-    <!-- Bootstrap core JavaScript-->
-    <script src="/sb-admin/vendor/jquery/jquery.min.js"></script>
-    <script src="/sb-admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+        .feature {
+            padding: 16px 18px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(47, 111, 69, 0.08);
+        }
 
-    <!-- Core plugin JavaScript-->
-    <script src="/sb-admin/vendor/jquery-easing/jquery.easing.min.js"></script>
+        .form-panel {
+            display: grid;
+            gap: 16px;
+        }
 
-    <!-- Custom scripts for all pages-->
-    <script src="/sb-admin/js/sb-admin-2.min.js"></script>
+        .panel-title {
+            margin: 0;
+            font-size: 1.8rem;
+        }
 
-    <!-- function -->
-    <script>
-        function Login(){
+        .fields {
+            display: grid;
+            gap: 12px;
+        }
 
-            let data = {
-                username: $('#username').val(),
-                password: $('#password').val()
+        .field {
+            width: 100%;
+            border: 1px solid rgba(47, 111, 69, 0.14);
+            border-radius: 18px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--text);
+        }
+
+        .field:focus {
+            outline: 2px solid rgba(47, 111, 69, 0.22);
+            border-color: rgba(47, 111, 69, 0.35);
+        }
+
+        .notice {
+            min-height: 24px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(47, 111, 69, 0.1);
+            line-height: 1.6;
+        }
+
+        .notice.error {
+            color: var(--danger);
+            border-color: rgba(183, 77, 54, 0.16);
+            background: rgba(255, 243, 239, 0.92);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 980px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                width: min(100% - 20px, 100%);
+                padding-top: 20px;
             }
 
-            $.ajax({
-                url: '/api/login',
-                method: 'POST',
-                contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify(data),
-                success: (data, status, xhr)=>{
-                    let refreshToken = xhr.getResponseHeader("RefreshToken");
-                    if(refreshToken === null || refreshToken === "" || Number(refreshToken) <= 0){
-                        alert("Account does not exist, or entered the wrong username or password.");
-                    } else {
-                        localStorage.setItem('RefreshToken', refreshToken);
-                        getAccessToken();
-                    }
-                },
-                error: (data, status, xhr)=>{
-                    alert(JSON.stringify(data));
-                }
-            });
+            .topbar,
+            .hero-panel,
+            .form-panel {
+                padding: 18px;
+                border-radius: 24px;
+            }
         }
+    </style>
+</head>
+<body>
+<div class="page">
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">🌿</div>
+            <div class="brand-copy">
+                <strong>GreenLink Login</strong>
+                <span>`plants.html`과 동일한 테마로 로그인 화면을 재구성했습니다.</span>
+            </div>
+        </div>
+        <div class="actions">
+            <a class="btn btn-secondary" href="/home">홈</a>
+            <a class="btn btn-secondary" href="/user/signup">회원가입</a>
+            <a class="btn btn-primary" href="/plants">Plant Room</a>
+        </div>
+    </header>
 
-        function getAccessToken(){
-            $.ajax({
-                url: "/api/auth",
-                method: "POST",
-                beforeSend : function(xhr){
-                    xhr.setRequestHeader("RefreshToken", localStorage.getItem("RefreshToken"));
-                },
-                contentType : 'application/json; charset=utf-8',
-                success: (data, status, xhr)=>{
-                    let accessToken = xhr.getResponseHeader("Authorization");
-                    localStorage.setItem("Authorization", accessToken);
-                    location.href = "/home";
-                },
-                error: (data, status, xhr)=>{
-                    alert(JSON.stringify(data));
-                },
-            });
+    <section class="hero">
+        <article class="panel hero-panel">
+            <div class="hero-badge">Auth Gateway</div>
+            <div class="hero-copy">
+                <h1>ENTER THE<br>GREENHOUSE</h1>
+                <p>
+                    기존 보안 흐름인 `/api/login` 과 `/api/auth` 를 그대로 사용합니다.
+                    로그인 성공 시 RefreshToken 과 Authorization 을 로컬 스토리지에 저장한 뒤 홈으로 이동합니다.
+                </p>
+            </div>
+            <div class="feature-list">
+                <div class="feature">
+                    <strong>1. Credential Check</strong>
+                    <div class="sub">`/api/login` 으로 아이디와 비밀번호를 전송합니다.</div>
+                </div>
+                <div class="feature">
+                    <strong>2. Refresh Token</strong>
+                    <div class="sub">응답 헤더의 `RefreshToken` 을 저장합니다.</div>
+                </div>
+                <div class="feature">
+                    <strong>3. Access Token</strong>
+                    <div class="sub">`/api/auth` 로 Authorization 헤더를 발급받습니다.</div>
+                </div>
+            </div>
+        </article>
+
+        <section class="panel form-panel">
+            <div>
+                <h2 class="panel-title">로그인</h2>
+                <div class="sub">현재 프로젝트의 JWT 로그인 흐름과 직접 연결되어 있습니다.</div>
+            </div>
+
+            <div class="fields">
+                <input id="username" class="field" type="text" placeholder="Username">
+                <input id="password" class="field" type="password" placeholder="Password">
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="login()">로그인</button>
+            <button type="button" class="btn btn-secondary" onclick="logout()">로그아웃</button>
+
+            <div id="loginNotice" class="notice">아이디와 비밀번호를 입력한 뒤 로그인하세요.</div>
+
+            <div class="footer-links">
+                <a href="/user/signup">계정이 없나요? 회원가입</a>
+                <a href="/plants">식물 화면 보기</a>
+            </div>
+        </section>
+    </section>
+</div>
+
+<script>
+function setNotice(message, isError = false) {
+    const notice = document.getElementById("loginNotice");
+    notice.textContent = message;
+    notice.className = isError ? "notice error" : "notice";
+}
+
+function login() {
+    const data = {
+        username: $("#username").val(),
+        password: $("#password").val()
+    };
+
+    if (!data.username || !data.password) {
+        setNotice("아이디와 비밀번호를 모두 입력하세요.", true);
+        return;
+    }
+
+    setNotice("로그인 요청 중입니다.");
+
+    $.ajax({
+        url: "/api/login",
+        method: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(data),
+        success: (response, status, xhr) => {
+            const refreshToken = xhr.getResponseHeader("RefreshToken");
+            if (!refreshToken) {
+                setNotice("RefreshToken 발급에 실패했습니다.", true);
+                return;
+            }
+
+            localStorage.setItem("RefreshToken", refreshToken);
+            getAccessToken();
+        },
+        error: () => {
+            setNotice("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인하세요.", true);
         }
+    });
+}
 
-        function Logout(){
-            $.ajax({
-                url: "/api/auth",
-                method: "Delete",
-                headers:{
-                    "Authorization" : localStorage.getItem("Authorization")
-                },
-                contentType : 'application/json; charset=utf-8',
-                success: (data, status, xhr)=>{
-                    localStorage.clear();
-                    alert(JSON.stringify(status));
-                },
-                error: (data, status, xhr)=>{
-                    alert(JSON.stringify(data));
-                },
-            });
+function getAccessToken() {
+    $.ajax({
+        url: "/api/auth",
+        method: "POST",
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("RefreshToken", localStorage.getItem("RefreshToken"));
+        },
+        contentType: "application/json; charset=utf-8",
+        success: (response, status, xhr) => {
+            const accessToken = xhr.getResponseHeader("Authorization");
+            if (!accessToken) {
+                setNotice("Authorization 발급에 실패했습니다.", true);
+                return;
+            }
+
+            localStorage.setItem("Authorization", accessToken);
+            setNotice("로그인에 성공했습니다. 홈으로 이동합니다.");
+            window.location.href = "/home";
+        },
+        error: () => {
+            setNotice("AccessToken 발급에 실패했습니다.", true);
         }
-    </script>
+    });
+}
 
+function logout() {
+    $.ajax({
+        url: "/api/auth",
+        method: "DELETE",
+        headers: {
+            Authorization: localStorage.getItem("Authorization")
+        },
+        contentType: "application/json; charset=utf-8",
+        success: () => {
+            localStorage.clear();
+            setNotice("로그아웃되었습니다.");
+        },
+        error: () => {
+            localStorage.clear();
+            setNotice("서버 응답과 무관하게 브라우저 세션은 정리했습니다.", true);
+        }
+    });
+}
+
+$("#password").on("keydown", function(event) {
+    if (event.key === "Enter") {
+        login();
+    }
+});
+</script>
 </body>
-
 </html>
