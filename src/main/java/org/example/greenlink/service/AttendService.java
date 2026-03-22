@@ -8,6 +8,6 @@ import java.util.List;
 
 @Service
 public interface AttendService {
-    AttendDto.TodayResDto today(Long userId);
-    AttendDto.ListResDto list(int year, int month, Long userId);
+    AttendDto.TodayResDto today(Long reqUserId);
+    AttendDto.ListResDto list(int year, int month, Long reqUserId);
 }

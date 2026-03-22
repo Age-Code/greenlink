@@ -33,27 +33,27 @@ public class UserPlantServiceimpl implements UserPlantService {
 
     // 나의 식물 생성
     @Override
-    public UserPlantDto.UserPlantIdResDto create(UserPlantDto.CreateReqDto createReqDto, Long requestUserId){
-        User requestUser = userRepository.findById(requestUserId).orElseThrow(() -> new EntityNotFoundException("UserPlant Create Error: 존재하지 않는 User입니다."));
-        Plant plant = plantRepository.findById(createReqDto.getPlantId()).orElseThrow(() -> new EntityNotFoundException("UserPlant Create Error: 존재하지 않는 Plant입니다."));
+    public UserPlantDto.UserPlantIdResDto create(UserPlantDto.CreateReqDto reqDto, Long reqUserId){
+        User reqUser = userRepository.findById(reqUserId).orElseThrow(() -> new EntityNotFoundException("UserPlant Create Error: 존재하지 않는 User입니다."));
+        Plant plant = plantRepository.findById(reqDto.getPlantId()).orElseThrow(() -> new EntityNotFoundException("UserPlant Create Error: 존재하지 않는 Plant입니다."));
 
-        return UserPlantDto.UserPlantIdResDto.from(userPlantRepository.save(UserPlant.of(createReqDto.getNickname(), DomainEnum.Status.GROWING, LocalDate.now(), LocalDate.now().plusDays(plant.getGrowthPeriodDays()), null, 0.0, 0.0, 0.0, null, requestUser, plant)));
+        return UserPlantDto.UserPlantIdResDto.from(userPlantRepository.save(UserPlant.of(reqDto.getNickname(), DomainEnum.Status.GROWING, LocalDate.now(), LocalDate.now().plusDays(plant.getGrowthPeriodDays()), null, 0.0, 0.0, 0.0, null, reqUser, plant)));
     }
 
     // 나의 식물 목록 조회
     @Override
-    public List<UserPlantDto.ListResDto> list(Long requestUserId) {
-        User requestUser = userRepository.findById(requestUserId).orElseThrow(() -> new EntityNotFoundException("UserPlant List Error: 존재하지 않는 User입니다."));
-        List<UserPlant> userPlantList = userPlantRepository.findByUser(requestUser);
+    public List<UserPlantDto.ListResDto> list(Long reqUserId) {
+        User reqUser = userRepository.findById(reqUserId).orElseThrow(() -> new EntityNotFoundException("UserPlant List Error: 존재하지 않는 User입니다."));
+        List<UserPlant> userPlantList = userPlantRepository.findByUser(reqUser);
 
         return userPlantList.stream().map(UserPlantDto.ListResDto::from).toList();
     }
 
     // 나의 식물 상세 조회
     @Override
-    public UserPlantDto.DetailResDto detail(Long userPlantId, Long requestUserId){
+    public UserPlantDto.DetailResDto detail(Long userPlantId, Long reqUserId){
         UserPlant userPlant = userPlantRepository.findById(userPlantId).orElseThrow(() -> new EntityNotFoundException("UserPlant Detail Error: 존재하지 않는 UserPlant입니다."));
-        if(!userPlant.getUser().getId().equals(requestUserId)){
+        if(!userPlant.getUser().getId().equals(reqUserId)){
             throw new NoPermissionException("UserPlant Detail Error: 접근 권한이 없습니다.");
         }
 
@@ -62,14 +62,14 @@ public class UserPlantServiceimpl implements UserPlantService {
 
     @Override
     @Transactional
-    public UserPlantDto.UserPlantIdResDto update(Long userPlantId, UserPlantDto.UpdateReqDto updateReqDto, Long requestUserId){
+    public UserPlantDto.UserPlantIdResDto update(Long userPlantId, UserPlantDto.UpdateReqDto reqDto, Long reqUserId){
         UserPlant userPlant = userPlantRepository.findById(userPlantId).orElseThrow(() -> new EntityNotFoundException("UserPlant Update Error: 존재하지 않는 UserPlant입니다."));
-        if(!userPlant.getUser().getId().equals(requestUserId)){
+        if(!userPlant.getUser().getId().equals(reqUserId)){
             throw new NoPermissionException("UserPlant Update Error: 접근 권한이 없습니다.");
         }
 
-        if(StringUtils.hasText(updateReqDto.getNickname()) && !updateReqDto.getNickname().equals(userPlant.getNickname())){
-            userPlant.setNickname(updateReqDto.getNickname());
+        if(StringUtils.hasText(reqDto.getNickname()) && !reqDto.getNickname().equals(userPlant.getNickname())){
+            userPlant.setNickname(reqDto.getNickname());
         }
 
         return UserPlantDto.UserPlantIdResDto.from(userPlant);
@@ -77,9 +77,9 @@ public class UserPlantServiceimpl implements UserPlantService {
 
     @Override
     @Transactional
-    public UserPlantDto.HarvestResDto harvest(Long userPlantId, Long requestUserId){
+    public UserPlantDto.HarvestResDto harvest(Long userPlantId, Long reqUserId){
         UserPlant userPlant = userPlantRepository.findById(userPlantId).orElseThrow(() -> new EntityNotFoundException("UserPlant Harvest Error: 존재하지 않는 UserPlant입니다."));
-        if(!userPlant.getUser().getId().equals(requestUserId)){
+        if(!userPlant.getUser().getId().equals(reqUserId)){
             throw new NoPermissionException("UserPlant Harvest Error: 접근 권한이 없습니다.");
         }
 
@@ -95,9 +95,9 @@ public class UserPlantServiceimpl implements UserPlantService {
 
     @Override
     @Transactional
-    public UserPlantDto.WaterResDto water(Long userPlantId, Long requestUserId){
+    public UserPlantDto.WaterResDto water(Long userPlantId, Long reqUserId){
         UserPlant userPlant = userPlantRepository.findById(userPlantId).orElseThrow(() -> new EntityNotFoundException("UserPlant Water Error: 존재하지 않는 UserPlant입니다."));
-        if(!userPlant.getUser().getId().equals(requestUserId)){
+        if(!userPlant.getUser().getId().equals(reqUserId)){
             throw new NoPermissionException("UserPlant Water Error: 접근 권한이 없습니다.");
         }
 
@@ -108,9 +108,9 @@ public class UserPlantServiceimpl implements UserPlantService {
 
     @Override
     @Transactional
-    public UserPlantDto.LightResDto light(Long userPlantId, Long requestUserId){
+    public UserPlantDto.LightResDto light(Long userPlantId, Long reqUserId){
         UserPlant userPlant = userPlantRepository.findById(userPlantId).orElseThrow(() -> new EntityNotFoundException("UserPlant Light Error: 존재하지 않는 UserPlant입니다."));
-        if(!userPlant.getUser().getId().equals(requestUserId)){
+        if(!userPlant.getUser().getId().equals(reqUserId)){
             throw new NoPermissionException("UserPlant Light Error: 접근 권한이 없습니다.");
         }
 

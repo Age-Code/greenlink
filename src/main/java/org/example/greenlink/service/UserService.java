@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface UserService {
-    UserDto.UserIdResDto signup(UserDto.SignupReqDto signupReqDto);
-    UserDto.DetailResDto detail(Long requestUserId);
-    UserDto.UserIdResDto update(UserDto.UpdateReqDto updateReqDto, Long requestUserId);
+    UserDto.UserIdResDto signup(UserDto.SignupReqDto reqDto);
+    UserDto.DetailResDto detail(Long reqUserId);
+    UserDto.UserIdResDto update(UserDto.UpdateReqDto reqDto, Long reqUserId);
 }

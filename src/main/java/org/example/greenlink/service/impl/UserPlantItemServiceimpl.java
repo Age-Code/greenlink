@@ -20,62 +20,62 @@ public class UserPlantItemServiceimpl implements UserPlantItemService {
     private final UserPlantRepository userPlantRepository;
 
     @Override
-    public List<UserPlantItemDto.ListResDto> list(Long userId) {
-        User u = userRepository.findByIdAndDeletedFalse(userId)
+    public List<UserPlantItemDto.ListResDto> list(Long reqUserId) {
+        User reqUser = userRepository.findByIdAndDeletedFalse(reqUserId)
                 .orElseThrow(()->new IllegalArgumentException("user not found"));
 
-        List<UserPlantItem> userPlantItems = userPlantItemRepository.findAllByUserIdAndDeletedFalse(userId);
+        List<UserPlantItem> userPlantItems = userPlantItemRepository.findAllByUserIdAndDeletedFalse(reqUserId);
 
         return userPlantItems.stream().map(UserPlantItemDto.ListResDto::from).toList();
     }
 
     @Override
-    public UserPlantItemDto.DetailResDto detailItem(Long userPlantItemId, Long userId) {
-        User u = userRepository.findByIdAndDeletedFalse(userId)
+    public UserPlantItemDto.DetailResDto detailItem(Long userPlantItemId, Long reqUserId) {
+        User reqUser = userRepository.findByIdAndDeletedFalse(reqUserId)
                 .orElseThrow(()->new IllegalArgumentException("user not found"));
 
-        UserPlantItem upi = userPlantItemRepository.findByIdAndDeletedFalse(userPlantItemId)
+        UserPlantItem userPlantItem = userPlantItemRepository.findByIdAndDeletedFalse(userPlantItemId)
                 .orElseThrow(()->new IllegalArgumentException("userPlantItem not found"));
 
-        return UserPlantItemDto.DetailResDto.from(upi);
+        return UserPlantItemDto.DetailResDto.from(userPlantItem);
     }
 
     @Override
     @Transactional
-    public UserPlantItemDto.UpdateResDto updateItem(Long userPlantItemId, UserPlantItemDto.UpdateReqDto req, Long userId) {
-        UserPlantItem upi = userPlantItemRepository.findByIdAndDeletedFalse(userPlantItemId)
+    public UserPlantItemDto.UpdateResDto updateItem(Long userPlantItemId, UserPlantItemDto.UpdateReqDto reqDto, Long reqUserId) {
+        UserPlantItem userPlantItem = userPlantItemRepository.findByIdAndDeletedFalse(userPlantItemId)
                 .orElseThrow(() -> new IllegalArgumentException("userPlantItem not found"));
 
-        if (!upi.getUser().getId().equals(userId)) {
+        if (!userPlantItem.getUser().getId().equals(reqUserId)) {
             throw new IllegalStateException("This item does not belong to the user.");
         }
 
-        UserPlant up = userPlantRepository.findByIdAndDeletedFalse(req.getUserPlantId())
+        UserPlant userPlant = userPlantRepository.findByIdAndDeletedFalse(reqDto.getUserPlantId())
                 .orElseThrow(() -> new IllegalArgumentException("userPlant not found"));
 
-        if (!up.getUser().getId().equals(userId)) {
+        if (!userPlant.getUser().getId().equals(reqUserId)) {
             throw new IllegalStateException("You do not own this plant.");
         }
 
-        DomainEnum.ItemType type = upi.getItem().getType();
+        DomainEnum.ItemType type = userPlantItem.getItem().getType();
 
         if (DomainEnum.ItemType.NUTRIENT == type) {
-            up.setNutrientLevel(up.getNutrientLevel() + 1);
-            upi.setDeleted(true);
-            upi.setUserPlant(null);
+            userPlant.setNutrientLevel(userPlant.getNutrientLevel() + 1);
+            userPlantItem.setDeleted(true);
+            userPlantItem.setUserPlant(null);
 
         } else if (DomainEnum.ItemType.POT == type || DomainEnum.ItemType.DECORATION == type) {
-            userPlantItemRepository.findByUserPlantIdAndItemType(up.getId(), type)
+            userPlantItemRepository.findByUserPlantIdAndItemType(userPlant.getId(), type)
                     .ifPresent(existingItem -> {
-                        if (!existingItem.getId().equals(upi.getId())) {
+                        if (!existingItem.getId().equals(userPlantItem.getId())) {
                             existingItem.setUserPlant(null);
                         }
                     });
 
-            upi.setUserPlant(up);
+            userPlantItem.setUserPlant(userPlant);
         }
 
-        return UserPlantItemDto.UpdateResDto.from(upi);
+        return UserPlantItemDto.UpdateResDto.from(userPlantItem);
     }
 
 }

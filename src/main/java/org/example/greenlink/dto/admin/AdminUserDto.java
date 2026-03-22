@@ -19,6 +19,7 @@ public class AdminUserDto {
         String email;
         String university;
         String nickname;
+        String address;
     }
 
     // Create Service Dto
@@ -26,7 +27,7 @@ public class AdminUserDto {
     public static class CreateSevDto extends CreateReqDto {
         Long reqUserId;
 
-        public User toEntity() { return User.of(getUsername(), getPassword(), getEmail(), getUniversity(), getNickname()); }
+        public User toEntity() { return User.of(getUsername(), getPassword(), getEmail(), getUniversity(), getNickname(), getAddress()); }
     }
 
     // Create Response Dto

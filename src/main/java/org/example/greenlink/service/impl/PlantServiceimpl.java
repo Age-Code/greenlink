@@ -20,7 +20,7 @@ public class PlantServiceimpl implements PlantService {
 
     @Override
     public List<PlantDto.ListResDto> list(){
-        List<Plant> plantList = plantRepository.findbyDeletedFalse();
+        List<Plant> plantList = plantRepository.findAllByDeletedFalse();
         return plantList.stream().map(PlantDto.ListResDto::from).toList();
     }
 

@@ -36,17 +36,14 @@ public class UserPlantItemRestController {
     //4.2 아이템 상세
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/{userPlantItemId}")
-    public ResponseEntity<UserPlantItemDto.DetailResDto> detailItem(@PathVariable Long userPlantItemId,
-                                                                  @AuthenticationPrincipal PrincipalDetails principalDetails){
+    public ResponseEntity<UserPlantItemDto.DetailResDto> detailItem(@PathVariable Long userPlantItemId, @AuthenticationPrincipal PrincipalDetails principalDetails){
         return ResponseEntity.ok(userPlantItemService.detailItem(userPlantItemId, getReqUserId(principalDetails)));
     }
 
     //4.3 아이템 사용/해제
     @PreAuthorize("hasRole('USER')")
     @PutMapping("/{userPlantItemId}")
-    public ResponseEntity<UserPlantItemDto.UpdateResDto> updateItem(@PathVariable Long userPlantItemId,
-                                                                    @RequestBody UserPlantItemDto.UpdateReqDto req,
-                                                                    @AuthenticationPrincipal PrincipalDetails principalDetails){
-        return ResponseEntity.ok(userPlantItemService.updateItem(userPlantItemId, req, getReqUserId(principalDetails)));
+    public ResponseEntity<UserPlantItemDto.UpdateResDto> updateItem(@PathVariable Long userPlantItemId, @RequestBody UserPlantItemDto.UpdateReqDto reqDto, @AuthenticationPrincipal PrincipalDetails principalDetails){
+        return ResponseEntity.ok(userPlantItemService.updateItem(userPlantItemId, reqDto, getReqUserId(principalDetails)));
     }
 }

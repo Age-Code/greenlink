@@ -36,6 +36,6 @@ public class AttendRestController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping("")
     public ResponseEntity<AttendDto.ListResDto> list(@RequestParam("year") int year, @RequestParam("month") int month, @AuthenticationPrincipal PrincipalDetails principalDetails){
-        return ResponseEntity.ok(attendService.list(year, month, getReqUserId  (principalDetails)));
+        return ResponseEntity.ok(attendService.list(year, month, getReqUserId(principalDetails)));
     }
 }

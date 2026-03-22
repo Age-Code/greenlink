@@ -26,8 +26,8 @@ public class UserRestController {
 
     // Signup
     @PostMapping("/signup")
-    public ResponseEntity<UserDto.UserIdResDto> signup(@RequestBody UserDto.SignupReqDto signupReqDto){
-        return ResponseEntity.ok(userService.signup(signupReqDto));
+    public ResponseEntity<UserDto.UserIdResDto> signup(@RequestBody UserDto.SignupReqDto reqDto){
+        return ResponseEntity.ok(userService.signup(reqDto));
     }
 
     // Detail
@@ -40,7 +40,7 @@ public class UserRestController {
     // Update
     @PreAuthorize("hasRole('USER')")
     @PutMapping("")
-    public ResponseEntity<UserDto.UserIdResDto> update(@RequestBody UserDto.UpdateReqDto updateReqDto, @AuthenticationPrincipal PrincipalDetails principalDetails){
-        return ResponseEntity.ok(userService.update(updateReqDto, getReqUserId(principalDetails)));
+    public ResponseEntity<UserDto.UserIdResDto> update(@RequestBody UserDto.UpdateReqDto reqDto, @AuthenticationPrincipal PrincipalDetails principalDetails){
+        return ResponseEntity.ok(userService.update(reqDto, getReqUserId(principalDetails)));
     }
 }

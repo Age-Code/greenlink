@@ -8,6 +8,6 @@ import java.util.List;
 
 @Service
 public interface QuestService {
-    List<QuestDto.ListResDto> list(Long userId);
-    QuestDto.DetailResDto detail(Long questId, Long userId);
+    List<QuestDto.ListResDto> list(Long reqUserId);
+    QuestDto.DetailResDto detail(Long questId, Long reqUserId);
 }

@@ -18,6 +18,9 @@ public class DefaultController {
     @RequestMapping({"/home", "", "/"})
     public String page() { return "home"; }
 
+    @RequestMapping("/plants")
+    public String plants() { return "plants"; }
+
     @ResponseBody
     @RequestMapping(value = "/image/{file_name:.+}", method = {RequestMethod.GET,RequestMethod.POST})
     public byte[] getImage(@PathVariable("file_name") String file_name, HttpServletRequest request) throws Exception {
