@@ -1,143 +1,387 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!doctype html>
+<html lang="ko">
 <head>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenLink Signup</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=SUIT:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --surface: rgba(255, 250, 240, 0.92);
+            --surface-strong: #fffdf7;
+            --line: rgba(80, 88, 65, 0.14);
+            --text: #243126;
+            --muted: #66725f;
+            --brand: #2f6f45;
+            --brand-strong: #1f5433;
+            --danger: #b74d36;
+            --shadow: 0 20px 40px rgba(58, 67, 45, 0.12);
+        }
 
-    <title>Signup</title>
+        * { box-sizing: border-box; }
 
-    <!-- Custom fonts for this template-->
-    <link href="/sb-admin/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "SUIT", "Noto Sans KR", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(255, 226, 165, 0.55), transparent 32%),
+                radial-gradient(circle at top right, rgba(127, 177, 121, 0.35), transparent 28%),
+                linear-gradient(180deg, #f9f5ea 0%, #eef4e6 54%, #eef1df 100%);
+        }
 
-    <!-- Custom styles for this template-->
-    <link href="/sb-admin/css/sb-admin-2.min.css" rel="stylesheet">
+        a { color: inherit; text-decoration: none; }
+        input, button { font: inherit; }
 
+        .page {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0 36px;
+        }
+
+        .topbar,
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 30px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 22px;
+            background: rgba(255, 252, 245, 0.78);
+            backdrop-filter: blur(18px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-mark {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 18px;
+            font-size: 24px;
+            background: linear-gradient(145deg, #2f6f45, #7dad62);
+            color: #fff;
+        }
+
+        .brand-copy strong,
+        .hero-badge,
+        .hero-copy h1,
+        .panel-title {
+            font-family: "Do Hyeon", sans-serif;
+            letter-spacing: 0.01em;
+            font-weight: 400;
+        }
+
+        .brand-copy strong {
+            font-size: 1.35rem;
+        }
+
+        .brand-copy span,
+        .hero-copy p,
+        .sub,
+        .notice {
+            color: var(--muted);
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: 0;
+            border-radius: 999px;
+            cursor: pointer;
+            padding: 12px 18px;
+            font-weight: 700;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .btn:hover { transform: translateY(-1px); }
+
+        .btn-primary {
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+            box-shadow: 0 14px 26px rgba(47, 111, 69, 0.24);
+        }
+
+        .btn-secondary {
+            color: var(--brand-strong);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(47, 111, 69, 0.18);
+        }
+
+        .hero {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(380px, 0.92fr);
+            gap: 18px;
+        }
+
+        .hero-panel,
+        .form-panel {
+            padding: 28px;
+        }
+
+        .hero-panel {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-panel::before {
+            content: "";
+            position: absolute;
+            right: -44px;
+            bottom: -60px;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 220, 120, 0.35), transparent 68%);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(47, 111, 69, 0.11);
+            color: var(--brand-strong);
+            margin-bottom: 14px;
+            font-size: 1rem;
+        }
+
+        .hero-copy h1 {
+            margin: 0;
+            font-size: clamp(2.7rem, 6vw, 4rem);
+            line-height: 0.95;
+        }
+
+        .hero-copy p {
+            margin: 14px 0 0;
+            line-height: 1.65;
+        }
+
+        .feature-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .feature {
+            padding: 16px 18px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(47, 111, 69, 0.08);
+        }
+
+        .form-panel {
+            display: grid;
+            gap: 16px;
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .fields {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .fields .full {
+            grid-column: 1 / -1;
+        }
+
+        .field {
+            width: 100%;
+            border: 1px solid rgba(47, 111, 69, 0.14);
+            border-radius: 18px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--text);
+        }
+
+        .field:focus {
+            outline: 2px solid rgba(47, 111, 69, 0.22);
+            border-color: rgba(47, 111, 69, 0.35);
+        }
+
+        .notice {
+            min-height: 24px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(47, 111, 69, 0.1);
+            line-height: 1.6;
+        }
+
+        .notice.error {
+            color: var(--danger);
+            border-color: rgba(183, 77, 54, 0.16);
+            background: rgba(255, 243, 239, 0.92);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 980px) {
+            .hero,
+            .fields {
+                grid-template-columns: 1fr;
+            }
+
+            .fields .full {
+                grid-column: auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                width: min(100% - 20px, 100%);
+                padding-top: 20px;
+            }
+
+            .topbar,
+            .hero-panel,
+            .form-panel {
+                padding: 18px;
+                border-radius: 24px;
+            }
+        }
+    </style>
 </head>
-
-<body class="bg-gradient-primary">
-
-    <div class="container">
-
-        <div class="card o-hidden border-0 shadow-lg my-5">
-            <div class="card-body p-0">
-                <!-- Nested Row within Card Body -->
-                <div class="row">
-                    <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
-                    <div class="col-lg-7">
-                        <div class="p-5">
-
-                            <div class="text-center">
-                                <h1 class="h4 text-gray-900 mb-4">Create an Account</h1>
-                            </div>
-
-                            <form class="user">
-                                <div class="form-group row">
-
-                                    <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="text" class="form-control form-control-user" id="user_username"
-                                            placeholder="Username">
-                                    </div>
-
-                                    <div class="col-sm-6">
-                                        <input type="password" class="form-control form-control-user" id="user_password"
-                                            placeholder="Password">
-                                    </div>
-
-                                </div>
-
-                                <div class="form-group">
-                                    <input type="email" class="form-control form-control-user" id="user_email"
-                                        placeholder="Email Address">
-                                </div>
-
-                                <div class="form-group row">
-                                    <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="text" class="form-control form-control-user"
-                                            id="user_university" placeholder="University">
-                                    </div>
-
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control form-control-user"
-                                            id="user_nickname" placeholder="Nickname">
-                                    </div>
-                                </div>
-
-                                <a onclick="signup()" class="btn btn-primary btn-user btn-block">Signup</a>
-
-                                <hr>
-
-                                <a href="/home" class="btn btn-google btn-user btn-block">
-                                    <i class="fab fa-google fa-fw"></i> Register with Google
-                                </a>
-
-                                <a href="/home" class="btn btn-facebook btn-user btn-block">
-                                    <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook
-                                </a>
-                            </form>
-
-                            <hr>
-
-                            <div class="text-center">
-                                <a class="small" href="forgot-password.html">Forgot Password?</a>
-                            </div>
-
-                            <div class="text-center">
-                                <a class="small" href="/user/login">Already have an account? Login!</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<body>
+<div class="page">
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">🌿</div>
+            <div class="brand-copy">
+                <strong>GreenLink Signup</strong>
+                <span>`plants.html`의 색감과 타이포를 이어받은 회원가입 화면입니다.</span>
             </div>
         </div>
+        <div class="actions">
+            <a class="btn btn-secondary" href="/home">홈</a>
+            <a class="btn btn-secondary" href="/user/login">로그인</a>
+            <a class="btn btn-primary" href="/plants">Plant Room</a>
+        </div>
+    </header>
 
-    </div>
+    <section class="hero">
+        <article class="panel hero-panel">
+            <div class="hero-badge">Create Account</div>
+            <div class="hero-copy">
+                <h1>START YOUR<br>FIRST GARDEN</h1>
+                <p>
+                    현재 백엔드 DTO에 맞춰 회원가입 입력 필드를 정리했습니다.
+                    가입 후 바로 로그인 화면으로 이동할 수 있게 사용자 흐름도 연결해 두었습니다.
+                </p>
+            </div>
+            <div class="feature-list">
+                <div class="feature">
+                    <strong>Username / Password</strong>
+                    <div class="sub">로그인에 사용할 기본 계정 정보입니다.</div>
+                </div>
+                <div class="feature">
+                    <strong>Profile Fields</strong>
+                    <div class="sub">이메일, 닉네임, 연락처, 주소를 함께 저장합니다.</div>
+                </div>
+                <div class="feature">
+                    <strong>API Mapping</strong>
+                    <div class="sub">`/api/user/signup` 과 `UserDto.SignupReqDto` 구조에 맞춰 전송합니다.</div>
+                </div>
+            </div>
+        </article>
 
-    <!-- Bootstrap core JavaScript-->
-    <script src="/sb-admin/vendor/jquery/jquery.min.js"></script>
-    <script src="/sb-admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <section class="panel form-panel">
+            <div>
+                <h2 class="panel-title">회원가입</h2>
+                <div class="sub">프로젝트의 실제 Signup DTO에 맞는 필드만 사용합니다.</div>
+            </div>
 
-    <!-- Core plugin JavaScript-->
-    <script src="/sb-admin/vendor/jquery-easing/jquery.easing.min.js"></script>
+            <div class="fields">
+                <input id="user_username" class="field" type="text" placeholder="Username">
+                <input id="user_password" class="field" type="password" placeholder="Password">
+                <input id="user_email" class="field full" type="email" placeholder="Email Address">
+                <input id="user_nickname" class="field" type="text" placeholder="Nickname">
+                <input id="user_phone" class="field" type="text" placeholder="Phone Number">
+                <input id="user_address" class="field full" type="text" placeholder="Address">
+            </div>
 
-    <!-- Custom scripts for all pages-->
-    <script src="/sb-admin/js/sb-admin-2.min.js"></script>
+            <button type="button" class="btn btn-primary" onclick="signup()">회원가입</button>
 
-    <!-- function -->
-    <script>
-        function signup() {
+            <div id="signupNotice" class="notice">가입 정보를 입력한 뒤 회원가입을 진행하세요.</div>
 
-            let data = {
-                username: $('#user_username').val(),
-                password: $('#user_password').val(),
-                email: $('#user_email').val(),
-                university: $('#user_university').val(),
-                nickname: $('#user_nickname').val()
-            };
+            <div class="footer-links">
+                <a href="/user/login">이미 계정이 있나요? 로그인</a>
+                <a href="/plants">식물 화면 보기</a>
+            </div>
+        </section>
+    </section>
+</div>
 
-            $.ajax({
-                url: "/api/user/signup",
-                method: "POST",
-                contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify(data),
-                success: (data, status, xhr)=>{
-                    alert(JSON.stringify(data));
-                },
-                error: (data, status, xhr)=>{
-                    alert(JSON.stringify(data));
-                }
-            });
+<script>
+function setNotice(message, isError = false) {
+    const notice = document.getElementById("signupNotice");
+    notice.textContent = message;
+    notice.className = isError ? "notice error" : "notice";
+}
+
+function signup() {
+    const data = {
+        username: $("#user_username").val(),
+        password: $("#user_password").val(),
+        email: $("#user_email").val(),
+        nickname: $("#user_nickname").val(),
+        phoneNumber: $("#user_phone").val(),
+        address: $("#user_address").val()
+    };
+
+    if (!data.username || !data.password || !data.email) {
+        setNotice("Username, Password, Email 은 필수입니다.", true);
+        return;
+    }
+
+    setNotice("회원가입 요청 중입니다.");
+
+    $.ajax({
+        url: "/api/user/signup",
+        method: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(data),
+        success: () => {
+            setNotice("회원가입에 성공했습니다. 로그인 화면으로 이동합니다.");
+            setTimeout(() => {
+                window.location.href = "/user/login";
+            }, 900);
+        },
+        error: (xhr) => {
+            const message = xhr.responseJSON?.message || "회원가입에 실패했습니다. 입력값을 확인하세요.";
+            setNotice(message, true);
         }
-    </script>
-
+    });
+}
+</script>
 </body>
-
 </html>

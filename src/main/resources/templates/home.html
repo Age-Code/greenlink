@@ -1,38 +1,511 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenLink Home</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <!-- 스타일 -->
-    <link href="https://cdn.jsdelivr.net/npm/[email protected]/dist/quill.snow.css" rel="stylesheet" />
-    <!-- 스크립트 -->
-    <script src="https://cdn.jsdelivr.net/npm/[email protected]/dist/quill.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=SUIT:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --surface: rgba(255, 250, 240, 0.92);
+            --surface-strong: #fffdf7;
+            --line: rgba(80, 88, 65, 0.14);
+            --text: #243126;
+            --muted: #66725f;
+            --brand: #2f6f45;
+            --brand-strong: #1f5433;
+            --accent: #efb24f;
+            --danger: #b74d36;
+            --shadow: 0 20px 40px rgba(58, 67, 45, 0.12);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "SUIT", "Noto Sans KR", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(255, 226, 165, 0.55), transparent 32%),
+                radial-gradient(circle at top right, rgba(127, 177, 121, 0.35), transparent 28%),
+                linear-gradient(180deg, #f9f5ea 0%, #eef4e6 54%, #eef1df 100%);
+        }
+
+        a { color: inherit; text-decoration: none; }
+        button { font: inherit; }
+
+        .page {
+            width: min(1240px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0 36px;
+        }
+
+        .topbar,
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 30px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 22px;
+            background: rgba(255, 252, 245, 0.78);
+            backdrop-filter: blur(18px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-mark {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 18px;
+            font-size: 24px;
+            background: linear-gradient(145deg, #2f6f45, #7dad62);
+            color: #fff;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        }
+
+        .brand-copy,
+        .hero-copy,
+        .stat-label,
+        .card-copy,
+        .token-meta,
+        .notice {
+            display: grid;
+            gap: 4px;
+        }
+
+        .brand-copy strong,
+        .hero-badge,
+        .hero-copy h1,
+        .stat-value,
+        .section-title,
+        .card-title {
+            font-family: "Do Hyeon", sans-serif;
+            letter-spacing: 0.01em;
+            font-weight: 400;
+        }
+
+        .brand-copy strong {
+            font-size: 1.35rem;
+        }
+
+        .brand-copy span,
+        .hero-copy p,
+        .section-sub,
+        .card-copy p,
+        .token-meta,
+        .notice {
+            color: var(--muted);
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: 0;
+            border-radius: 999px;
+            cursor: pointer;
+            padding: 12px 18px;
+            font-weight: 700;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .btn:hover { transform: translateY(-1px); }
+
+        .btn-primary {
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+            box-shadow: 0 14px 26px rgba(47, 111, 69, 0.24);
+        }
+
+        .btn-secondary {
+            color: var(--brand-strong);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(47, 111, 69, 0.18);
+        }
+
+        .hero {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.9fr);
+            gap: 18px;
+        }
+
+        .hero-panel,
+        .status-panel,
+        .section {
+            padding: 28px;
+        }
+
+        .hero-panel {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-panel::before {
+            content: "";
+            position: absolute;
+            right: -46px;
+            bottom: -62px;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 220, 120, 0.35), transparent 68%);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(47, 111, 69, 0.11);
+            color: var(--brand-strong);
+            font-size: 1rem;
+        }
+
+        .hero-copy h1 {
+            margin: 0;
+            font-size: clamp(2.7rem, 6vw, 4.3rem);
+            line-height: 0.95;
+        }
+
+        .hero-copy p {
+            max-width: 700px;
+            margin: 14px 0 0;
+            line-height: 1.65;
+            font-size: 1rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .stat {
+            padding: 16px 18px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(47, 111, 69, 0.08);
+        }
+
+        .stat-value {
+            font-size: 1.95rem;
+            margin-top: 8px;
+        }
+
+        .status-panel {
+            display: grid;
+            gap: 12px;
+        }
+
+        .token-box {
+            padding: 18px;
+            border-radius: 24px;
+            color: #fff;
+            background: linear-gradient(145deg, #2b5f3d, #7aa363);
+        }
+
+        .token-box strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .token-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .token-pill.off {
+            background: rgba(183, 77, 54, 0.18);
+        }
+
+        .mini-card {
+            padding: 16px 18px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(47, 111, 69, 0.08);
+        }
+
+        .grid {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .section-head {
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            margin: 0;
+            font-size: 1.75rem;
+        }
+
+        .section-sub {
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+
+        .feature-card {
+            display: grid;
+            gap: 18px;
+            padding: 22px;
+            border-radius: 26px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(47, 111, 69, 0.08);
+        }
+
+        .card-visual {
+            height: 180px;
+            border-radius: 22px;
+            display: grid;
+            place-items: center;
+            font-size: 3.4rem;
+            background: linear-gradient(135deg, #dcefc7, #fff2d5);
+        }
+
+        .card-title {
+            margin: 0;
+            font-size: 1.6rem;
+        }
+
+        .card-copy p {
+            margin: 0;
+            line-height: 1.65;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .notice {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(47, 111, 69, 0.1);
+            line-height: 1.6;
+        }
+
+        .notice.error {
+            color: var(--danger);
+            border-color: rgba(183, 77, 54, 0.16);
+            background: rgba(255, 243, 239, 0.92);
+        }
+
+        @media (max-width: 980px) {
+            .hero,
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                width: min(100% - 20px, 100%);
+                padding-top: 20px;
+            }
+
+            .topbar,
+            .hero-panel,
+            .status-panel,
+            .section {
+                padding: 18px;
+                border-radius: 24px;
+            }
+        }
+    </style>
 </head>
 <body>
-<h1>Home</h1>
+<div class="page">
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">🌿</div>
+            <div class="brand-copy">
+                <strong>GreenLink Greenhouse</strong>
+                <span>`plants.html`의 시각 흐름을 홈 화면까지 이어 붙인 사용자 진입 페이지입니다.</span>
+            </div>
+        </div>
+        <div class="actions">
+            <a class="btn btn-secondary" href="/user/login">로그인</a>
+            <a class="btn btn-secondary" href="/user/signup">회원가입</a>
+            <a class="btn btn-primary" href="/plants">Plant Room</a>
+        </div>
+    </header>
 
-<div>
-    <h2>User</h2>
+    <section class="hero">
+        <article class="panel hero-panel">
+            <div class="hero-badge">GreenLink Front Theme</div>
+            <div class="hero-copy">
+                <h1>GROW YOUR<br>DIGITAL GARDEN</h1>
+                <p>
+                    GreenLink의 사용자 화면을 하나의 톤으로 묶었습니다.
+                    로그인, 회원가입, 식물 관리 페이지가 같은 색감과 타이포그래피로 이어지도록 구성했습니다.
+                </p>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">식물 도감</div>
+                    <div class="stat-value">Plant</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">인증 흐름</div>
+                    <div class="stat-value">JWT</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">사용자 진입</div>
+                    <div class="stat-value">Unified</div>
+                </div>
+            </div>
+        </article>
 
-    <a href="/user/signup">Signup</a>
-    <br/>
+        <aside class="panel status-panel">
+            <div class="token-box">
+                <strong>현재 세션 상태</strong>
+                <span id="sessionPill" class="token-pill off">로그아웃 상태</span>
+            </div>
+            <div class="mini-card">
+                <strong>Access Token</strong>
+                <div id="accessTokenMeta" class="token-meta">로컬 스토리지에 저장된 토큰이 없습니다.</div>
+            </div>
+            <div class="mini-card">
+                <strong>Refresh Token</strong>
+                <div id="refreshTokenMeta" class="token-meta">로컬 스토리지에 저장된 토큰이 없습니다.</div>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="logout()">세션 정리</button>
+        </aside>
+    </section>
 
-    <a href="/user/login">Login</a>
-    <br/>
+    <section class="panel section">
+        <div class="section-head">
+            <h2 class="section-title">Quick Routes</h2>
+            <div class="section-sub">사용자 흐름을 바로 테스트할 수 있도록 핵심 페이지를 동일한 테마 아래에 배치했습니다.</div>
+        </div>
 
+        <div class="grid">
+            <article class="feature-card">
+                <div class="card-visual">🪴</div>
+                <div class="card-copy">
+                    <h3 class="card-title">Plant Room</h3>
+                    <p>보유 식물 목록과 식물 상세를 함께 확인하는 메인 공간입니다.</p>
+                </div>
+                <div class="card-actions">
+                    <a class="btn btn-primary" href="/plants">식물 보기</a>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <div class="card-visual">🔐</div>
+                <div class="card-copy">
+                    <h3 class="card-title">Login</h3>
+                    <p>기존 `/api/login` 과 `/api/auth` 흐름을 사용하는 로그인 페이지입니다.</p>
+                </div>
+                <div class="card-actions">
+                    <a class="btn btn-primary" href="/user/login">로그인 이동</a>
+                </div>
+            </article>
+
+            <article class="feature-card">
+                <div class="card-visual">🌱</div>
+                <div class="card-copy">
+                    <h3 class="card-title">Signup</h3>
+                    <p>실제 `UserDto.SignupReqDto` 필드와 맞는 회원가입 화면으로 연결합니다.</p>
+                </div>
+                <div class="card-actions">
+                    <a class="btn btn-primary" href="/user/signup">회원가입 이동</a>
+                    <a class="btn btn-secondary" href="/admin/index">관리자</a>
+                </div>
+            </article>
+        </div>
+
+        <div id="homeNotice" class="notice">토큰 상태는 브라우저 `localStorage` 기준으로 표시됩니다.</div>
+    </section>
 </div>
 
-<div>
-    <h2>Admin</h2>
+<script>
+function setSessionState() {
+    const accessToken = localStorage.getItem("Authorization");
+    const refreshToken = localStorage.getItem("RefreshToken");
+    const sessionPill = document.getElementById("sessionPill");
+    const accessTokenMeta = document.getElementById("accessTokenMeta");
+    const refreshTokenMeta = document.getElementById("refreshTokenMeta");
 
-    <a href="/admin/index">Index</a>
-    <br/>
+    if (accessToken && refreshToken) {
+        sessionPill.textContent = "로그인 상태";
+        sessionPill.className = "token-pill";
+        accessTokenMeta.textContent = `저장됨 (${accessToken.length} chars)`;
+        refreshTokenMeta.textContent = `저장됨 (${refreshToken.length} chars)`;
+        return;
+    }
 
-</div>
+    sessionPill.textContent = "로그아웃 상태";
+    sessionPill.className = "token-pill off";
+    accessTokenMeta.textContent = "로컬 스토리지에 저장된 토큰이 없습니다.";
+    refreshTokenMeta.textContent = "로컬 스토리지에 저장된 토큰이 없습니다.";
+}
 
+function logout() {
+    $.ajax({
+        url: "/api/auth",
+        method: "DELETE",
+        headers: {
+            Authorization: localStorage.getItem("Authorization")
+        },
+        contentType: "application/json; charset=utf-8",
+        success: () => {
+            localStorage.clear();
+            setSessionState();
+            document.getElementById("homeNotice").textContent = "세션이 정리되었습니다.";
+            document.getElementById("homeNotice").className = "notice";
+        },
+        error: () => {
+            localStorage.clear();
+            setSessionState();
+            document.getElementById("homeNotice").textContent = "서버 로그아웃 호출은 실패했지만 브라우저 토큰은 정리했습니다.";
+            document.getElementById("homeNotice").className = "notice error";
+        }
+    });
+}
+
+setSessionState();
+</script>
 </body>
 </html>
