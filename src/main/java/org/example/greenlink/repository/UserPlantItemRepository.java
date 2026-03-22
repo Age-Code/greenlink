@@ -15,5 +15,9 @@ public interface UserPlantItemRepository extends JpaRepository<UserPlantItem, Lo
 
     Optional<UserPlantItem> findByIdAndDeletedFalse(Long userPlantItemId);
 
+//    @Query("SELECT upi FROM UserPlantItem upi WHERE upi.userPlant = :plant " +
+//            "AND upi.item.type = :type AND upi.deleted = false")
+//    Optional<UserPlantItem> findByUserPlantAndItemType(UserPlant plant, ItemType type);
+
     Optional<UserPlantItem> findByUserPlantIdAndItemType(Long id, DomainEnum.ItemType type);
 }
