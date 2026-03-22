@@ -81,6 +81,7 @@ public class UserPlantDto {
         public Double nutrientLevel;
         public Double sunlightExposure;
         public String lastPhotoUrl;
+        public equippedDecoration equippedDecoration;
 
         public static DetailResDto from(UserPlant userPlant){
             return DetailResDto.builder()
@@ -100,6 +101,15 @@ public class UserPlantDto {
                     .build();
         }
 
+    }
+
+    // equippedDecoration
+    @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class equippedDecoration {
+        public Long userPlantItemId;
+        public Long itemId;
+        public String name;
+        public String imageUrl;
     }
 
     // Update Request Dto
