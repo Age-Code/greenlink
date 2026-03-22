@@ -29,7 +29,7 @@ public class PlantRestController {
     // List
     @PreAuthorize("hasRole('USER')")
     @GetMapping("")
-    public ResponseEntity<List<PlantDto.ListResDto>> list(@RequestBody PlantDto.ListReqDto listReqDto){
+    public ResponseEntity<List<PlantDto.ListResDto>> list(){
         return ResponseEntity.ok(plantService.list(listReqDto));
     }
 

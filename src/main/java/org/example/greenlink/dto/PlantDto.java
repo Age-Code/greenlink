@@ -24,6 +24,16 @@ public class PlantDto {
         public String category;
         public String difficulty;
         public String imageUrl;
+
+        public static ListResDto from(Plant plant){
+            return ListResDto.builder()
+                    .plantId(plant.getId())
+                    .name(plant.getName())
+                    .category(plant.getCategory())
+                    .difficulty(plant.getDifficulty().toString())
+                    .imageUrl(plant.getImageUrl())
+                    .build();
+        }
     }
 
     // Detail Response Dto

@@ -7,6 +7,6 @@ import java.util.List;
 
 @Service
 public interface PlantService {
-    List<PlantDto.ListResDto> list(PlantDto.ListReqDto listReqDto);
+    List<PlantDto.ListResDto> list();
     PlantDto.DetailResDto detail(Long plantId);
 }

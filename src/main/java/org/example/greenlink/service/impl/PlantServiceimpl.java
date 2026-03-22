@@ -19,8 +19,9 @@ public class PlantServiceimpl implements PlantService {
     final PlantMapper plantMapper;
 
     @Override
-    public List<PlantDto.ListResDto> list(PlantDto.ListReqDto listReqDto){
-        return plantMapper.list(listReqDto);
+    public List<PlantDto.ListResDto> list(){
+        List<Plant> plantList = plantRepository.findbyDeletedFalse();
+        return plantList.stream().map(PlantDto.ListResDto::from).toList();
     }
 
     @Override
