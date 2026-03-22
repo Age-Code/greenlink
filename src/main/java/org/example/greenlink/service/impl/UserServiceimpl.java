@@ -20,23 +20,23 @@ public class UserServiceimpl implements UserService {
 
     // Signup
     @Override
-    public UserDto.UserIdResDto signup(UserDto.SignupReqDto signupReqDto){
+    public UserDto.UserIdResDto signup(UserDto.SignupReqDto reqDto){
 
-        User user = userRepository.findByUsername(signupReqDto.getUsername()).orElse(null);
+        User user = userRepository.findByUsername(reqDto.getUsername()).orElse(null);
         if(user != null) {
             throw new RuntimeException("Already exist");
         }
 
-        signupReqDto.setPassword(bCryptPasswordEncoder.encode(signupReqDto.getPassword()));
-        user = userRepository.save(signupReqDto.toEntity());
+        reqDto.setPassword(bCryptPasswordEncoder.encode(reqDto.getPassword()));
+        user = userRepository.save(reqDto.toEntity());
 
-        return UserDto.UserIdResDto.toUserIdResDto(user);
+        return UserDto.UserIdResDto.from(user);
     }
 
     // Detail
     @Override
-    public UserDto.DetailResDto detail(Long requestUserId){
-        User user = userRepository.findById(requestUserId).orElseThrow(() -> new EntityNotFoundException("User Detail Error"));
+    public UserDto.DetailResDto detail(Long reqUserId){
+        User user = userRepository.findById(reqUserId).orElseThrow(() -> new EntityNotFoundException("User Detail Error"));
 
         return UserDto.DetailResDto.from(user);
     }
@@ -44,20 +44,20 @@ public class UserServiceimpl implements UserService {
     // Update
     @Override
     @Transactional
-    public UserDto.UserIdResDto update(UserDto.UpdateReqDto updateReqDto, Long requestUserId){
-        User user = userRepository.findById(requestUserId).orElseThrow(() -> new EntityNotFoundException("User Update Error"));
+    public UserDto.UserIdResDto update(UserDto.UpdateReqDto reqDto, Long reqUserId){
+        User user = userRepository.findById(reqUserId).orElseThrow(() -> new EntityNotFoundException("User Update Error"));
 
-        if(StringUtils.hasText(updateReqDto.getNickname()) && !updateReqDto.getNickname().equals(user.getNickname())){
-            user.setNickname(updateReqDto.getNickname());
+        if(StringUtils.hasText(reqDto.getNickname()) && !reqDto.getNickname().equals(user.getNickname())){
+            user.setNickname(reqDto.getNickname());
         }
-        if(StringUtils.hasText(updateReqDto.getPhoneNumber()) && !updateReqDto.getPhoneNumber().equals(user.getPhoneNumber())){
-            user.setPhoneNumber(updateReqDto.getPhoneNumber());
+        if(StringUtils.hasText(reqDto.getPhoneNumber()) && !reqDto.getPhoneNumber().equals(user.getPhoneNumber())){
+            user.setPhoneNumber(reqDto.getPhoneNumber());
         }
-        if(StringUtils.hasText(updateReqDto.getAddress()) && !updateReqDto.getAddress().equals(user.getAddress())){
-            user.setAddress(updateReqDto.getAddress());
+        if(StringUtils.hasText(reqDto.getAddress()) && !reqDto.getAddress().equals(user.getAddress())){
+            user.setAddress(reqDto.getAddress());
         }
 
-        return UserDto.UserIdResDto.toUserIdResDto(user);
+        return UserDto.UserIdResDto.from(user);
     }
 
 }

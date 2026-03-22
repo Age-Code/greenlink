@@ -7,7 +7,7 @@ import java.util.List;
 
 @Service
 public interface UserPlantItemService {
-    List<UserPlantItemDto.ListResDto> list(Long userId);
-    UserPlantItemDto.DetailResDto detailItem(Long userPlantItemId, Long userId);
-    UserPlantItemDto.UpdateResDto updateItem(Long userPlantItemId, UserPlantItemDto.UpdateReqDto req, Long userId);
+    List<UserPlantItemDto.ListResDto> list(Long reqUserId);
+    UserPlantItemDto.DetailResDto detailItem(Long userPlantItemId, Long reqUserId);
+    UserPlantItemDto.UpdateResDto updateItem(Long userPlantItemId, UserPlantItemDto.UpdateReqDto reqDto, Long reqUserId);
 }

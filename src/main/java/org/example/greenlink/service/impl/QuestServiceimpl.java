@@ -18,23 +18,23 @@ public class QuestServiceimpl implements QuestService {
     private final UserRepository userRepository;
 
     @Override
-    public List<QuestDto.ListResDto> list(Long userId){
-        User u = userRepository.findByIdAndDeletedFalse(userId)
+    public List<QuestDto.ListResDto> list(Long reqUserId){
+        User reqUser = userRepository.findByIdAndDeletedFalse(reqUserId)
                 .orElseThrow(()->new IllegalArgumentException("user not found"));
 
-        List<Quest> quests = questRepository.findAllByUserId(userId);
+        List<Quest> questList = questRepository.findAllByUserId(reqUserId);
 
-        return quests.stream().map(QuestDto.ListResDto::from).toList();
+        return questList.stream().map(QuestDto.ListResDto::from).toList();
     }
 
     @Override
-    public QuestDto.DetailResDto detail(Long questId, Long userId){
-        User u = userRepository.findByIdAndDeletedFalse(userId)
+    public QuestDto.DetailResDto detail(Long questId, Long reqUserId){
+        User reqUser = userRepository.findByIdAndDeletedFalse(reqUserId)
                 .orElseThrow(()->new IllegalArgumentException("user not found"));
 
-        Quest q = questRepository.findByIdAndDeletedFalse(questId)
+        Quest quest = questRepository.findByIdAndDeletedFalse(questId)
                 .orElseThrow(()->new IllegalArgumentException("quest not found"));
 
-        return QuestDto.DetailResDto.from(q);
+        return QuestDto.DetailResDto.from(quest);
     }
 }

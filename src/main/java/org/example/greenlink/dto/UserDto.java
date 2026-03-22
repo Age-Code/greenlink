@@ -17,7 +17,7 @@ public class UserDto {
     public static class UserIdResDto {
         Long userId;
 
-        public static UserIdResDto toUserIdResDto(User user) {
+        public static UserIdResDto from(User user) {
             return UserIdResDto.builder().userId(user.getId()).build();
         }
     }
