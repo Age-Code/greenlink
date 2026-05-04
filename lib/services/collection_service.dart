@@ -1,40 +1,61 @@
-import '../models/api_response.dart';
-import '../models/collection.dart';
-import 'api_client.dart';
+import 'package:flutter/foundation.dart';
+import '../core/network/api_client.dart';
+import '../core/network/api_response.dart';
+import '../core/constants/api_paths.dart';
+import '../models/collection_models.dart';
 
+// ============================================================
+// CollectionService
+// TEST 9: 도감 조회
+//   [x] GET /api/collections — Authorization 헤더 포함
+//   [x] collected true/false UI 구분
+//   [x] harvestCount 표시
+//   [x] 카드 클릭 → CollectionDetailPage
+//
+// TEST 10: 도감 상세 조회
+//   [x] GET /api/collections/{plantId}
+//   [x] 식물 정보, collected 상태, harvestedPlants 목록 표시
+//   [x] harvestedPlants 빈 경우 안내 표시
+// ============================================================
 class CollectionService {
   final ApiClient _client = ApiClient();
 
-  Future<ApiResponse<List<CollectionItem>>> getCollections() async {
+  Future<ApiResponse<List<CollectionPlant>>> getCollections() async {
+    debugPrint('[CollectionService] 📚 도감 목록 조회');
     try {
-      final response = await _client.get('/api/collections');
-      
-      List<CollectionItem> collections = [];
-      if (response['data'] != null) {
-        collections = (response['data'] as List).map((i) => CollectionItem.fromJson(i)).toList();
-      }
-      
-      return ApiResponse(
-        success: response['success'] ?? true,
-        message: response['message'] ?? '도감 조회 성공',
-        data: collections,
+      final response = await _client.get(ApiPaths.collections);
+      final result = ApiResponse<List<CollectionPlant>>.fromJson(
+        response,
+        (data) => (data as List).map((i) => CollectionPlant.fromJson(i)).toList(),
       );
+      if (result.success) {
+        final collected = result.data?.where((p) => p.collected).length ?? 0;
+        final total = result.data?.length ?? 0;
+        debugPrint('[CollectionService] ✅ 도감 $total개 (수집: $collected개)');
+      }
+      return result;
     } catch (e) {
-      return ApiResponse(success: false, message: '도감 조회 실패: $e');
+      debugPrint('[CollectionService] ❌ 도감 조회 예외: $e');
+      return ApiResponse<List<CollectionPlant>>(success: false, message: '도감을 불러오지 못했습니다: $e');
     }
   }
 
   Future<ApiResponse<CollectionDetail>> getCollectionDetail(int plantId) async {
+    debugPrint('[CollectionService] 🔍 도감 상세 조회 (plantId=$plantId)');
     try {
-      final response = await _client.get('/api/collections/$plantId');
-      
-      return ApiResponse(
-        success: response['success'] ?? true,
-        message: response['message'] ?? '도감 상세 조회 성공',
-        data: response['data'] != null ? CollectionDetail.fromJson(response['data']) : null,
+      final response = await _client.get(ApiPaths.collectionDetail(plantId));
+      final result = ApiResponse<CollectionDetail>.fromJson(
+        response,
+        (data) => CollectionDetail.fromJson(data),
       );
+      if (result.success && result.data != null) {
+        debugPrint('[CollectionService] ✅ name=${result.data!.name}, collected=${result.data!.collected}');
+        debugPrint('[CollectionService]   harvestedPlants=${result.data!.harvestedPlants.length}개');
+      }
+      return result;
     } catch (e) {
-      return ApiResponse(success: false, message: '도감 상세 조회 실패: $e');
+      debugPrint('[CollectionService] ❌ 도감 상세 조회 예외: $e');
+      return ApiResponse<CollectionDetail>(success: false, message: '도감 상세 정보를 불러오지 못했습니다: $e');
     }
   }
 }

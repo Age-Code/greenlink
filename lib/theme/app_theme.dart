@@ -50,7 +50,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(24),
         ),
         elevation: 0.5,
-        shadowColor: borderSoft.withOpacity(0.5),
+        shadowColor: borderSoft.withValues(alpha: 0.5),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

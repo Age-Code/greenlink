@@ -1,13 +1,13 @@
 
 import 'package:flutter/material.dart';
-import '../models/plant.dart';
+import '../models/user_plant_models.dart';
 
-class SelectableUserPlantCard extends StatelessWidget {
-  final UserPlant plant;
+class SelectableUserPlantSummaryCard extends StatelessWidget {
+  final UserPlantSummary plant;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const SelectableUserPlantCard({
+  const SelectableUserPlantSummaryCard({
     Key? key,
     required this.plant,
     required this.isSelected,
@@ -28,16 +28,16 @@ class SelectableUserPlantCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? theme.colorScheme.secondary.withOpacity(0.3) : theme.colorScheme.surface,
+          color: isSelected ? theme.colorScheme.secondary.withValues(alpha: 0.3) : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? theme.primaryColor : theme.dividerColor.withOpacity(0.2),
+            color: isSelected ? theme.primaryColor : theme.dividerColor.withValues(alpha: 0.2),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             if (!isSelected)
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
+                color: Colors.black.withValues(alpha: 0.03),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               )

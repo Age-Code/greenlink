@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/quest.dart';
-import '../services/quest_service.dart';
+import '../models/quest_models.dart';
+import '../../services/quest_service.dart';
 import '../screens/main_page.dart';
 
 class QuestDetailBottomSheet extends StatefulWidget {
@@ -85,7 +85,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
                   decoration: BoxDecoration(
                     color: theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme.disabledColor.withOpacity(0.1)),
+                    border: Border.all(color: theme.disabledColor.withValues(alpha: 0.1)),
                   ),
                   child: Row(
                     children: [
@@ -93,7 +93,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: theme.disabledColor.withOpacity(0.1),
+                          color: theme.disabledColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: rewardData.reward.itemName.contains('영양제') 
@@ -185,7 +185,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.disabledColor.withOpacity(0.1),
+        color: theme.disabledColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
@@ -202,27 +202,27 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
 
     switch (status) {
       case 'IN_PROGRESS':
-        badgeColor = theme.primaryColor.withOpacity(0.2);
+        badgeColor = theme.primaryColor.withValues(alpha: 0.2);
         textColor = theme.primaryColorDark;
         text = '진행 중';
         break;
       case 'ACHIEVABLE':
-        badgeColor = theme.colorScheme.secondary.withOpacity(0.2);
+        badgeColor = theme.colorScheme.secondary.withValues(alpha: 0.2);
         textColor = theme.colorScheme.secondary;
         text = '보상 가능';
         break;
       case 'COMPLETED':
-        badgeColor = theme.disabledColor.withOpacity(0.1);
+        badgeColor = theme.disabledColor.withValues(alpha: 0.1);
         textColor = theme.disabledColor;
         text = '완료';
         break;
       case 'EXPIRED':
-        badgeColor = Colors.red.withOpacity(0.1);
+        badgeColor = Colors.red.withValues(alpha: 0.1);
         textColor = Colors.red;
         text = '기간 만료';
         break;
       default:
-        badgeColor = theme.disabledColor.withOpacity(0.1);
+        badgeColor = theme.disabledColor.withValues(alpha: 0.1);
         textColor = theme.disabledColor;
         text = status;
     }
@@ -275,7 +275,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
               width: 48,
               height: 6,
               decoration: BoxDecoration(
-                color: theme.disabledColor.withOpacity(0.3),
+                color: theme.disabledColor.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -290,9 +290,9 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
           ),
           const SizedBox(height: 16),
           Text(_detail!.title, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-          if (_detail!.description != null) ...[
+          if (_detail!.description.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text(_detail!.description!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
+            Text(_detail!.description, style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
           ],
           const SizedBox(height: 24),
           Row(
@@ -307,7 +307,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: progressRate,
-              backgroundColor: theme.disabledColor.withOpacity(0.1),
+              backgroundColor: theme.disabledColor.withValues(alpha: 0.1),
               valueColor: AlwaysStoppedAnimation<Color>(isAchievable ? theme.colorScheme.secondary : theme.primaryColor),
               minHeight: 12,
             ),
@@ -328,9 +328,9 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.secondary.withOpacity(0.05),
+                color: theme.colorScheme.secondary.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: theme.colorScheme.secondary.withOpacity(0.2)),
+                border: Border.all(color: theme.colorScheme.secondary.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
@@ -352,7 +352,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
                       children: [
                         Text("보상", style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.secondary, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        Text("${_detail!.rewardItem!.name} ${_detail!.rewardQuantity}개", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        Text("${_detail!.rewardItem!.name} ${_detail!.rewardItem?.quantity}개", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -363,7 +363,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.disabledColor.withOpacity(0.05),
+                color: theme.disabledColor.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text("등록된 보상이 없어요", style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor), textAlign: TextAlign.center),
@@ -396,7 +396,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
                 onPressed: null,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: theme.disabledColor.withOpacity(0.1),
+                  backgroundColor: theme.disabledColor.withValues(alpha: 0.1),
                   foregroundColor: theme.disabledColor,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
@@ -411,7 +411,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
                 onPressed: null,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: theme.disabledColor.withOpacity(0.1),
+                  backgroundColor: theme.disabledColor.withValues(alpha: 0.1),
                   foregroundColor: theme.disabledColor,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
@@ -426,7 +426,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
                 onPressed: null,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: theme.disabledColor.withOpacity(0.1),
+                  backgroundColor: theme.disabledColor.withValues(alpha: 0.1),
                   foregroundColor: theme.disabledColor,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
