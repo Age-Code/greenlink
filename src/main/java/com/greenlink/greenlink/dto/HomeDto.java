@@ -46,11 +46,13 @@ public class HomeDto {
     public static class UserDto {
         private Long userId;
         private String nickname;
+        private String profileImageUrl;
 
         public static UserDto from(User user) {
             return UserDto.builder()
                     .userId(user.getId())
                     .nickname(user.getNickname())
+                    .profileImageUrl(user.getProfileImageUrl())
                     .build();
         }
     }
