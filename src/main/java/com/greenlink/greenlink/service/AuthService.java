@@ -77,6 +77,47 @@ public class AuthService {
         return AuthDto.LoginResDto.of(accessToken, user);
     }
 
+    @Transactional
+    public AuthDto.LoginResDto oauthLogin(OAuthUserInfo userInfo) {
+        User user = userRepository
+                .findByProviderAndProviderIdAndDeletedFalse(
+                        userInfo.getProvider(),
+                        userInfo.getProviderId()
+                )
+                .orElseGet(() -> createOAuthUserFromOAuthInfo(userInfo));
+
+        String accessToken = jwtTokenProvider.createAccessToken(
+                user.getId(),
+                user.getEmail(),
+                user.getRole().name()
+        );
+
+        return AuthDto.LoginResDto.of(accessToken, user);
+    }
+
+    private User createOAuthUserFromOAuthInfo(OAuthUserInfo userInfo) {
+        String socialPassword = passwordEncoder.encode(
+                "SOCIAL_LOGIN_" + userInfo.getProvider() + "_" + userInfo.getProviderId()
+        );
+
+        User user = User.createOAuthUser(
+                userInfo.getEmail(),
+                socialPassword,
+                userInfo.getNickname(),
+                userInfo.getProvider(),
+                userInfo.getProviderId(),
+                userInfo.getProfileImageUrl()
+        );
+
+        User savedUser = userRepository.save(user);
+
+        grantDefaultItems(savedUser);
+
+        createAchievementUserQuests(savedUser);
+
+        return savedUser;
+    }
+
     private void validateDuplicateEmail(String email) {
         if (userRepository.existsByEmailAndDeletedFalse(email)) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
@@ -108,19 +149,5 @@ public class AuthService {
             UserQuest userQuest = UserQuest.create(user, quest, now);
             userQuestRepository.save(userQuest);
         }
-    }
-
-    @Transactional
-    public AuthDto.LoginResDto oauthLogin(OAuthUserInfo userInfo) {
-        User user = userRepository
-                .findByProviderAndProviderIdAndDeletedFalse(
-                        userInfo.getProvider(),
-                        userInfo.getProviderId()
-                )
-                .orElseGet(() -> createOAuthUser(userInfo));
-
-        String accessToken = jwtTokenProvider.createAccessToken(user.getId());
-
-        return AuthDto.LoginResDto.of(accessToken, user);
     }
 }

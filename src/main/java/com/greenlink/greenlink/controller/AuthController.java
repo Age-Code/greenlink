@@ -3,7 +3,7 @@ package com.greenlink.greenlink.controller;
 import com.greenlink.greenlink.common.ApiResponse;
 import com.greenlink.greenlink.dto.AuthDto;
 import com.greenlink.greenlink.service.AuthService;
-import com.greenlink.greenlink.service.oauth.GoogleOAuthClient;
+import com.greenlink.greenlink.service.oauth.OAuthLoginService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final GoogleOAuthClient oauthLoginService;
+    private final OAuthLoginService oauthLoginService;
 
     @PostMapping("/signup")
     public ApiResponse<AuthDto.SignupResDto> signup(
