@@ -33,19 +33,75 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 20)
     private UserRole role;
 
-    private User(String email, String password, String nickname, UserRole role) {
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LoginProvider provider;
+
+    @Column
+    private String providerId;
+
+    @Column
+    private String profileImageUrl;
+
+    private User(
+            String email,
+            String password,
+            String nickname,
+            UserRole role,
+            LoginProvider provider,
+            String providerId,
+            String profileImageUrl
+    ) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.role = role;
+        this.provider = provider;
+        this.providerId = providerId;
+        this.profileImageUrl = profileImageUrl;
     }
 
     public static User createUser(String email, String encodedPassword, String nickname) {
-        return new User(email, encodedPassword, nickname, UserRole.USER);
+        return new User(
+                email,
+                encodedPassword,
+                nickname,
+                UserRole.USER,
+                LoginProvider.LOCAL,
+                null,
+                null
+        );
     }
 
     public static User createAdmin(String email, String encodedPassword, String nickname) {
-        return new User(email, encodedPassword, nickname, UserRole.ADMIN);
+        return new User(
+                email,
+                encodedPassword,
+                nickname,
+                UserRole.ADMIN,
+                LoginProvider.LOCAL,
+                null,
+                null
+        );
+    }
+
+    public static User createOAuthUser(
+            String email,
+            String encodedPassword,
+            String nickname,
+            LoginProvider provider,
+            String providerId,
+            String profileImageUrl
+    ) {
+        return new User(
+                email,
+                encodedPassword,
+                nickname,
+                UserRole.USER,
+                provider,
+                providerId,
+                profileImageUrl
+        );
     }
 
     public void updateNickname(String nickname) {

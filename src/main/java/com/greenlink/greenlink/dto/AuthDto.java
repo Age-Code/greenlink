@@ -145,4 +145,13 @@ public class AuthDto {
                     .build();
         }
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OAuthLoginReqDto {
+        private String code;
+        private String redirectUri;
+    }
 }

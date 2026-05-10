@@ -13,6 +13,7 @@ import com.greenlink.greenlink.repository.UserItemRepository;
 import com.greenlink.greenlink.repository.UserQuestRepository;
 import com.greenlink.greenlink.repository.UserRepository;
 import com.greenlink.greenlink.security.JwtTokenProvider;
+import com.greenlink.greenlink.service.oauth.OAuthUserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -107,5 +108,19 @@ public class AuthService {
             UserQuest userQuest = UserQuest.create(user, quest, now);
             userQuestRepository.save(userQuest);
         }
+    }
+
+    @Transactional
+    public AuthDto.LoginResDto oauthLogin(OAuthUserInfo userInfo) {
+        User user = userRepository
+                .findByProviderAndProviderIdAndDeletedFalse(
+                        userInfo.getProvider(),
+                        userInfo.getProviderId()
+                )
+                .orElseGet(() -> createOAuthUser(userInfo));
+
+        String accessToken = jwtTokenProvider.createAccessToken(user.getId());
+
+        return AuthDto.LoginResDto.of(accessToken, user);
     }
 }

@@ -3,6 +3,7 @@ package com.greenlink.greenlink.controller;
 import com.greenlink.greenlink.common.ApiResponse;
 import com.greenlink.greenlink.dto.AuthDto;
 import com.greenlink.greenlink.service.AuthService;
+import com.greenlink.greenlink.service.oauth.GoogleOAuthClient;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final GoogleOAuthClient oauthLoginService;
 
     @PostMapping("/signup")
     public ApiResponse<AuthDto.SignupResDto> signup(
@@ -30,5 +32,21 @@ public class AuthController {
         AuthDto.LoginResDto response = authService.login(request);
 
         return ApiResponse.success("로그인에 성공했습니다.", response);
+    }
+
+    @PostMapping("/oauth/kakao")
+    public ApiResponse<AuthDto.LoginResDto> kakaoLogin(
+            @RequestBody AuthDto.OAuthLoginReqDto request
+    ) {
+        AuthDto.LoginResDto response = oauthLoginService.loginWithKakao(request);
+        return ApiResponse.success("카카오 로그인 성공", response);
+    }
+
+    @PostMapping("/oauth/google")
+    public ApiResponse<AuthDto.LoginResDto> googleLogin(
+            @RequestBody AuthDto.OAuthLoginReqDto request
+    ) {
+        AuthDto.LoginResDto response = oauthLoginService.loginWithGoogle(request);
+        return ApiResponse.success("구글 로그인 성공", response);
     }
 }

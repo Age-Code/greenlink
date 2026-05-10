@@ -70,6 +70,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/iot/esp/**").permitAll()
                         .requestMatchers("/api/iot/commands/**").permitAll()
                         .requestMatchers("/api/iot/plant-images").permitAll()
+                        .requestMatchers(
+                                "/api/auth/signup",
+                                "/api/auth/login",
+                                "/api/auth/oauth/kakao",
+                                "/api/auth/oauth/google"
+                        ).permitAll()
 
                         // 그 외 API는 JWT 인증 필요
                         .anyRequest().authenticated()
