@@ -162,22 +162,30 @@ class HomePageState extends State<HomePage> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Material(
-                      color: theme.colorScheme.surface,
-                      shape: const CircleBorder(),
-                      elevation: 2,
-                      child: IconButton(
-                        icon: Icon(Icons.person_outline,
-                            color: theme.primaryColor),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const SettingsPage()),
-                          );
-                        },
-                        tooltip: '계정',
-                      ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const SettingsPage()),
+                        );
+                      },
+                      child: user.profileImageUrl != null
+                          ? CircleAvatar(
+                              radius: 20,
+                              backgroundImage: NetworkImage(user.profileImageUrl!),
+                              backgroundColor: theme.colorScheme.surface,
+                            )
+                          : Material(
+                              color: theme.colorScheme.surface,
+                              shape: const CircleBorder(),
+                              elevation: 2,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(Icons.person_outline,
+                                    color: theme.primaryColor),
+                              ),
+                            ),
                     ),
                   ],
                 ),

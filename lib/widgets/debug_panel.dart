@@ -87,7 +87,7 @@ class _DebugPanelState extends State<DebugPanel> {
             const Divider(color: Colors.grey, height: 24),
 
             // Base URL
-            _DebugRow(label: 'Base URL', value: 'http://54.180.203.50:8080/api'),
+            _DebugRow(label: 'Base URL', value: 'http://localhost:8080/api'),
             const SizedBox(height: 12),
 
             // Token

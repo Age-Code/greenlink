@@ -17,10 +17,14 @@ class HomeResponse {
 class HomeUser {
   final int userId;
   final String nickname;
-  HomeUser({required this.userId, required this.nickname});
+  final String? profileImageUrl;
+
+  HomeUser({required this.userId, required this.nickname, this.profileImageUrl});
+  
   factory HomeUser.fromJson(Map<String, dynamic> json) => HomeUser(
     userId: json['userId'] ?? 0,
     nickname: json['nickname'] ?? '',
+    profileImageUrl: json['profileImageUrl'],
   );
 }
 

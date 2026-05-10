@@ -61,6 +61,38 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _loginWithKakao() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    final res = await _authService.loginWithKakao();
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (res.success) {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => MainPage()));
+    } else {
+      setState(() => _errorMessage = res.message);
+    }
+  }
+
+  void _loginWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    final res = await _authService.loginWithGoogle();
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (res.success) {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => MainPage()));
+    } else {
+      setState(() => _errorMessage = res.message);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -120,9 +152,84 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SignupPage())),
                 child: const Text('처음이에요, 회원가입하기'),
               ),
+              const SizedBox(height: 32),
+              const Row(
+                children: [
+                  Expanded(child: Divider()),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text('또는 소셜 로그인', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  ),
+                  Expanded(child: Divider()),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _SocialLoginButton(
+                    onTap: _isLoading ? null : _loginWithKakao,
+                    color: const Color(0xFFFEE500),
+                    icon: Icons.chat_bubble,
+                    iconColor: Colors.black,
+                  ),
+                  const SizedBox(width: 24),
+                  _SocialLoginButton(
+                    onTap: _isLoading ? null : _loginWithGoogle,
+                    color: Colors.white,
+                    icon: Icons.g_mobiledata,
+                    iconSize: 40,
+                    iconColor: Colors.red,
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SocialLoginButton extends StatelessWidget {
+  final VoidCallback? onTap;
+  final Color color;
+  final IconData icon;
+  final Color iconColor;
+  final double iconSize;
+  final BoxBorder? border;
+
+  const _SocialLoginButton({
+    this.onTap,
+    required this.color,
+    required this.icon,
+    required this.iconColor,
+    this.iconSize = 24,
+    this.border,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(28),
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: border,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: iconColor, size: iconSize),
       ),
     );
   }

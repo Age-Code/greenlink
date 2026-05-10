@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/quest_models.dart';
-import '../../services/quest_service.dart';
+import '../services/quest_service.dart';
 import '../screens/main_page.dart';
 
 class QuestDetailBottomSheet extends StatefulWidget {

@@ -2,6 +2,8 @@ class ApiPaths {
   // Auth
   static const String signup = '/auth/signup';
   static const String login = '/auth/login';
+  static const String kakaoLogin = '/auth/oauth/kakao';
+  static const String googleLogin = '/auth/oauth/google';
 
   // User
   static const String userMe = '/users/me';
