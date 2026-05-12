@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../models/user_plant_models.dart';
 import '../../services/user_plant_service.dart';
+import '../../services/iot_service.dart';
 import '../../core/widgets/greenlink_card.dart';
+import '../iot/iot_status_page.dart';
 
 class UserPlantDetailPage extends StatefulWidget {
   final int userPlantId;
@@ -14,9 +16,15 @@ class UserPlantDetailPage extends StatefulWidget {
 
 class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
   final UserPlantService _plantService = UserPlantService();
+  final IotService _iotService = IotService();
+
   UserPlantDetail? _plant;
   bool _isLoading = true;
   bool _isHarvesting = false;
+
+  // IoT latest API에서 가져온 최신 정지 이미지
+  String? _latestImageUrl;
+  String? _capturedAt;
 
   @override
   void initState() {
@@ -34,9 +42,31 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
         _plant = res.data;
         _isLoading = false;
       });
+      // IoT latest API에서 최신 이미지 버독 로드
+      _loadLatestImage();
     } else {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message)));
+    }
+  }
+
+  /// IoT latest API로 최신 촬영 이미지 및 capturedAt 로드 (비동기 - 화면 블로킹 없음)
+  Future<void> _loadLatestImage() async {
+    debugPrint('[UserPlantDetailPage] 📸 최신 이미지 로드 (plantId=${widget.userPlantId})');
+    try {
+      final res = await _iotService.getLatestStatus(widget.userPlantId);
+      if (!mounted) return;
+      final img = res.data?.latestImage;
+      if (img != null && img.imageUrl.isNotEmpty) {
+        setState(() {
+          _latestImageUrl = img.imageUrl;
+          _capturedAt = img.capturedAt;
+        });
+        debugPrint('[UserPlantDetailPage] ✅ 최신 이미지 URL: $_latestImageUrl');
+      }
+    } catch (e) {
+      debugPrint('[UserPlantDetailPage] ⚠️ 최신 이미지 로드 실패: $e');
+      // 실패해도 앱 동작에 영향 없음
     }
   }
 
@@ -157,6 +187,18 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     }
   }
 
+  /// capturedAt 등 날짜+시간 표시용 (yyyy-MM-dd HH:mm)
+  String _formatDateTimeStr(String? isoString) {
+    if (isoString == null) return '-';
+    try {
+      final dt = DateTime.parse(isoString);
+      final pad = (int n) => n.toString().padLeft(2, '0');
+      return '${dt.year}-${pad(dt.month)}-${pad(dt.day)} ${pad(dt.hour)}:${pad(dt.minute)}';
+    } catch (_) {
+      return isoString;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -208,6 +250,9 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
                   Text("장착 화분", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   _buildPotCard(theme),
+                  const SizedBox(height: 24),
+                  // IoT 카드
+                  _buildIotCard(theme),
                 ],
               ),
             ),
@@ -219,6 +264,9 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
   }
 
   Widget _buildMainCard(ThemeData theme, String statusMsg) {
+    // 최신 정지 이미지 우선, 없으면 plant 기본 이미지
+    final displayUrl = _latestImageUrl ?? _plant!.imageUrl;
+
     return GreenlinkCard(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -239,14 +287,29 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
               shape: BoxShape.circle,
               color: theme.scaffoldBackgroundColor,
             ),
-            child: _plant!.imageUrl != null
-                ? Image.network(_plant!.imageUrl!)
-                : Icon(Icons.eco, size: 80, color: theme.primaryColor),
+            child: ClipOval(
+              child: displayUrl != null
+                  ? Image.network(
+                      displayUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          Icon(Icons.eco, size: 80, color: theme.primaryColor),
+                    )
+                  : Icon(Icons.eco, size: 80, color: theme.primaryColor),
+            ),
           ),
           const SizedBox(height: 24),
           Text(_plant!.nickname, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Text(_plant!.plantName, style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
+          // 최근 촬영 시간 표시
+          if (_capturedAt != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              '최근 촬영: ${_formatDateTimeStr(_capturedAt)}',
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.disabledColor),
+            ),
+          ],
         ],
       ),
     );
@@ -378,6 +441,79 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
                 isHarvestable ? "수확하기" : "아직 더 자라야 해요",
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
+      ),
+    );
+  }
+
+  /// IoT 섹션 카드 — IoT 상태 화면으로 이동하는 버튼
+  Widget _buildIotCard(ThemeData theme) {
+    return GreenlinkCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.sensors, color: theme.primaryColor, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'IoT 모니터링',
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      '온도·습도·조도·토양수분 및 물 주기·조명 제어',
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: theme.disabledColor),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => IotStatusPage(
+                      userPlantId: widget.userPlantId,
+                      plantName: _plant?.nickname ?? '식물',
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.monitor_heart_outlined, size: 18),
+              label: const Text(
+                'IoT 상태 보기',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                backgroundColor: theme.primaryColor,
+                foregroundColor: theme.primaryColorDark,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+                elevation: 0,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

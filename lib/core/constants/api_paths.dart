@@ -34,4 +34,10 @@ class ApiPaths {
   // Attend
   static const String attends = '/attends';
   static const String attendToday = '/attends/today';
+
+  // IoT
+  static String iotLatest(int userPlantId) => '/user-plants/$userPlantId/iot/latest';
+  static String iotWater(int userPlantId) => '/user-plants/$userPlantId/iot/water';
+  static String iotLightOn(int userPlantId) => '/user-plants/$userPlantId/iot/light/on';
+  static String iotLightOff(int userPlantId) => '/user-plants/$userPlantId/iot/light/off';
 }

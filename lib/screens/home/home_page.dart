@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/home_models.dart';
 import '../../services/home_service.dart';
 import '../../services/user_plant_service.dart';
+import '../../services/iot_service.dart';
 import '../../models/user_plant_models.dart';
 import '../../core/widgets/greenlink_card.dart';
 import '../../core/widgets/greenlink_button.dart';
@@ -20,9 +21,12 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final HomeService _homeService = HomeService();
   final UserPlantService _plantService = UserPlantService();
+  final IotService _iotService = IotService();
 
   HomeResponse? _homeData;
   List<UserPlantSummary> _userPlants = [];
+  // userPlantId → 최신 정지 이미지 URL (IoT latest API)
+  final Map<int, String?> _latestImageUrls = {};
   bool _isLoading = true;
   final PageController _pageController = PageController(viewportFraction: 0.85);
   int _currentPage = 0;
@@ -79,6 +83,22 @@ class HomePageState extends State<HomePage> {
             remainingDays: plant.remainingDays,
           ));
         }
+      }
+
+      // 각 식물의 최신 이미지 병렬 조회 (IoT latest API)
+      if (_userPlants.isNotEmpty) {
+        debugPrint('[HomePage] 📸 최신 이미지 병렬 조회 (${_userPlants.length}개)');
+        final futures = _userPlants.map(
+          (p) => _iotService.getLatestImageUrl(p.userPlantId).then(
+                (url) => MapEntry(p.userPlantId, url),
+              ),
+        );
+        final results = await Future.wait(futures);
+        if (!mounted) return;
+        for (final entry in results) {
+          _latestImageUrls[entry.key] = entry.value;
+        }
+        debugPrint('[HomePage] ✅ 최신 이미지 로드 완료: $_latestImageUrls');
       }
     }
     if (!mounted) return;
@@ -371,11 +391,21 @@ class HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 24),
 
-            // Plant Image
+            // Plant Image — latestImageUrl 우선, 없으면 plant.imageUrl, 없으면 아이콘
             Expanded(
-              child: plant.imageUrl != null
-                  ? Image.network(plant.imageUrl!, fit: BoxFit.contain)
-                  : Icon(Icons.eco, size: 120, color: theme.primaryColor),
+              child: Builder(builder: (context) {
+                final latestUrl = _latestImageUrls[plant.userPlantId];
+                final displayUrl = latestUrl ?? plant.imageUrl;
+                if (displayUrl != null) {
+                  return Image.network(
+                    displayUrl,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) =>
+                        Icon(Icons.eco, size: 120, color: theme.primaryColor),
+                  );
+                }
+                return Icon(Icons.eco, size: 120, color: theme.primaryColor);
+              }),
             ),
 
             const SizedBox(height: 24),

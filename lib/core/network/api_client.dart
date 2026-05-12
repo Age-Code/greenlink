@@ -8,7 +8,7 @@ import 'token_storage.dart';
 // 디버깅: 요청/응답 URL, method, status code, 인증 헤더 출력
 // ============================================================
 class ApiClient {
-  static const String baseUrl = 'http://localhost:8080/api';
+  static const String baseUrl = 'https://likepigs.shop/api';
   final TokenStorage _tokenStorage = TokenStorage();
 
   /// 401 발생 시 호출할 콜백 (SplashPage/Navigator 연결용)
