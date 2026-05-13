@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../models/home_models.dart';
+import '../../models/iot_models.dart';
 import '../../services/home_service.dart';
 import '../../services/user_plant_service.dart';
 import '../../services/iot_service.dart';
 import '../../models/user_plant_models.dart';
+import '../../core/utils/plant_image_utils.dart';
 import '../../core/widgets/greenlink_card.dart';
 import '../../core/widgets/greenlink_button.dart';
 import '../user_plant/user_plant_list_page.dart';
@@ -25,8 +27,8 @@ class HomePageState extends State<HomePage> {
 
   HomeResponse? _homeData;
   List<UserPlantSummary> _userPlants = [];
-  // userPlantId → 최신 정지 이미지 URL (IoT latest API)
-  final Map<int, String?> _latestImageUrls = {};
+  // userPlantId → IoT latest 이미지 정보 (aiImageUrl + imageUrl)
+  final Map<int, PlantImageData?> _latestImageData = {};
   bool _isLoading = true;
   final PageController _pageController = PageController(viewportFraction: 0.85);
   int _currentPage = 0;
@@ -85,20 +87,20 @@ class HomePageState extends State<HomePage> {
         }
       }
 
-      // 각 식물의 최신 이미지 병렬 조회 (IoT latest API)
+      // 각 식물의 최신 이미지 정보 병렬 조회 (IoT latest API)
       if (_userPlants.isNotEmpty) {
         debugPrint('[HomePage] 📸 최신 이미지 병렬 조회 (${_userPlants.length}개)');
         final futures = _userPlants.map(
-          (p) => _iotService.getLatestImageUrl(p.userPlantId).then(
-                (url) => MapEntry(p.userPlantId, url),
+          (p) => _iotService.getLatestImageData(p.userPlantId).then(
+                (data) => MapEntry(p.userPlantId, data),
               ),
         );
         final results = await Future.wait(futures);
         if (!mounted) return;
         for (final entry in results) {
-          _latestImageUrls[entry.key] = entry.value;
+          _latestImageData[entry.key] = entry.value;
         }
-        debugPrint('[HomePage] ✅ 최신 이미지 로드 완료: $_latestImageUrls');
+        debugPrint('[HomePage] ✅ 최신 이미지 로드 완료');
       }
     }
     if (!mounted) return;
@@ -391,11 +393,14 @@ class HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 24),
 
-            // Plant Image — latestImageUrl 우선, 없으면 plant.imageUrl, 없으면 아이콘
+            // Plant Image — 홈 정책: aiImageUrl → imageUrl → 기본 아이콘
             Expanded(
               child: Builder(builder: (context) {
-                final latestUrl = _latestImageUrls[plant.userPlantId];
-                final displayUrl = latestUrl ?? plant.imageUrl;
+                final imgData = _latestImageData[plant.userPlantId];
+                final displayUrl = getHomePlantImageUrl(
+                  aiImageUrl: imgData?.aiImageUrl,
+                  originalImageUrl: imgData?.imageUrl,
+                );
                 if (displayUrl != null) {
                   return Image.network(
                     displayUrl,

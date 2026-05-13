@@ -91,17 +91,20 @@ class SoilData {
 class PlantImageData {
   final int? plantImageId;
   final String imageUrl;
+  final String? aiImageUrl;   // AI 변환 이미지 (없을 수 있음)
   final String? capturedAt;
 
   PlantImageData({
     this.plantImageId,
     required this.imageUrl,
+    this.aiImageUrl,
     this.capturedAt,
   });
 
   factory PlantImageData.fromJson(Map<String, dynamic> json) => PlantImageData(
         plantImageId: json['plantImageId'],
         imageUrl: json['imageUrl'] ?? '',
+        aiImageUrl: json['aiImageUrl'],
         capturedAt: json['capturedAt'],
       );
 }

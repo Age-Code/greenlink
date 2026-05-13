@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../models/user_plant_models.dart';
+import '../../models/iot_models.dart';
 import '../../services/user_plant_service.dart';
 import '../../services/iot_service.dart';
+import '../../core/utils/plant_image_utils.dart';
 import '../../core/widgets/greenlink_card.dart';
 import '../iot/iot_status_page.dart';
 
@@ -22,8 +24,8 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
   bool _isLoading = true;
   bool _isHarvesting = false;
 
-  // IoT latest API에서 가져온 최신 정지 이미지
-  String? _latestImageUrl;
+  // IoT latest API에서 가져온 최신 이미지 정보
+  PlantImageData? _latestImageData;
   String? _capturedAt;
 
   @override
@@ -50,23 +52,22 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     }
   }
 
-  /// IoT latest API로 최신 촬영 이미지 및 capturedAt 로드 (비동기 - 화면 블로킹 없음)
+  /// IoT latest API로 최신 촬영 이미지 정보 로드 (비동기 - 화면 블로킹 없음)
   Future<void> _loadLatestImage() async {
     debugPrint('[UserPlantDetailPage] 📸 최신 이미지 로드 (plantId=${widget.userPlantId})');
     try {
       final res = await _iotService.getLatestStatus(widget.userPlantId);
       if (!mounted) return;
       final img = res.data?.latestImage;
-      if (img != null && img.imageUrl.isNotEmpty) {
+      if (img != null) {
         setState(() {
-          _latestImageUrl = img.imageUrl;
+          _latestImageData = img;
           _capturedAt = img.capturedAt;
         });
-        debugPrint('[UserPlantDetailPage] ✅ 최신 이미지 URL: $_latestImageUrl');
+        debugPrint('[UserPlantDetailPage] ✅ imageUrl: ${img.imageUrl}, aiImageUrl: ${img.aiImageUrl}');
       }
     } catch (e) {
       debugPrint('[UserPlantDetailPage] ⚠️ 최신 이미지 로드 실패: $e');
-      // 실패해도 앱 동작에 영향 없음
     }
   }
 
@@ -264,8 +265,11 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
   }
 
   Widget _buildMainCard(ThemeData theme, String statusMsg) {
-    // 최신 정지 이미지 우선, 없으면 plant 기본 이미지
-    final displayUrl = _latestImageUrl ?? _plant!.imageUrl;
+    // 상세 화면 정책: imageUrl → aiImageUrl → plant 기본 이미지
+    final displayUrl = getDetailPlantImageUrl(
+      aiImageUrl: _latestImageData?.aiImageUrl,
+      originalImageUrl: _latestImageData?.imageUrl,
+    ) ?? _plant!.imageUrl;
 
     return GreenlinkCard(
       padding: const EdgeInsets.all(24),

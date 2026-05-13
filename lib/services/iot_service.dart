@@ -90,14 +90,12 @@ class IotService {
     }
   }
 
-  /// 최신 이미지 URL만 반환 — 홈/상세 화면 이미지 로드용
-  /// latestImage가 null이거나 imageUrl이 없으면 null 반환
-  Future<String?> getLatestImageUrl(int userPlantId) async {
+  /// 최신 이미지 정보(PlantImageData) 반환 — 홈/상세 화면 이미지 로드용
+  /// latestImage가 null이면 null 반환
+  Future<PlantImageData?> getLatestImageData(int userPlantId) async {
     try {
       final res = await getLatestStatus(userPlantId);
-      final img = res.data?.latestImage;
-      final url = img?.imageUrl;
-      return (url != null && url.isNotEmpty) ? url : null;
+      return res.data?.latestImage;
     } catch (_) {
       return null;
     }
