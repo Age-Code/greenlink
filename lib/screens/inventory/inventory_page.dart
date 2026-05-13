@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/user_item_models.dart';
 import '../../services/user_item_service.dart';
 import '../../core/widgets/greenlink_card.dart';
-import '../../core/widgets/greenlink_button.dart';
-import '../user_plant/seed_planting_page.dart';
-
+import '../../theme/app_theme.dart';
 import 'inventory_action_sheets.dart';
 
 class InventoryPage extends StatefulWidget {
@@ -16,9 +14,17 @@ class InventoryPage extends StatefulWidget {
 
 class InventoryPageState extends State<InventoryPage> {
   final UserItemService _itemService = UserItemService();
+
   List<UserItemGroup>? _items;
   bool _isLoading = true;
-  String _selectedFilter = 'ALL';
+  String _selectedType = 'ALL';
+
+  final Map<String, String> _typeFilters = {
+    'ALL': '전체',
+    'SEED': '씨앗',
+    'POT': '화분',
+    'NUTRIENT': '영양제',
+  };
 
   @override
   void initState() {
@@ -26,7 +32,6 @@ class InventoryPageState extends State<InventoryPage> {
     _loadItems();
   }
 
-  /// 4. 인벤토리 갱신 — 외부에서 호출 가능한 refresh
   void refresh() {
     debugPrint('[InventoryPage] 🔄 refresh inventory');
     _loadItems();
@@ -34,115 +39,128 @@ class InventoryPageState extends State<InventoryPage> {
 
   Future<void> _loadItems() async {
     setState(() => _isLoading = true);
-    String? itemType;
-    if (_selectedFilter != 'ALL') {
-      itemType = _selectedFilter;
-    }
-
-    final res = await _itemService.getUserItems(itemType: itemType);
+    final typeParam = _selectedType == 'ALL' ? null : _selectedType;
+    final res = await _itemService.getUserItems(itemType: typeParam);
     if (!mounted) return;
     if (res.success && res.data != null) {
-      setState(() {
-        _items = res.data;
-        _isLoading = false;
-      });
+      setState(() { _items = res.data; _isLoading = false; });
     } else {
-      setState(() {
-        _items = [];
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(res.message)));
+      setState(() { _items = []; _isLoading = false; });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message)));
     }
   }
 
-  void _openEquipPotBottomSheet(int userItemId) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.7,
-        child: PotEquipBottomSheet(
-          userItemId: userItemId,
-          onSuccess: _loadItems,
-        ),
-      ),
-    );
+  void _onTypeChanged(String type) {
+    setState(() => _selectedType = type);
+    _loadItems();
   }
 
-  void _openUseNutrientBottomSheet(int userItemId) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.7,
-        child: NutrientUseBottomSheet(
-          userItemId: userItemId,
-          onSuccess: _loadItems,
+  void _onItemTap(UserItemGroup group) {
+    final firstOwned = group.items.where((i) => i.status == 'OWNED').toList();
+    if (firstOwned.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('사용 가능한 아이템이 없습니다.')));
+      return;
+    }
+
+    final userItemId = firstOwned.first.userItemId;
+
+    if (group.itemType == 'POT') {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => Container(
+          height: MediaQuery.of(context).size.height * 0.75,
+          decoration: const BoxDecoration(
+            color: AppColors.canvas,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: PotEquipBottomSheet(userItemId: userItemId, onSuccess: _loadItems),
         ),
-      ),
-    );
+      );
+    } else if (group.itemType == 'NUTRIENT') {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => Container(
+          height: MediaQuery.of(context).size.height * 0.75,
+          decoration: const BoxDecoration(
+            color: AppColors.canvas,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: NutrientUseBottomSheet(userItemId: userItemId, onSuccess: _loadItems),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${group.name}은 씨앗 심기 화면에서 사용할 수 있습니다.')));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: AppColors.canvas,
+      appBar: AppBar(title: const Text('인벤토리')),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-            child: Text("인벤토리", style: theme.textTheme.titleLarge),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text("식물 친구를 위한 작은 도구들이에요",
-                style: theme.textTheme.bodyMedium),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
+            child: Text(
+              '씨앗, 화분, 영양제를 확인하고 사용해요',
+              style: TextStyle(fontSize: 15, color: AppColors.bodyMuted),
+            ),
           ),
           const SizedBox(height: 16),
-          _buildFilterChips(theme),
-          const SizedBox(height: 8),
+          _buildFilters(),
+          const SizedBox(height: 12),
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.primaryStrong)))
                 : _items == null || _items!.isEmpty
-                    ? _buildEmptyState(theme)
-                    : _buildItemList(theme),
+                    ? _buildEmptyState()
+                    : GridView.builder(
+                        padding: const EdgeInsets.all(20),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 14,
+                          childAspectRatio: 0.8,
+                        ),
+                        itemCount: _items!.length,
+                        itemBuilder: (context, index) => _buildItemCard(_items![index]),
+                      ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFilterChips(ThemeData theme) {
-    final filters = [
-      {'label': '전체', 'value': 'ALL'},
-      {'label': '씨앗', 'value': 'SEED'},
-      {'label': '화분', 'value': 'POT'},
-      {'label': '영양제', 'value': 'NUTRIENT'},
-    ];
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: filters.map((f) {
-          final isSelected = _selectedFilter == f['value'];
+  Widget _buildFilters() {
+    return SizedBox(
+      height: 40,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        children: _typeFilters.entries.map((e) {
+          final isSelected = _selectedType == e.key;
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            padding: const EdgeInsets.only(right: 8),
             child: ChoiceChip(
-              label: Text(f['label']!),
+              label: Text(e.value),
               selected: isSelected,
-              onSelected: (selected) {
-                if (selected) {
-                  setState(() => _selectedFilter = f['value']!);
-                  _loadItems();
-                }
-              },
+              onSelected: (_) => _onTypeChanged(e.key),
+              selectedColor: AppColors.primarySoft,
+              backgroundColor: AppColors.canvas,
+              side: BorderSide(color: isSelected ? AppColors.primary : AppColors.hairline),
+              labelStyle: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+                color: isSelected ? AppColors.primaryStrong : AppColors.bodyMuted,
+              ),
+              shape: const StadiumBorder(),
+              checkmarkColor: AppColors.primaryStrong,
             ),
           );
         }).toList(),
@@ -150,205 +168,119 @@ class InventoryPageState extends State<InventoryPage> {
     );
   }
 
-  Widget _buildEmptyState(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.inventory_2_outlined,
-              size: 80, color: theme.colorScheme.secondary),
-          const SizedBox(height: 24),
-          Text("아직 가진 아이템이 없어요",
-              style:
-                  theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Text("출석과 퀘스트로 아이템을 모아보세요",
-              style: theme.textTheme.bodyMedium),
-        ],
-      ),
-    );
-  }
+  Widget _buildItemCard(UserItemGroup group) {
+    final usable = group.usableCount > 0;
 
-  Widget _buildItemList(ThemeData theme) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(24),
-      itemCount: _items!.length,
-      itemBuilder: (context, index) {
-        final item = _items![index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16.0),
-          child: _buildItemCard(item, theme),
-        );
-      },
-    );
-  }
+    Color typeColor;
+    Color typeBg;
+    IconData typeIcon;
 
-  Widget _buildItemCard(UserItemGroup item, ThemeData theme) {
-    String badgeText = "";
-    String hintText = "";
-    String actionText = "";
-    VoidCallback? onAction;
-    String disabledText = "";
-
-    int? firstOwnedUserItemId;
-    try {
-      firstOwnedUserItemId =
-          item.items.firstWhere((i) => i.status == 'OWNED').userItemId;
-    } catch (e) {
-      // Ignore
-    }
-
-    switch (item.itemType) {
+    switch (group.itemType) {
       case 'SEED':
-        badgeText = "씨앗";
-        hintText = "심을 수 있어요";
-        actionText = "심기";
-        disabledText = "사용 가능한 씨앗이 없어요";
-        onAction = () async {
-          // A. 씨앗 심기 성공 후 인벤토리 재조회
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => SeedPlantingPage()),
-          );
-          if (!mounted) return;
-          if (result == true) {
-            debugPrint('[InventoryPage] 🔄 refresh inventory (after seed planting)');
-            _loadItems();
-          }
-        };
+        typeColor = AppColors.primaryStrong;
+        typeBg = AppColors.primarySoft;
+        typeIcon = Icons.grass_rounded;
         break;
       case 'POT':
-        badgeText = "화분";
-        hintText = "식물에게 장착할 수 있어요";
-        actionText = "장착하기";
-        disabledText = "장착 가능한 화분이 없어요";
-        onAction = () {
-          if (firstOwnedUserItemId != null) {
-            _openEquipPotBottomSheet(firstOwnedUserItemId);
-          }
-        };
+        typeColor = const Color(0xFF8A6500);
+        typeBg = const Color(0xFFFFF4D8);
+        typeIcon = Icons.inventory_2_rounded;
         break;
       case 'NUTRIENT':
-        badgeText = "영양제";
-        hintText = "식물에게 줄 수 있어요";
-        actionText = "사용하기";
-        disabledText = "사용 가능한 영양제가 없어요";
-        onAction = () {
-          if (firstOwnedUserItemId != null) {
-            _openUseNutrientBottomSheet(firstOwnedUserItemId);
-          }
-        };
+        typeColor = const Color(0xFF3A8FC8);
+        typeBg = const Color(0xFFDEEFFB);
+        typeIcon = Icons.water_drop_rounded;
         break;
+      default:
+        typeColor = AppColors.bodyMuted;
+        typeBg = AppColors.canvasSoft;
+        typeIcon = Icons.category_outlined;
     }
 
-    final bool canUse = item.usableCount > 0;
-
-    return GreenlinkCard(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return GestureDetector(
+      onTap: usable ? () => _onItemTap(group) : null,
+      child: Opacity(
+        opacity: usable ? 1.0 : 0.45,
+        child: GreenlinkCard(
+          padding: const EdgeInsets.all(16),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image Placeholder
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: theme.scaffoldBackgroundColor,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: item.imageUrl != null
-                    ? Image.network(item.imageUrl!, fit: BoxFit.contain)
-                    : Icon(Icons.eco, color: theme.primaryColor, size: 30),
-              ),
-              const SizedBox(width: 16),
+              // Image
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.secondary
-                                .withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(badgeText,
-                              style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.primaryColorDark)),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(hintText, style: theme.textTheme.bodySmall),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(item.name, style: theme.textTheme.titleMedium),
-                    if (item.description != null) ...[
-                      const SizedBox(height: 4),
-                      Text(item.description!,
-                          style: theme.textTheme.bodyMedium),
-                    ]
-                  ],
+                flex: 3,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: typeBg,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: group.imageUrl != null
+                      ? Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Image.network(group.imageUrl!, fit: BoxFit.contain),
+                        )
+                      : Icon(typeIcon, size: 36, color: typeColor),
                 ),
+              ),
+              const SizedBox(height: 12),
+              // Name
+              Text(
+                group.name,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.ink),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 6),
+              // Count & type
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: usable ? typeBg : AppColors.canvasSoft,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${group.usableCount}개',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: usable ? typeColor : AppColors.bodyMuted,
+                      ),
+                    ),
+                  ),
+                  if (usable)
+                    Icon(Icons.chevron_right, size: 16, color: AppColors.bodyMuted),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: theme.scaffoldBackgroundColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildCountColumn("보유", item.ownedCount, theme),
-                _buildCountColumn("사용 가능", item.usableCount, theme,
-                    isHighlight: true),
-                _buildCountColumn("사용 완료", item.usedCount, theme),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          canUse
-              ? GreenlinkButton(text: actionText, onPressed: onAction!)
-              : Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(disabledText,
-                        style: TextStyle(color: theme.disabledColor)),
-                  ),
-                ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildCountColumn(String label, int count, ThemeData theme,
-      {bool isHighlight = false}) {
-    return Column(
-      children: [
-        Text(label, style: theme.textTheme.bodySmall),
-        const SizedBox(height: 4),
-        Text(
-          "$count개",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: isHighlight
-                ? theme.primaryColorDark
-                : theme.textTheme.bodyLarge?.color,
-          ),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80, height: 80,
+              decoration: BoxDecoration(color: AppColors.canvasGreenTint, borderRadius: BorderRadius.circular(24)),
+              child: const Icon(Icons.backpack_outlined, size: 40, color: AppColors.bodyMuted),
+            ),
+            const SizedBox(height: 24),
+            const Text('아직 아이템이 없어요', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.ink)),
+            const SizedBox(height: 8),
+            const Text('퀘스트 보상으로 아이템을 얻을 수 있어요', style: TextStyle(fontSize: 14, color: AppColors.bodyMuted, height: 1.5)),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/quest_models.dart';
 import '../../services/quest_service.dart';
 import '../../core/widgets/greenlink_card.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/quest_detail_bottom_sheet.dart';
 import '../attend/attend_page.dart';
 import '../main_page.dart';
@@ -32,7 +33,7 @@ class QuestPageState extends State<QuestPage> {
   };
 
   final Map<String, String> _typeFilters = {
-    'ALL': '전체 유형',
+    'ALL': '전체',
     'DAILY': '일일',
     'WEEKLY': '주간',
     'MONTHLY': '월간',
@@ -45,7 +46,6 @@ class QuestPageState extends State<QuestPage> {
     _loadQuests();
   }
 
-  /// 5. 퀘스트 갱신 — 외부에서 호출 가능한 refresh
   void refresh() {
     debugPrint('[QuestPage] 🔄 refresh quests');
     _loadQuests();
@@ -62,161 +62,97 @@ class QuestPageState extends State<QuestPage> {
         _isLoading = false;
       });
     } else {
-      setState(() {
-        _allQuests = [];
-        _filteredQuests = [];
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(res.message)));
+      setState(() { _allQuests = []; _filteredQuests = []; _isLoading = false; });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message)));
     }
   }
 
   void _applyFilters() {
     if (_allQuests == null) return;
     _filteredQuests = _allQuests!.where((q) {
-      bool passStatus =
-          _selectedStatus == 'ALL' || q.status == _selectedStatus;
-      bool passType =
-          _selectedQuestType == 'ALL' || q.questType == _selectedQuestType;
+      bool passStatus = _selectedStatus == 'ALL' || q.status == _selectedStatus;
+      bool passType = _selectedQuestType == 'ALL' || q.questType == _selectedQuestType;
       return passStatus && passType;
     }).toList();
   }
 
-  void _onStatusChanged(String status) {
-    setState(() {
-      _selectedStatus = status;
-      _applyFilters();
-    });
-  }
-
-  void _onTypeChanged(String type) {
-    setState(() {
-      _selectedQuestType = type;
-      _applyFilters();
-    });
-  }
+  void _onStatusChanged(String status) => setState(() { _selectedStatus = status; _applyFilters(); });
+  void _onTypeChanged(String type) => setState(() { _selectedQuestType = type; _applyFilters(); });
 
   Future<void> _receiveReward(UserQuestSummary quest) async {
     final res = await _questService.receiveReward(quest.userQuestId);
     if (!mounted) return;
-
     if (res.success && res.data != null) {
-      // G. 퀘스트 보상 수령 후 GET /api/user-quests 재조회
       await _loadQuests();
       _showRewardSuccessDialog(res.data!);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(res.message)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message)));
     }
   }
 
   void _showRewardSuccessDialog(QuestRewardResponse rewardData) {
     showDialog(
       context: context,
-      builder: (context) {
-        final theme = Theme.of(context);
-        return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.redeem,
-                    size: 60, color: theme.colorScheme.secondary),
-                const SizedBox(height: 16),
-                Text("보상을 받았어요",
-                    style: theme.textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text("작은 약속을 지켜서 선물을 받았어요",
-                    style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: theme.disabledColor)),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: theme.scaffoldBackgroundColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                        color: theme.disabledColor.withValues(alpha: 0.1)),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color:
-                              theme.disabledColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: rewardData.reward.itemName.contains('영양제')
-                            ? Icon(Icons.water_drop,
-                                color: theme.colorScheme.secondary)
-                            : Icon(Icons.eco, color: theme.primaryColor),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          "${rewardData.reward.itemName} ${rewardData.reward.quantity}개가 인벤토리에 들어왔어요",
-                          style: theme.textTheme.bodyMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
+      builder: (context) => Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64, height: 64,
+                decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(20)),
+                child: const Icon(Icons.redeem_rounded, size: 32, color: AppColors.primaryStrong),
+              ),
+              const SizedBox(height: 20),
+              const Text('보상을 받았어요', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.ink)),
+              const SizedBox(height: 6),
+              const Text('작은 약속을 지켜서 선물을 받았어요', style: TextStyle(fontSize: 14, color: AppColors.bodyMuted)),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.canvasGreenTint,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                 ),
-                const SizedBox(height: 32),
-                Row(
+                child: Row(
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
-                        ),
-                        child: const Text("확인"),
-                      ),
+                    Container(
+                      width: 44, height: 44,
+                      decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(12)),
+                      child: const Icon(Icons.eco_rounded, color: AppColors.primaryStrong, size: 22),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          // G. 인벤토리로 이동 시 인벤토리 탭으로 전환 (index=1)
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  const MainPage(initialIndex: 1),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: theme.primaryColor,
-                          foregroundColor: theme.primaryColorDark,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
-                          elevation: 0,
-                        ),
-                        child: const Text("인벤토리 보러가기"),
+                      child: Text(
+                        '${rewardData.reward.itemName} ${rewardData.reward.quantity}개가 인벤토리에 들어왔어요',
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.ink),
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 28),
+              Row(
+                children: [
+                  Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(context), child: const Text('확인'))),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainPage(initialIndex: 1)));
+                      },
+                      child: const Text('인벤토리'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -224,45 +160,29 @@ class QuestPageState extends State<QuestPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.canvas,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: QuestDetailBottomSheet(userQuestId: quest.userQuestId, onRewardReceived: _loadQuests),
       ),
-      builder: (context) {
-        return QuestDetailBottomSheet(
-          userQuestId: quest.userQuestId,
-          onRewardReceived: _loadQuests,
-        );
-      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        title: const Text("퀘스트"),
-        centerTitle: false,
+        title: const Text('퀘스트'),
         actions: [
           IconButton(
-            icon: Icon(Icons.calendar_month,
-                color: theme.colorScheme.secondary),
+            icon: const Icon(Icons.calendar_month_rounded, size: 22),
             onPressed: () async {
-              // F. 출석 성공 시 onAttended 콜백 → _loadQuests() 재호출
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AttendPage(
-                    onAttended: _loadQuests,
-                  ),
-                ),
-              );
-              // 출석 페이지에서 돌아왔을 때도 퀘스트 재조회
-              if (mounted) {
-                debugPrint('[QuestPage] 🔄 refresh quests (after attend page)');
-                _loadQuests();
-              }
+              await Navigator.push(context, MaterialPageRoute(builder: (_) => AttendPage(onAttended: _loadQuests)));
+              if (mounted) _loadQuests();
             },
             tooltip: '출석',
           ),
@@ -272,38 +192,33 @@ class QuestPageState extends State<QuestPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
             child: Text(
-              "식물 친구와 함께하는 작은 약속이에요",
-              style: theme.textTheme.bodyLarge
-                  ?.copyWith(color: theme.textTheme.bodyMedium?.color),
+              '식물 친구와 함께하는 작은 약속이에요',
+              style: TextStyle(fontSize: 15, color: AppColors.bodyMuted),
             ),
           ),
-          const SizedBox(height: 12),
-          if (!_isLoading && _allQuests != null)
+          const SizedBox(height: 16),
+          if (!_isLoading && _allQuests != null) ...[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: _buildSummaryCard(theme),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _buildSummaryCard(),
             ),
-          const SizedBox(height: 16),
-          _buildFilters(theme),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
+          ],
+          _buildFilters(),
+          const SizedBox(height: 12),
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.primaryStrong)))
                 : _filteredQuests == null || _filteredQuests!.isEmpty
-                    ? _buildEmptyState(theme)
+                    ? _buildEmptyState()
                     : ListView.separated(
                         padding: const EdgeInsets.all(20),
                         itemCount: _filteredQuests!.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: 16),
-                        itemBuilder: (context, index) {
-                          return _buildQuestCard(
-                              _filteredQuests![index], theme);
-                        },
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) => _buildQuestCard(_filteredQuests![index]),
                       ),
           ),
         ],
@@ -311,118 +226,78 @@ class QuestPageState extends State<QuestPage> {
     );
   }
 
-  Widget _buildSummaryCard(ThemeData theme) {
-    // ignore: unused_local_variable
-    final int total = _allQuests!.length;
-    final int inProgress =
-        _allQuests!.where((q) => q.status == 'IN_PROGRESS').length;
-    int achievable =
-        _allQuests!.where((q) => q.status == 'ACHIEVABLE').length;
-    int completed =
-        _allQuests!.where((q) => q.status == 'COMPLETED').length;
+  Widget _buildSummaryCard() {
+    final int inProgress = _allQuests!.where((q) => q.status == 'IN_PROGRESS').length;
+    final int achievable = _allQuests!.where((q) => q.status == 'ACHIEVABLE').length;
+    final int completed = _allQuests!.where((q) => q.status == 'COMPLETED').length;
 
     return GreenlinkCard(
-      padding: const EdgeInsets.all(20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildSummaryItem("진행 중", inProgress, theme),
-          Container(
-              width: 1,
-              height: 40,
-              color: theme.disabledColor.withValues(alpha: 0.2)),
-          _buildSummaryItem("받을 보상", achievable, theme,
-              highlight: achievable > 0),
-          Container(
-              width: 1,
-              height: 40,
-              color: theme.disabledColor.withValues(alpha: 0.2)),
-          _buildSummaryItem("완료", completed, theme),
+          _SummaryItem(label: '진행 중', count: inProgress),
+          Container(width: 1, height: 36, color: AppColors.hairline),
+          _SummaryItem(label: '받을 보상', count: achievable, isHighlight: achievable > 0),
+          Container(width: 1, height: 36, color: AppColors.hairline),
+          _SummaryItem(label: '완료', count: completed),
         ],
       ),
     );
   }
 
-  Widget _buildSummaryItem(String label, int count, ThemeData theme,
-      {bool highlight = false}) {
+  Widget _buildFilters() {
     return Column(
       children: [
-        Text(
-          "$count개",
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: highlight ? theme.colorScheme.secondary : null,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: theme.textTheme.bodySmall),
-      ],
-    );
-  }
-
-  Widget _buildFilters(ThemeData theme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
+        SizedBox(
+          height: 40,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             children: _statusFilters.entries.map((e) {
               final isSelected = _selectedStatus == e.key;
               return Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: FilterChip(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(
                   label: Text(e.value),
                   selected: isSelected,
                   onSelected: (_) => _onStatusChanged(e.key),
-                  backgroundColor: theme.scaffoldBackgroundColor,
-                  selectedColor: theme.primaryColor,
+                  selectedColor: AppColors.primarySoft,
+                  backgroundColor: AppColors.canvas,
+                  side: BorderSide(color: isSelected ? AppColors.primary : AppColors.hairline),
                   labelStyle: TextStyle(
-                    color: isSelected
-                        ? theme.primaryColorDark
-                        : theme.textTheme.bodyMedium?.color,
-                    fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+                    color: isSelected ? AppColors.primaryStrong : AppColors.bodyMuted,
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: BorderSide(
-                      color: isSelected
-                          ? theme.primaryColor
-                          : theme.disabledColor.withValues(alpha: 0.2),
-                    ),
-                  ),
+                  shape: const StadiumBorder(),
+                  checkmarkColor: AppColors.primaryStrong,
                 ),
               );
             }).toList(),
           ),
         ),
         const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
+        SizedBox(
+          height: 36,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             children: _typeFilters.entries.map((e) {
               final isSelected = _selectedQuestType == e.key;
               return Padding(
-                padding: const EdgeInsets.only(right: 8.0),
+                padding: const EdgeInsets.only(right: 8),
                 child: ChoiceChip(
-                  label: Text(e.value,
-                      style: const TextStyle(fontSize: 12)),
+                  label: Text(e.value),
                   selected: isSelected,
                   onSelected: (_) => _onTypeChanged(e.key),
-                  backgroundColor: theme.scaffoldBackgroundColor,
-                  selectedColor:
-                      theme.disabledColor.withValues(alpha: 0.1),
+                  selectedColor: AppColors.canvasGreenTint,
+                  backgroundColor: AppColors.canvas,
+                  side: BorderSide(color: isSelected ? AppColors.primaryFocus : AppColors.hairline),
                   labelStyle: TextStyle(
-                    color: isSelected
-                        ? theme.textTheme.bodyLarge?.color
-                        : theme.disabledColor,
+                    fontSize: 12,
+                    color: isSelected ? AppColors.ink : AppColors.bodySoft,
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: const StadiumBorder(),
                 ),
               );
             }).toList(),
@@ -432,106 +307,83 @@ class QuestPageState extends State<QuestPage> {
     );
   }
 
-  Widget _buildQuestCard(UserQuestSummary quest, ThemeData theme) {
+  Widget _buildQuestCard(UserQuestSummary quest) {
     final bool isExpired = quest.status == 'EXPIRED';
     final bool isAchievable = quest.status == 'ACHIEVABLE';
     final bool isCompleted = quest.status == 'COMPLETED';
 
-    double progressRate =
-        quest.targetValue == 0 ? 0 : quest.progressValue / quest.targetValue;
+    double progressRate = quest.targetValue == 0 ? 0 : quest.progressValue / quest.targetValue;
     if (progressRate > 1.0) progressRate = 1.0;
-
-    String cardMessage = "조금만 더 해볼까요?";
-    if (isAchievable) cardMessage = "받을 수 있는 보상이 있어요";
-    if (isCompleted) cardMessage = "이미 보상을 받았어요";
-    if (isExpired) cardMessage = "이번 약속은 지나갔어요";
 
     return GestureDetector(
       onTap: () => _showDetailBottomSheet(quest),
       child: Opacity(
-        opacity: isExpired ? 0.6 : 1.0,
+        opacity: isExpired ? 0.55 : 1.0,
         child: GreenlinkCard(
-          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildTypeBadge(quest.questType, theme),
-                  _buildStatusBadge(quest.status, theme),
+                  _TypeBadge(type: quest.questType),
+                  _StatusBadge(status: quest.status),
                 ],
               ),
-              const SizedBox(height: 16),
-              Text(quest.title,
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 14),
+              Text(quest.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.ink)),
               const SizedBox(height: 4),
-              Text(cardMessage,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: theme.disabledColor)),
-              const SizedBox(height: 20),
+              Text(
+                _statusMessage(quest.status),
+                style: const TextStyle(fontSize: 13, color: AppColors.bodyMuted),
+              ),
+              const SizedBox(height: 16),
+              // Progress
               Row(
                 children: [
                   Expanded(
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(6),
                       child: LinearProgressIndicator(
                         value: progressRate,
-                        backgroundColor:
-                            theme.disabledColor.withValues(alpha: 0.1),
+                        backgroundColor: AppColors.primarySoft,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          isAchievable
-                              ? theme.colorScheme.secondary
-                              : theme.primaryColor,
+                          isAchievable ? AppColors.primaryStrong : AppColors.primary,
                         ),
-                        minHeight: 10,
+                        minHeight: 8,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   Text(
-                    "${quest.progressValue} / ${quest.targetValue}",
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    '${quest.progressValue}/${quest.targetValue}',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.ink),
                   ),
                 ],
               ),
               if (isAchievable) ...[
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
+                  height: 44,
                   child: ElevatedButton(
                     onPressed: () => _receiveReward(quest),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      backgroundColor: theme.colorScheme.secondary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                      elevation: 0,
-                    ),
-                    child: const Text("보상 받기",
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text('보상 받기', style: TextStyle(fontWeight: FontWeight.w500)),
                   ),
                 ),
               ],
               if (isCompleted) ...[
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
+                  height: 44,
+                  child: OutlinedButton(
                     onPressed: null,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      backgroundColor:
-                          theme.disabledColor.withValues(alpha: 0.1),
-                      foregroundColor: theme.disabledColor,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                      elevation: 0,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.bodyMuted,
+                      side: const BorderSide(color: AppColors.hairline),
                     ),
-                    child: const Text("받았어요"),
+                    child: const Text('보상 받음'),
                   ),
                 ),
               ],
@@ -542,118 +394,136 @@ class QuestPageState extends State<QuestPage> {
     );
   }
 
-  String _getTypeName(String type) {
-    switch (type) {
-      case 'DAILY':
-        return '오늘의 약속';
-      case 'WEEKLY':
-        return '이번 주 약속';
-      case 'MONTHLY':
-        return '이번 달 약속';
-      case 'ACHIEVEMENT':
-        return '도전 기록';
-      default:
-        return type;
+  String _statusMessage(String status) {
+    switch (status) {
+      case 'IN_PROGRESS': return '조금만 더 해볼까요?';
+      case 'ACHIEVABLE': return '보상을 받을 수 있어요';
+      case 'COMPLETED': return '이미 보상을 받았어요';
+      case 'EXPIRED': return '이번 약속은 지나갔어요';
+      default: return '';
     }
   }
 
-  Widget _buildTypeBadge(String type, ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: theme.disabledColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        _getTypeName(type),
-        style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            color: theme.disabledColor),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80, height: 80,
+              decoration: BoxDecoration(color: AppColors.canvasGreenTint, borderRadius: BorderRadius.circular(24)),
+              child: const Icon(Icons.check_circle_outline_rounded, size: 40, color: AppColors.bodyMuted),
+            ),
+            const SizedBox(height: 24),
+            const Text('아직 퀘스트가 없어요', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.ink)),
+            const SizedBox(height: 8),
+            const Text('식물을 돌보면 새로운 약속이 생겨요', style: TextStyle(fontSize: 14, color: AppColors.bodyMuted, height: 1.5)),
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildStatusBadge(String status, ThemeData theme) {
-    Color badgeColor;
-    Color textColor;
+// ── Sub-widgets ───────────────────────────────────────────────
+
+class _SummaryItem extends StatelessWidget {
+  final String label;
+  final int count;
+  final bool isHighlight;
+
+  const _SummaryItem({required this.label, required this.count, this.isHighlight = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          '$count개',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: isHighlight ? AppColors.primaryStrong : AppColors.ink,
+            letterSpacing: -0.3,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 13, color: AppColors.bodyMuted)),
+      ],
+    );
+  }
+}
+
+class _TypeBadge extends StatelessWidget {
+  final String type;
+  const _TypeBadge({required this.type});
+
+  String get _label {
+    switch (type) {
+      case 'DAILY': return '오늘의 약속';
+      case 'WEEKLY': return '이번 주 약속';
+      case 'MONTHLY': return '이번 달 약속';
+      case 'ACHIEVEMENT': return '도전 기록';
+      default: return type;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.canvasGreenTint,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(_label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.bodyMuted)),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String status;
+  const _StatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    Color bg;
+    Color fg;
     String text;
 
     switch (status) {
       case 'IN_PROGRESS':
-        badgeColor = theme.primaryColor.withValues(alpha: 0.2);
-        textColor = theme.primaryColorDark;
+        bg = AppColors.primarySoft;
+        fg = AppColors.primaryStrong;
         text = '진행 중';
         break;
       case 'ACHIEVABLE':
-        badgeColor = theme.colorScheme.secondary.withValues(alpha: 0.2);
-        textColor = theme.colorScheme.secondary;
+        bg = const Color(0xFFFFF4D8);
+        fg = const Color(0xFF8A6500);
         text = '보상 가능';
         break;
       case 'COMPLETED':
-        badgeColor = theme.disabledColor.withValues(alpha: 0.1);
-        textColor = theme.disabledColor;
+        bg = const Color(0xFFF0F0EE);
+        fg = AppColors.bodyMuted;
         text = '완료';
         break;
       case 'EXPIRED':
-        badgeColor = Colors.red.withValues(alpha: 0.1);
-        textColor = Colors.red;
-        text = '기간 만료';
+        bg = AppColors.dangerBg;
+        fg = AppColors.dangerText;
+        text = '만료';
         break;
       default:
-        badgeColor = theme.disabledColor.withValues(alpha: 0.1);
-        textColor = theme.disabledColor;
+        bg = const Color(0xFFF0F0EE);
+        fg = AppColors.bodyMuted;
         text = status;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: badgeColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-            fontSize: 10, fontWeight: FontWeight.bold, color: textColor),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(ThemeData theme) {
-    String msg1 = "아직 진행 중인 퀘스트가 없어요";
-    String msg2 = "식물을 돌보면 새로운 약속이 생길 거예요";
-
-    if (_selectedStatus == 'ACHIEVABLE') {
-      msg1 = "지금 받을 수 있는 보상은 없어요";
-      msg2 = "조금만 더 돌보면 보상이 기다리고 있어요";
-    } else if (_selectedStatus == 'COMPLETED') {
-      msg1 = "아직 완료한 약속이 없어요";
-      msg2 = "";
-    }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.check_circle_outline,
-              size: 80, color: theme.disabledColor.withValues(alpha: 0.3)),
-          const SizedBox(height: 24),
-          Text(
-            msg1,
-            style: theme.textTheme.titleMedium
-                ?.copyWith(color: theme.disabledColor),
-          ),
-          if (msg2.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              msg2,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.disabledColor),
-            ),
-          ]
-        ],
-      ),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      child: Text(text, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: fg)),
     );
   }
 }

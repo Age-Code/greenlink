@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/quest_models.dart';
 import '../services/quest_service.dart';
 import '../screens/main_page.dart';
+import '../theme/app_theme.dart';
 
 class QuestDetailBottomSheet extends StatefulWidget {
   final int userQuestId;
@@ -32,30 +33,23 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
   Future<void> _loadDetail() async {
     final res = await _questService.getUserQuestDetail(widget.userQuestId);
     if (!mounted) return;
-    
     if (res.success && res.data != null) {
-      setState(() {
-        _detail = res.data;
-        _isLoading = false;
-      });
+      setState(() { _detail = res.data; _isLoading = false; });
     } else {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message)));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message)));
     }
   }
 
   Future<void> _receiveReward() async {
     if (_isReceiving || _detail == null) return;
-    
     setState(() => _isReceiving = true);
     final res = await _questService.receiveReward(_detail!.userQuestId);
     if (!mounted) return;
-
     setState(() => _isReceiving = false);
-
     if (res.success && res.data != null) {
       widget.onRewardReceived();
-      Navigator.pop(context); // Close bottom sheet first
+      Navigator.pop(context);
       _showRewardSuccessDialog(res.data!);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message)));
@@ -65,89 +59,68 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
   void _showRewardSuccessDialog(QuestRewardResponse rewardData) {
     showDialog(
       context: context,
-      builder: (context) {
-        final theme = Theme.of(context);
-        return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.redeem, size: 60, color: theme.colorScheme.secondary),
-                const SizedBox(height: 16),
-                Text("보상을 받았어요", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text("작은 약속을 지켜서 선물을 받았어요", style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: theme.scaffoldBackgroundColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme.disabledColor.withValues(alpha: 0.1)),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: theme.disabledColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: rewardData.reward.itemName.contains('영양제') 
-                            ? Icon(Icons.water_drop, color: theme.colorScheme.secondary)
-                            : Icon(Icons.eco, color: theme.primaryColor),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          "${rewardData.reward.itemName} ${rewardData.reward.quantity}개가 인벤토리에 들어왔어요",
-                          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
+      builder: (context) => Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64, height: 64,
+                decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(20)),
+                child: const Icon(Icons.redeem_rounded, size: 32, color: AppColors.primaryStrong),
+              ),
+              const SizedBox(height: 20),
+              const Text('보상을 받았어요', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.ink)),
+              const SizedBox(height: 6),
+              const Text('작은 약속을 지켜서 선물을 받았어요', style: TextStyle(fontSize: 14, color: AppColors.bodyMuted)),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.canvasGreenTint,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                 ),
-                const SizedBox(height: 32),
-                Row(
+                child: Row(
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                        child: const Text("확인"),
-                      ),
+                    Container(
+                      width: 44, height: 44,
+                      decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(12)),
+                      child: rewardData.reward.itemName.contains('영양제')
+                          ? const Icon(Icons.water_drop_rounded, color: AppColors.primaryStrong)
+                          : const Icon(Icons.eco_rounded, color: AppColors.primaryStrong),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          // 인벤토리로 이동 (메인페이지에서 인벤토리 탭으로 교체)
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => MainPage()));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: theme.primaryColor,
-                          foregroundColor: theme.primaryColorDark,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          elevation: 0,
-                        ),
-                        child: const Text("인벤토리 보러가기"),
+                      child: Text(
+                        '${rewardData.reward.itemName} ${rewardData.reward.quantity}개가 인벤토리에 들어왔어요',
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.ink),
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 28),
+              Row(
+                children: [
+                  Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(context), child: const Text('확인'))),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainPage(initialIndex: 1)));
+                      },
+                      child: const Text('인벤토리'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -156,9 +129,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
     try {
       final dt = DateTime.parse(isoString);
       return '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return isoString;
-    }
+    } catch (_) { return isoString; }
   }
 
   String _getTypeName(String type) {
@@ -181,79 +152,19 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
     }
   }
 
-  Widget _buildTypeBadge(String type, ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: theme.disabledColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        _getTypeName(type),
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: theme.disabledColor),
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(String status, ThemeData theme) {
-    Color badgeColor;
-    Color textColor;
-    String text;
-
-    switch (status) {
-      case 'IN_PROGRESS':
-        badgeColor = theme.primaryColor.withValues(alpha: 0.2);
-        textColor = theme.primaryColorDark;
-        text = '진행 중';
-        break;
-      case 'ACHIEVABLE':
-        badgeColor = theme.colorScheme.secondary.withValues(alpha: 0.2);
-        textColor = theme.colorScheme.secondary;
-        text = '보상 가능';
-        break;
-      case 'COMPLETED':
-        badgeColor = theme.disabledColor.withValues(alpha: 0.1);
-        textColor = theme.disabledColor;
-        text = '완료';
-        break;
-      case 'EXPIRED':
-        badgeColor = Colors.red.withValues(alpha: 0.1);
-        textColor = Colors.red;
-        text = '기간 만료';
-        break;
-      default:
-        badgeColor = theme.disabledColor.withValues(alpha: 0.1);
-        textColor = theme.disabledColor;
-        text = status;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: badgeColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(text, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: textColor)),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     if (_isLoading) {
-      return Container(
+      return const SizedBox(
         height: 300,
-        alignment: Alignment.center,
-        child: const CircularProgressIndicator(),
+        child: Center(child: SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.primaryStrong))),
       );
     }
 
     if (_detail == null) {
-      return Container(
-        height: 300,
-        alignment: Alignment.center,
-        child: const Text("데이터를 불러오지 못했습니다."),
+      return const SizedBox(
+        height: 200,
+        child: Center(child: Text('데이터를 불러오지 못했습니다.', style: TextStyle(color: AppColors.bodyMuted))),
       );
     }
 
@@ -270,172 +181,208 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Handle
           Center(
             child: Container(
-              width: 48,
-              height: 6,
-              decoration: BoxDecoration(
-                color: theme.disabledColor.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(3),
-              ),
+              width: 40, height: 4,
+              decoration: BoxDecoration(color: AppColors.hairline, borderRadius: BorderRadius.circular(2)),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 28),
+
+          // Badges
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildTypeBadge(_detail!.questType, theme),
-              _buildStatusBadge(_detail!.status, theme),
+              _TypeBadge(type: _detail!.questType, label: _getTypeName(_detail!.questType)),
+              _StatusBadge(status: _detail!.status),
             ],
           ),
           const SizedBox(height: 16),
-          Text(_detail!.title, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+
+          // Title
+          Text(_detail!.title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.ink, letterSpacing: -0.3)),
           if (_detail!.description.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text(_detail!.description, style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
+            Text(_detail!.description, style: const TextStyle(fontSize: 15, color: AppColors.bodyMuted, height: 1.5)),
           ],
           const SizedBox(height: 24),
+
+          // Progress
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("목표: ${_getTargetTypeName(_detail!.targetType)}", style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
-              Text("${_detail!.progressValue} / ${_detail!.targetValue}", style: theme.textTheme.bodySmall),
+              Text(
+                '목표: ${_getTargetTypeName(_detail!.targetType)}',
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.body),
+              ),
+              Text(
+                '${_detail!.progressValue} / ${_detail!.targetValue}',
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.ink),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
               value: progressRate,
-              backgroundColor: theme.disabledColor.withValues(alpha: 0.1),
-              valueColor: AlwaysStoppedAnimation<Color>(isAchievable ? theme.colorScheme.secondary : theme.primaryColor),
-              minHeight: 12,
+              backgroundColor: AppColors.primarySoft,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isAchievable ? AppColors.primaryStrong : AppColors.primary,
+              ),
+              minHeight: 10,
             ),
           ),
-          const SizedBox(height: 24),
+
+          // Date range
+          const SizedBox(height: 16),
           Row(
             children: [
               if (_detail!.startedAt != null)
-                Expanded(child: Text("시작일: ${_formatDate(_detail!.startedAt)}", style: theme.textTheme.bodySmall?.copyWith(color: theme.disabledColor))),
+                Expanded(child: Text('시작: ${_formatDate(_detail!.startedAt)}', style: const TextStyle(fontSize: 13, color: AppColors.bodyMuted))),
               if (_detail!.expiredAt != null)
-                Expanded(child: Text("마감일: ${_formatDate(_detail!.expiredAt)}", style: theme.textTheme.bodySmall?.copyWith(color: theme.disabledColor), textAlign: TextAlign.right)),
+                Expanded(child: Text('마감: ${_formatDate(_detail!.expiredAt)}', style: const TextStyle(fontSize: 13, color: AppColors.bodyMuted), textAlign: TextAlign.right)),
             ],
           ),
-          const SizedBox(height: 32),
-          
+          const SizedBox(height: 28),
+
           // Reward area
-          if (_detail!.rewardItem != null) ...[
+          if (_detail!.rewardItem != null)
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.secondary.withValues(alpha: 0.05),
+                color: AppColors.canvasGreenTint,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: theme.colorScheme.secondary.withValues(alpha: 0.2)),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
                   Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: theme.scaffoldBackgroundColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    width: 48, height: 48,
+                    decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(14)),
                     child: _detail!.rewardItem!.imageUrl != null
                         ? Image.network(_detail!.rewardItem!.imageUrl!)
-                        : Icon(Icons.star, color: theme.colorScheme.secondary),
+                        : const Icon(Icons.eco_rounded, color: AppColors.primaryStrong),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("보상", style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.secondary, fontWeight: FontWeight.bold)),
+                        const Text('보상', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.primaryStrong)),
                         const SizedBox(height: 4),
-                        Text("${_detail!.rewardItem!.name} ${_detail!.rewardItem?.quantity}개", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        Text(
+                          '${_detail!.rewardItem!.name} ${_detail!.rewardItem?.quantity}개',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.ink),
+                        ),
                       ],
                     ),
                   ),
                 ],
               ),
-            ),
-          ] else ...[
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.disabledColor.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text("등록된 보상이 없어요", style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor), textAlign: TextAlign.center),
-            ),
-          ],
-
-          const SizedBox(height: 32),
-
-          if (isAchievable)
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isReceiving ? null : _receiveReward,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: theme.colorScheme.secondary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: _isReceiving 
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text("보상 받기", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              ),
-            )
-          else if (isCompleted)
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: null,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: theme.disabledColor.withValues(alpha: 0.1),
-                  foregroundColor: theme.disabledColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: const Text("받았어요", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              ),
-            )
-          else if (isExpired)
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: null,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: theme.disabledColor.withValues(alpha: 0.1),
-                  foregroundColor: theme.disabledColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: const Text("이번 약속은 시간이 지났어요", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              ),
             )
           else
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: null,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: theme.disabledColor.withValues(alpha: 0.1),
-                  foregroundColor: theme.disabledColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: const Text("아직 진행 중이에요", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(color: AppColors.canvasSoft, borderRadius: BorderRadius.circular(16)),
+              child: const Text('등록된 보상이 없어요', style: TextStyle(color: AppColors.bodyMuted, fontSize: 14), textAlign: TextAlign.center),
             ),
+          const SizedBox(height: 28),
+
+          // Action button
+          _buildActionButton(isAchievable, isCompleted, isExpired),
         ],
       ),
+    );
+  }
+
+  Widget _buildActionButton(bool isAchievable, bool isCompleted, bool isExpired) {
+    if (isAchievable) {
+      return SizedBox(
+        height: 52,
+        child: ElevatedButton(
+          onPressed: _isReceiving ? null : _receiveReward,
+          child: _isReceiving
+              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onPrimary))
+              : const Text('보상 받기', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+        ),
+      );
+    }
+
+    String label = isCompleted ? '이미 받았어요' : isExpired ? '기간이 지났어요' : '아직 진행 중이에요';
+    return SizedBox(
+      height: 52,
+      child: OutlinedButton(
+        onPressed: null,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.bodyMuted,
+          side: const BorderSide(color: AppColors.hairline),
+        ),
+        child: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+      ),
+    );
+  }
+}
+
+// ── Shared badges ────────────────────────────────────────────
+
+class _TypeBadge extends StatelessWidget {
+  final String type;
+  final String label;
+  const _TypeBadge({required this.type, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(color: AppColors.canvasGreenTint, borderRadius: BorderRadius.circular(20)),
+      child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.bodyMuted)),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String status;
+  const _StatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    Color bg;
+    Color fg;
+    String text;
+
+    switch (status) {
+      case 'IN_PROGRESS':
+        bg = AppColors.primarySoft;
+        fg = AppColors.primaryStrong;
+        text = '진행 중';
+        break;
+      case 'ACHIEVABLE':
+        bg = const Color(0xFFFFF4D8);
+        fg = const Color(0xFF8A6500);
+        text = '보상 가능';
+        break;
+      case 'COMPLETED':
+        bg = const Color(0xFFF0F0EE);
+        fg = AppColors.bodyMuted;
+        text = '완료';
+        break;
+      case 'EXPIRED':
+        bg = AppColors.dangerBg;
+        fg = AppColors.dangerText;
+        text = '만료';
+        break;
+      default:
+        bg = const Color(0xFFF0F0EE);
+        fg = AppColors.bodyMuted;
+        text = status;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      child: Text(text, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: fg)),
     );
   }
 }

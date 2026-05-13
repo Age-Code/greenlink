@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 
 class GreenlinkCard extends StatelessWidget {
   final Widget child;
@@ -13,23 +14,23 @@ class GreenlinkCard extends StatelessWidget {
     this.padding,
     this.onTap,
     this.color,
-    this.borderRadius = 24.0,
+    this.borderRadius = 18.0,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cardColor = color ?? theme.colorScheme.surface;
+    final cardColor = color ?? AppColors.surfaceCard;
 
-    final card = Container(
+    return Container(
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: [
+        border: Border.all(color: AppColors.hairline, width: 1),
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Color(0x0A000000), // rgba(0,0,0,0.04)
+            blurRadius: 24,
+            offset: Offset(0, 8),
           ),
         ],
       ),
@@ -39,6 +40,8 @@ class GreenlinkCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(borderRadius),
+          splashColor: AppColors.primarySoft.withValues(alpha: 0.5),
+          highlightColor: AppColors.canvasGreenTint.withValues(alpha: 0.5),
           child: Padding(
             padding: padding ?? const EdgeInsets.all(20.0),
             child: child,
@@ -46,7 +49,5 @@ class GreenlinkCard extends StatelessWidget {
         ),
       ),
     );
-
-    return card;
   }
 }

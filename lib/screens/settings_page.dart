@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import 'auth/login_page.dart';
 
@@ -9,27 +10,60 @@ class SettingsPage extends StatelessWidget {
   Future<void> _logout(BuildContext context) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('로그아웃'),
-        content: const Text('정말 로그아웃 할까요?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('취소'),
+      builder: (ctx) => Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.dangerBg,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(Icons.logout_rounded, color: AppColors.dangerText, size: 28),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                '로그아웃',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.ink),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '정말 로그아웃 하시겠어요?',
+                style: TextStyle(fontSize: 15, color: AppColors.bodyMuted),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('취소'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.dangerBg,
+                        foregroundColor: AppColors.dangerText,
+                        side: const BorderSide(color: AppColors.dangerBorder),
+                        elevation: 0,
+                        shape: const StadiumBorder(),
+                      ),
+                      child: const Text('로그아웃', style: TextStyle(fontWeight: FontWeight.w500)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[700],
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              elevation: 0,
-            ),
-            child: const Text('로그아웃'),
-          ),
-        ],
+        ),
       ),
     );
 
@@ -45,60 +79,97 @@ class SettingsPage extends StatelessWidget {
       MaterialPageRoute(builder: (_) => LoginPage()),
       (route) => false,
     );
+
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
         title: const Text('계정'),
-        centerTitle: false,
+        backgroundColor: AppColors.canvas,
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        padding: const EdgeInsets.all(24),
         children: [
-          // 구분선 레이블
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              '계정 관리',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.disabledColor,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-              ),
+          const SizedBox(height: 8),
+          // 섹션 레이블
+          const Text(
+            '계정 관리',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.bodyMuted,
+              letterSpacing: 0.4,
             ),
           ),
+          const SizedBox(height: 12),
 
           // 로그아웃 항목
-          Card(
-            elevation: 0,
-            margin: EdgeInsets.zero,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            color: theme.colorScheme.surface,
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.surfaceCard,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.hairline),
+            ),
             child: ListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               leading: Container(
-                width: 40,
-                height: 40,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.1),
+                  color: AppColors.dangerBg,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.logout, color: Colors.red, size: 20),
+                child: const Icon(Icons.logout_rounded, color: AppColors.dangerText, size: 22),
               ),
               title: const Text(
                 '로그아웃',
-                style:
-                    TextStyle(fontWeight: FontWeight.w600, color: Colors.red),
+                style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.dangerText, fontSize: 16),
               ),
-              subtitle: const Text('계정에서 로그아웃합니다'),
-              trailing: const Icon(Icons.chevron_right, color: Colors.red),
+              subtitle: const Text(
+                '계정에서 로그아웃합니다',
+                style: TextStyle(color: AppColors.bodyMuted, fontSize: 14),
+              ),
+              trailing: const Icon(Icons.chevron_right, color: AppColors.dangerText, size: 20),
               onTap: () => _logout(context),
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // 앱 정보
+          const Text(
+            '앱 정보',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.bodyMuted,
+              letterSpacing: 0.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.surfaceCard,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.hairline),
+            ),
+            child: const ListTile(
+              contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              leading: Icon(Icons.eco_rounded, color: AppColors.primaryStrong, size: 22),
+              title: Text(
+                'GreenLink',
+                style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.ink, fontSize: 16),
+              ),
+              subtitle: Text(
+                '나만의 반려식물 성장 서비스',
+                style: TextStyle(color: AppColors.bodyMuted, fontSize: 14),
+              ),
+              trailing: Text(
+                'v1.0.0',
+                style: TextStyle(color: AppColors.bodySoft, fontSize: 13),
+              ),
             ),
           ),
         ],

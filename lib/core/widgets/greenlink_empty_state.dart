@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
+import 'greenlink_button.dart';
 
 class GreenlinkEmptyState extends StatelessWidget {
   final IconData icon;
@@ -18,35 +20,53 @@ class GreenlinkEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 80, color: theme.disabledColor.withValues(alpha: 0.3)),
-          const SizedBox(height: 24),
-          Text(title, style: theme.textTheme.titleMedium?.copyWith(color: theme.disabledColor)),
-          const SizedBox(height: 8),
-          Text(description, style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
-          if (buttonText != null && onButtonPressed != null) ...[
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: onButtonPressed,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                backgroundColor: theme.scaffoldBackgroundColor,
-                foregroundColor: theme.textTheme.bodyLarge?.color,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: theme.disabledColor.withValues(alpha: 0.2)),
-                ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                color: AppColors.canvasGreenTint,
+                borderRadius: BorderRadius.circular(24),
               ),
-              child: Text(buttonText!),
+              child: Icon(icon, size: 40, color: AppColors.primaryStrong),
             ),
+            const SizedBox(height: 24),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ink,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (description.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                description,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.bodyMuted,
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            if (buttonText != null && onButtonPressed != null) ...[
+              const SizedBox(height: 32),
+              GreenlinkButton(
+                text: buttonText!,
+                onPressed: onButtonPressed,
+                width: 180,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

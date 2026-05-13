@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/network/api_client.dart';
+import '../theme/app_theme.dart';
 import 'auth/login_page.dart';
 import 'main_page.dart';
 
@@ -33,7 +34,7 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> _checkAuth() async {
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(milliseconds: 1200));
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
 
@@ -48,19 +49,55 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: AppColors.canvasSoft,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.eco, size: 80, color: theme.primaryColor),
-            const SizedBox(height: 16),
-            Text('GreenLink', style: theme.textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text('나만의 작은 반려식물 돌봄', style: theme.textTheme.bodyMedium),
-            const SizedBox(height: 32),
-            const CircularProgressIndicator(),
+            // Logo mark — leaf symbol
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: AppColors.primarySoft,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
+              ),
+              child: const Icon(
+                Icons.eco_rounded,
+                size: 48,
+                color: AppColors.primaryStrong,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'GreenLink',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ink,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              '나만의 반려식물 성장 서비스',
+              style: TextStyle(
+                fontSize: 15,
+                color: AppColors.bodyMuted,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 48),
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.primaryStrong,
+              ),
+            ),
           ],
         ),
       ),

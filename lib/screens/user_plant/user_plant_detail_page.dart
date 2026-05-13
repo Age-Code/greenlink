@@ -5,6 +5,8 @@ import '../../services/user_plant_service.dart';
 import '../../services/iot_service.dart';
 import '../../core/utils/plant_image_utils.dart';
 import '../../core/widgets/greenlink_card.dart';
+import '../../core/widgets/greenlink_button.dart';
+import '../../theme/app_theme.dart';
 import '../iot/iot_status_page.dart';
 
 class UserPlantDetailPage extends StatefulWidget {
@@ -24,7 +26,6 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
   bool _isLoading = true;
   bool _isHarvesting = false;
 
-  // IoT latest API에서 가져온 최신 이미지 정보
   PlantImageData? _latestImageData;
   String? _capturedAt;
 
@@ -40,11 +41,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     if (!mounted) return;
 
     if (res.success && res.data != null) {
-      setState(() {
-        _plant = res.data;
-        _isLoading = false;
-      });
-      // IoT latest API에서 최신 이미지 버독 로드
+      setState(() { _plant = res.data; _isLoading = false; });
       _loadLatestImage();
     } else {
       setState(() => _isLoading = false);
@@ -52,9 +49,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     }
   }
 
-  /// IoT latest API로 최신 촬영 이미지 정보 로드 (비동기 - 화면 블로킹 없음)
   Future<void> _loadLatestImage() async {
-    debugPrint('[UserPlantDetailPage] 📸 최신 이미지 로드 (plantId=${widget.userPlantId})');
     try {
       final res = await _iotService.getLatestStatus(widget.userPlantId);
       if (!mounted) return;
@@ -64,7 +59,6 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
           _latestImageData = img;
           _capturedAt = img.capturedAt;
         });
-        debugPrint('[UserPlantDetailPage] ✅ imageUrl: ${img.imageUrl}, aiImageUrl: ${img.aiImageUrl}');
       }
     } catch (e) {
       debugPrint('[UserPlantDetailPage] ⚠️ 최신 이미지 로드 실패: $e');
@@ -73,108 +67,88 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
 
   Future<void> _harvestPlant() async {
     if (_plant == null || _isHarvesting) return;
-
     setState(() => _isHarvesting = true);
     final res = await _plantService.harvestUserPlant(_plant!.userPlantId);
     if (!mounted) return;
-
     setState(() => _isHarvesting = false);
 
     if (res.success) {
-      debugPrint('[UserPlantDetailPage] ✅ 수확 성공 → pop(true) 전달');
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('식물 수확이 완료되었습니다.')));
-      // E. 수확 성공 → 이전 화면(홈/식물목록)에 갱신 신호 전달
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('식물 수확이 완료되었습니다.')));
       Navigator.pop(context, true);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(res.message)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message)));
     }
   }
 
   void _showEditNameBottomSheet() {
     if (_plant == null) return;
-    
-    final TextEditingController nameController = TextEditingController(text: _plant!.nickname);
-    
+    final nameController = TextEditingController(text: _plant!.nickname);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) {
-        final theme = Theme.of(context);
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 24, right: 24, top: 24,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 48, height: 6,
-                decoration: BoxDecoration(color: theme.disabledColor.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(3)),
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.canvas,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: EdgeInsets.only(
+          left: 24, right: 24, top: 24,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(color: AppColors.hairline, borderRadius: BorderRadius.circular(2)),
               ),
-              const SizedBox(height: 24),
-              Text("이름 수정하기", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 24),
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  hintText: "새로운 이름을 지어주세요",
-                  filled: true,
-                  fillColor: theme.scaffoldBackgroundColor,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: theme.disabledColor.withValues(alpha: 0.2))),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: theme.disabledColor.withValues(alpha: 0.2))),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: theme.primaryColor)),
+            ),
+            const SizedBox(height: 24),
+            const Text('이름 수정하기', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.ink)),
+            const SizedBox(height: 6),
+            const Text('식물 친구에게 새로운 이름을 지어주세요', style: TextStyle(fontSize: 14, color: AppColors.bodyMuted)),
+            const SizedBox(height: 24),
+            TextField(
+              controller: nameController,
+              autofocus: true,
+              style: const TextStyle(fontSize: 16, color: AppColors.ink),
+              decoration: const InputDecoration(hintText: '새로운 이름'),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('취소'),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 32),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      child: const Text("취소"),
-                    ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final newName = nameController.text.trim();
+                      if (newName.isNotEmpty && newName != _plant!.nickname) {
+                        Navigator.pop(context);
+                        final res = await _plantService.updateUserPlantNickname(_plant!.userPlantId, newName);
+                        if (res.success && mounted) _loadDetail();
+                        else if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message)));
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: const Text('저장'),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final newName = nameController.text.trim();
-                        if (newName.isNotEmpty && newName != _plant!.nickname) {
-                          Navigator.pop(context);
-                          final res = await _plantService.updateUserPlantNickname(_plant!.userPlantId, newName);
-                          if (res.success) {
-                            if (mounted) _loadDetail();
-                          } else {
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message)));
-                            }
-                          }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: theme.primaryColor,
-                        foregroundColor: theme.primaryColorDark,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 0,
-                      ),
-                      child: const Text("저장"),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -183,58 +157,55 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     try {
       final dt = DateTime.parse(isoString);
       return '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return isoString;
-    }
+    } catch (_) { return isoString; }
   }
 
-  /// capturedAt 등 날짜+시간 표시용 (yyyy-MM-dd HH:mm)
   String _formatDateTimeStr(String? isoString) {
     if (isoString == null) return '-';
     try {
       final dt = DateTime.parse(isoString);
       final pad = (int n) => n.toString().padLeft(2, '0');
       return '${dt.year}-${pad(dt.month)}-${pad(dt.day)} ${pad(dt.hour)}:${pad(dt.minute)}';
-    } catch (_) {
-      return isoString;
-    }
+    } catch (_) { return isoString; }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text("식물 상세")),
-        body: const Center(child: CircularProgressIndicator()),
+        backgroundColor: AppColors.canvas,
+        appBar: AppBar(title: const Text('식물 상세')),
+        body: const Center(child: SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.primaryStrong))),
       );
     }
 
     if (_plant == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text("식물 상세")),
-        body: const Center(child: Text("데이터를 불러오지 못했습니다.")),
+        backgroundColor: AppColors.canvas,
+        appBar: AppBar(title: const Text('식물 상세')),
+        body: const Center(child: Text('데이터를 불러오지 못했습니다.', style: TextStyle(color: AppColors.bodyMuted))),
       );
     }
 
-    String statusMsg = "";
-    if (_plant!.status == 'GROWING') statusMsg = "나 조금씩 자라고 있어요";
-    else if (_plant!.status == 'HARVESTABLE') statusMsg = "이제 수확할 수 있어요";
-    else if (_plant!.status == 'HARVESTED') statusMsg = "도감에 기록됐어요";
+    String statusMsg = '';
+    if (_plant!.status == 'GROWING') statusMsg = '조금씩 자라고 있어요 🌱';
+    else if (_plant!.status == 'HARVESTABLE') statusMsg = '이제 수확할 수 있어요 🌿';
+    else if (_plant!.status == 'HARVESTED') statusMsg = '도감에 기록됐어요 📖';
 
     return Scaffold(
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
         title: Text(_plant!.nickname),
         actions: [
           IconButton(
-            icon: Icon(Icons.edit, color: theme.colorScheme.secondary),
+            icon: const Icon(Icons.edit_outlined, size: 20),
             onPressed: _showEditNameBottomSheet,
+            tooltip: '이름 수정',
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: SingleChildScrollView(
@@ -242,137 +213,178 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildMainCard(theme, statusMsg),
-                  const SizedBox(height: 24),
-                  Text("성장 정보", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  _buildMainCard(statusMsg),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle('성장 정보'),
                   const SizedBox(height: 12),
-                  _buildGrowthInfoCard(theme),
+                  _buildGrowthInfoCard(),
                   const SizedBox(height: 24),
-                  Text("장착 화분", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  _buildSectionTitle('장착 화분'),
                   const SizedBox(height: 12),
-                  _buildPotCard(theme),
+                  _buildPotCard(),
                   const SizedBox(height: 24),
-                  // IoT 카드
-                  _buildIotCard(theme),
+                  _buildIotCard(),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
           ),
-          _buildBottomAction(theme),
+          if (_plant!.status != 'HARVESTED') _buildBottomAction(),
         ],
       ),
     );
   }
 
-  Widget _buildMainCard(ThemeData theme, String statusMsg) {
-    // 상세 화면 정책: imageUrl → aiImageUrl → plant 기본 이미지
+  Widget _buildSectionTitle(String title) {
+    return Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.ink));
+  }
+
+  Widget _buildMainCard(String statusMsg) {
     final displayUrl = getDetailPlantImageUrl(
       aiImageUrl: _latestImageData?.aiImageUrl,
       originalImageUrl: _latestImageData?.imageUrl,
     ) ?? _plant!.imageUrl;
 
     return GreenlinkCard(
-      padding: const EdgeInsets.all(24),
+      borderRadius: 24,
+      padding: EdgeInsets.zero,
+      color: AppColors.canvasSoft,
       child: Column(
         children: [
+          // Image area
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: theme.scaffoldBackgroundColor,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: theme.disabledColor.withValues(alpha: 0.1)),
+            width: double.infinity,
+            height: 240,
+            decoration: const BoxDecoration(
+              color: AppColors.canvasSoft,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(23)),
             ),
-            child: Text(statusMsg, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.secondary)),
+            child: Stack(
+              children: [
+                Center(
+                  child: displayUrl != null
+                      ? Image.network(
+                          displayUrl,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const Icon(Icons.eco_rounded, size: 80, color: AppColors.primaryStrong),
+                        )
+                      : const Icon(Icons.eco_rounded, size: 80, color: AppColors.primaryStrong),
+                ),
+                // Image type label
+                Positioned(
+                  top: 16,
+                  left: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.canvas.withValues(alpha: 0.88),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.hairline),
+                    ),
+                    child: Text(
+                      _latestImageData?.imageUrl != null ? 'Original Snapshot' : 'Plant Image',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.bodyMuted),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 24),
+          // Info
           Container(
-            width: 160, height: 160,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: theme.scaffoldBackgroundColor,
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: AppColors.surfaceCard,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(23)),
+              border: Border(top: BorderSide(color: AppColors.hairline)),
             ),
-            child: ClipOval(
-              child: displayUrl != null
-                  ? Image.network(
-                      displayUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          Icon(Icons.eco, size: 80, color: theme.primaryColor),
-                    )
-                  : Icon(Icons.eco, size: 80, color: theme.primaryColor),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(_plant!.nickname, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.ink, letterSpacing: -0.3)),
+                          const SizedBox(height: 2),
+                          Text(_plant!.plantName, style: const TextStyle(fontSize: 14, color: AppColors.bodyMuted)),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _plant!.status == 'HARVESTABLE' ? AppColors.primarySoft : AppColors.canvasGreenTint,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        statusMsg,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: _plant!.status == 'HARVESTABLE' ? AppColors.primaryStrong : AppColors.bodyMuted,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_capturedAt != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    '최근 촬영: ${_formatDateTimeStr(_capturedAt)}',
+                    style: const TextStyle(fontSize: 13, color: AppColors.bodySoft),
+                  ),
+                ],
+              ],
             ),
           ),
-          const SizedBox(height: 24),
-          Text(_plant!.nickname, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text(_plant!.plantName, style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
-          // 최근 촬영 시간 표시
-          if (_capturedAt != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              '최근 촬영: ${_formatDateTimeStr(_capturedAt)}',
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.disabledColor),
-            ),
-          ],
         ],
       ),
     );
   }
 
-  Widget _buildGrowthInfoCard(ThemeData theme) {
+  Widget _buildGrowthInfoCard() {
     return GreenlinkCard(
-      padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          _buildInfoRow("식물 종류", _plant!.plantName, theme),
-          const SizedBox(height: 16),
-          _buildInfoRow("함께한 지", "${_plant!.daysAfterPlanting ?? 0}일째", theme),
-          const SizedBox(height: 16),
-          _buildInfoRow("심은 날짜", _formatDate(_plant!.plantedAt), theme),
+          _InfoRow(label: '식물 종류', value: _plant!.plantName),
+          const _Hairline(),
+          _InfoRow(label: '함께한 지', value: '${_plant!.daysAfterPlanting ?? 0}일째'),
+          const _Hairline(),
+          _InfoRow(label: '심은 날짜', value: _formatDate(_plant!.plantedAt)),
           if (_plant!.status == 'HARVESTED') ...[
-            const SizedBox(height: 16),
-            _buildInfoRow("수확 날짜", _formatDate(_plant!.harvestedAt), theme),
+            const _Hairline(),
+            _InfoRow(label: '수확 날짜', value: _formatDate(_plant!.harvestedAt)),
           ] else if (_plant!.remainingDays != null && _plant!.remainingDays! > 0) ...[
-            const SizedBox(height: 16),
-            _buildInfoRow("수확까지", "${_plant!.remainingDays}일 남음", theme),
+            const _Hairline(),
+            _InfoRow(label: '수확까지', value: '${_plant!.remainingDays}일 남음', valueColor: AppColors.primaryStrong),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value, ThemeData theme) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
-        Text(value, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
-  Widget _buildPotCard(ThemeData theme) {
+  Widget _buildPotCard() {
     if (_plant!.equippedPot == null) {
       return GreenlinkCard(
-        padding: const EdgeInsets.all(20),
         child: Row(
           children: [
             Container(
               width: 48, height: 48,
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(Icons.inventory_2_outlined, color: theme.disabledColor),
+              decoration: BoxDecoration(color: AppColors.canvasGreenTint, borderRadius: BorderRadius.circular(12)),
+              child: const Icon(Icons.inventory_2_outlined, color: AppColors.bodyMuted, size: 22),
             ),
             const SizedBox(width: 16),
-            Expanded(
+            const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("아직 장착한 화분이 없어요", style: theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor)),
-                  const SizedBox(height: 2),
-                  Text("인벤토리에서 화분을 장착해보세요", style: theme.textTheme.bodySmall?.copyWith(color: theme.disabledColor)),
+                  Text('장착한 화분이 없어요', style: TextStyle(fontSize: 15, color: AppColors.ink, fontWeight: FontWeight.w500)),
+                  SizedBox(height: 2),
+                  Text('인벤토리에서 화분을 장착해보세요', style: TextStyle(fontSize: 13, color: AppColors.bodyMuted)),
                 ],
               ),
             ),
@@ -383,18 +395,14 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
 
     final pot = _plant!.equippedPot!;
     return GreenlinkCard(
-      padding: const EdgeInsets.all(20),
       child: Row(
         children: [
           Container(
-            width: 60, height: 60,
-            decoration: BoxDecoration(
-              color: theme.scaffoldBackgroundColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
+            width: 56, height: 56,
+            decoration: BoxDecoration(color: AppColors.canvasGreenTint, borderRadius: BorderRadius.circular(14)),
             child: pot.imageUrl != null
-                ? Image.network(pot.imageUrl!)
-                : Icon(Icons.inventory_2, color: theme.primaryColor),
+                ? ClipRRect(borderRadius: BorderRadius.circular(14), child: Image.network(pot.imageUrl!, fit: BoxFit.contain))
+                : const Icon(Icons.inventory_2_rounded, color: AppColors.primaryStrong, size: 28),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -402,15 +410,12 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.secondary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text("장착 중", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: theme.colorScheme.secondary)),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(20)),
+                  child: const Text('장착 중', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.primaryStrong)),
                 ),
                 const SizedBox(height: 6),
-                Text(pot.name, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                Text(pot.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.ink)),
               ],
             ),
           ),
@@ -419,69 +424,27 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     );
   }
 
-  Widget _buildBottomAction(ThemeData theme) {
-    if (_plant!.status == 'HARVESTED') return const SizedBox();
-
-    bool isHarvestable = _plant!.status == 'HARVESTABLE';
-    
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -5))],
-      ),
-      child: ElevatedButton(
-        onPressed: isHarvestable && !_isHarvesting ? _harvestPlant : null,
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: isHarvestable ? theme.colorScheme.secondary : theme.disabledColor.withValues(alpha: 0.1),
-          foregroundColor: isHarvestable ? Colors.white : theme.disabledColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 0,
-        ),
-        child: _isHarvesting
-            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-            : Text(
-                isHarvestable ? "수확하기" : "아직 더 자라야 해요",
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-      ),
-    );
-  }
-
-  /// IoT 섹션 카드 — IoT 상태 화면으로 이동하는 버튼
-  Widget _buildIotCard(ThemeData theme) {
+  Widget _buildIotCard() {
     return GreenlinkCard(
-      padding: const EdgeInsets.all(20),
+      color: AppColors.surfaceDark,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: theme.primaryColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(Icons.sensors, color: theme.primaryColor, size: 22),
+                width: 40, height: 40,
+                decoration: BoxDecoration(color: AppColors.primaryOnDark.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
+                child: const Icon(Icons.sensors_rounded, color: AppColors.primaryOnDark, size: 20),
               ),
               const SizedBox(width: 12),
-              Expanded(
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'IoT 모니터링',
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      '온도·습도·조도·토양수분 및 물 주기·조명 제어',
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: theme.disabledColor),
-                    ),
+                    Text('IoT 모니터링', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.bodyOnDark)),
+                    SizedBox(height: 2),
+                    Text('온도·습도·조도·토양수분 및 실시간 제어', style: TextStyle(fontSize: 13, color: AppColors.bodyMutedOnDark)),
                   ],
                 ),
               ),
@@ -490,35 +453,79 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
+            height: 48,
             child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => IotStatusPage(
-                      userPlantId: widget.userPlantId,
-                      plantName: _plant?.nickname ?? '식물',
-                    ),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.monitor_heart_outlined, size: 18),
-              label: const Text(
-                'IoT 상태 보기',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => IotStatusPage(userPlantId: widget.userPlantId, plantName: _plant?.nickname ?? '식물')),
               ),
+              icon: const Icon(Icons.monitor_heart_outlined, size: 18),
+              label: const Text('IoT 상태 보기', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                backgroundColor: theme.primaryColor,
-                foregroundColor: theme.primaryColorDark,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                backgroundColor: AppColors.primaryOnDark.withValues(alpha: 0.15),
+                foregroundColor: AppColors.primaryOnDark,
                 elevation: 0,
+                shape: const StadiumBorder(),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildBottomAction() {
+    final isHarvestable = _plant!.status == 'HARVESTABLE';
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+      decoration: const BoxDecoration(
+        color: AppColors.canvas,
+        border: Border(top: BorderSide(color: AppColors.hairline)),
+      ),
+      child: GreenlinkButton(
+        text: isHarvestable ? '수확하기' : '아직 더 자라야 해요',
+        isLoading: _isHarvesting,
+        type: isHarvestable ? ButtonType.primary : ButtonType.disabled,
+        onPressed: isHarvestable && !_isHarvesting ? _harvestPlant : null,
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+
+  const _InfoRow({required this.label, required this.value, this.valueColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 15, color: AppColors.bodyMuted)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: valueColor ?? AppColors.ink,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Hairline extends StatelessWidget {
+  const _Hairline();
+  @override
+  Widget build(BuildContext context) {
+    return const Divider(height: 1, color: AppColors.hairline);
   }
 }
