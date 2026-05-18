@@ -224,7 +224,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
               color: AppColors.canvasSoft,
               child: MjpegStreamView(
                 key: ValueKey(_cameraReloadKey),
-                streamUrl: CameraConfig.streamUrl,
+                streamUrl: CameraConfig.getCameraStreamUrl(widget.userPlantId),
                 height: 260,
                 fit: BoxFit.contain,
               ),

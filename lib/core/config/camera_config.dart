@@ -6,4 +6,17 @@ class CameraConfig {
 
   /// 라즈베리파이 실시간 MJPEG 스트림 주소
   static const String streamUrl = 'https://camera.likepigs.shop/stream.mjpg';
+
+  /// 식물 ID에 따른 실시간 MJPEG 스트림 주소 반환
+  static String getCameraStreamUrl(int userPlantId) {
+    if (userPlantId == 5) {
+      return 'https://camera.likepigs.shop/stream/sunflower.mjpg';
+    }
+
+    if (userPlantId == 6) {
+      return 'https://camera.likepigs.shop/stream/basil.mjpg';
+    }
+
+    return streamUrl;
+  }
 }
