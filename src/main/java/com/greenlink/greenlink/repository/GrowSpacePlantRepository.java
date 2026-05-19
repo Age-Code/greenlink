@@ -29,4 +29,18 @@ public interface GrowSpacePlantRepository extends JpaRepository<GrowSpacePlant, 
             GrowSpace growSpace,
             UserPlant userPlant
     );
+
+    /**
+     * 특정 재배 공간에 연결된 활성 식물 목록 조회
+     *
+     * 자동 LED 판단에서 growSpace 안의 식물 자동화 설정을 확인할 때 사용한다.
+     */
+    List<GrowSpacePlant> findByGrowSpaceAndActiveTrueAndDeletedFalse(
+            GrowSpace growSpace
+    );
+
+
+    Optional<GrowSpacePlant> findTopByUserPlantAndActiveTrueAndDeletedFalse(
+            UserPlant userPlant
+    );
 }

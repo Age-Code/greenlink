@@ -52,4 +52,5 @@ public interface IotDeviceRepository extends JpaRepository<IotDevice, Long> {
     List<IotDevice> findAllByUserPlantAndDeletedFalse(UserPlant userPlant);
 
     List<IotDevice> findAllByUserPlantAndActiveTrueAndDeletedFalse(UserPlant userPlant);
+
 }
