@@ -30,4 +30,9 @@ public interface PumpChannelRepository extends JpaRepository<PumpChannel, Long> 
     List<PumpChannel> findAllByRaspberryDeviceAndDeletedFalse(IotDevice raspberryDevice);
 
     List<PumpChannel> findAllByRaspberryDeviceAndActiveTrueAndDeletedFalse(IotDevice raspberryDevice);
+
+    Optional<PumpChannel> findByGrowSpaceAndUserPlantAndActiveTrueAndDeletedFalse(
+            GrowSpace growSpace,
+            UserPlant userPlant
+    );
 }

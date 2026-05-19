@@ -9,6 +9,7 @@ import com.greenlink.greenlink.domain.iot.PumpChannel;
 import com.greenlink.greenlink.domain.plant.UserPlant;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -55,5 +56,23 @@ public interface DeviceCommandRepository extends JpaRepository<DeviceCommand, Lo
             PumpChannel pumpChannel,
             CommandType commandType,
             Collection<CommandStatus> commandStatuses
+    );
+
+
+    /**
+     * 특정 식물의 특정 명령 타입 중 가장 최근 명령 조회
+     *
+     * 물 주기 쿨다운 확인에 사용한다.
+     */
+    Optional<DeviceCommand> findTopByUserPlantAndCommandTypeAndDeletedFalseOrderByRequestedAtDesc(
+            UserPlant userPlant,
+            CommandType commandType
+    );
+
+    List<DeviceCommand> findByUserPlantAndCommandTypeAndRequestedAtBetweenAndDeletedFalseOrderByRequestedAtAsc(
+            UserPlant userPlant,
+            CommandType commandType,
+            LocalDateTime start,
+            LocalDateTime end
     );
 }

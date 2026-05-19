@@ -32,6 +32,7 @@ public class IotDeviceDataService {
     private final UserPlantRepository userPlantRepository;
     private final GrowSpacePlantRepository growSpacePlantRepository;
     private final S3UploadService s3UploadService;
+    private final AutomationService automationService;
 
     @Transactional
     public IotDeviceDto.RaspberryEnvironmentResDto saveRaspberryEnvironment(
@@ -61,6 +62,8 @@ public class IotDeviceDataService {
                 raspberrySensorDataRepository.save(sensorData);
 
         raspberryDevice.updateLastConnectedAt();
+
+        automationService.evaluateAutoLight(savedSensorData);
 
         return IotDeviceDto.RaspberryEnvironmentResDto.from(savedSensorData);
     }
@@ -93,6 +96,8 @@ public class IotDeviceDataService {
                 espSensorDataRepository.save(sensorData);
 
         espDevice.updateLastConnectedAt();
+
+        automationService.evaluateAutoWater(savedSensorData);
 
         return IotDeviceDto.EspSoilMoistureResDto.from(savedSensorData);
     }
