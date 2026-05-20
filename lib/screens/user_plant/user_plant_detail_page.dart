@@ -8,6 +8,7 @@ import '../../core/widgets/greenlink_card.dart';
 import '../../core/widgets/greenlink_button.dart';
 import '../../theme/app_theme.dart';
 import '../iot/iot_status_page.dart';
+import 'automation_section.dart';
 
 class UserPlantDetailPage extends StatefulWidget {
   final int userPlantId;
@@ -224,7 +225,11 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
                   _buildPotCard(),
                   const SizedBox(height: 24),
                   _buildIotCard(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
+                  _buildSectionTitle('자동화 관리'),
+                  const SizedBox(height: 12),
+                  AutomationSection(userPlantId: widget.userPlantId),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),

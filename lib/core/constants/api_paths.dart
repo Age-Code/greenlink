@@ -40,4 +40,10 @@ class ApiPaths {
   static String iotWater(int userPlantId) => '/user-plants/$userPlantId/iot/water';
   static String iotLightOn(int userPlantId) => '/user-plants/$userPlantId/iot/light/on';
   static String iotLightOff(int userPlantId) => '/user-plants/$userPlantId/iot/light/off';
+
+  // Automation
+  static String automation(int userPlantId) => '/user-plants/$userPlantId/automation';
+  static String automationTrain(int userPlantId) => '/user-plants/$userPlantId/automation/train';
+  static String automationModel(int userPlantId) => '/user-plants/$userPlantId/automation/model';
+  static String automationLogs(int userPlantId) => '/user-plants/$userPlantId/automation/logs';
 }
