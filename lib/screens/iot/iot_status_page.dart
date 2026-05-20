@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../models/iot_models.dart';
 import '../../services/iot_service.dart';
+import '../../core/constants/iot_thresholds.dart';
 import '../../core/config/camera_config.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/mjpeg_stream_view.dart';
+import '../../widgets/soil_moisture_sufficient_banner.dart';
+import '../../widgets/water_shortage_banner.dart';
 
 // ============================================================
 // IotStatusPage
@@ -34,6 +37,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
   bool _isLightingOff = false;
 
   int _cameraReloadKey = 0;
+  bool _hasShownWaterShortageNotice = false;
 
   @override
   void initState() {
@@ -46,13 +50,26 @@ class _IotStatusPageState extends State<IotStatusPage> {
     final res = await _iotService.getLatestStatus(widget.userPlantId);
     if (!mounted) return;
     if (res.success && res.data != null) {
-      setState(() { _status = res.data; _isLoading = false; });
+      final latest = res.data!;
+      setState(() { _status = latest; _isLoading = false; });
+      _showWaterShortageSnackIfNeeded(latest);
     } else {
       setState(() { _isLoading = false; _errorMessage = res.message; });
     }
   }
 
   Future<void> _onWater() async {
+    if (_status?.isTooWet == true) {
+      final moisture = _status!.soilMoisturePercent;
+      _showSnack(
+        moisture == null
+            ? '토양 수분이 충분히 높아 지금은 물을 줄 수 없습니다.'
+            : '토양 수분이 ${moisture.toStringAsFixed(1)}%로 충분히 높아 지금은 물을 줄 수 없습니다.',
+        success: false,
+      );
+      return;
+    }
+
     setState(() => _isWatering = true);
     final res = await _iotService.requestWater(widget.userPlantId);
     if (!mounted) return;
@@ -87,6 +104,21 @@ class _IotStatusPageState extends State<IotStatusPage> {
     ));
   }
 
+  void _showWaterShortageSnackIfNeeded(IotLatestStatus latest) {
+    final moisture = latest.soilMoisturePercent;
+    if (_hasShownWaterShortageNotice || moisture == null || !latest.isWaterShortage) {
+      return;
+    }
+
+    _hasShownWaterShortageNotice = true;
+    final plantName = widget.plantName.trim();
+    final prefix = plantName.isEmpty ? '' : '$plantName ';
+    _showSnack(
+      '$prefix토양 수분이 부족해요. 물이 필요합니다. 현재 토양 수분: ${moisture.toStringAsFixed(1)}%',
+      success: true,
+    );
+  }
+
   String _formatDateTime(String? raw) {
     if (raw == null || raw.isEmpty) return '-';
     try {
@@ -108,7 +140,10 @@ class _IotStatusPageState extends State<IotStatusPage> {
           IconButton(
             icon: const Icon(Icons.refresh_rounded, size: 22),
             tooltip: '새로고침',
-            onPressed: _isLoading ? null : _loadLatest,
+            onPressed: _isLoading ? null : () {
+              _hasShownWaterShortageNotice = false;
+              _loadLatest();
+            },
           ),
           const SizedBox(width: 8),
         ],
@@ -154,6 +189,20 @@ class _IotStatusPageState extends State<IotStatusPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (status.isWaterShortage && status.soilMoisturePercent != null) ...[
+            WaterShortageBanner(
+              plantName: widget.plantName,
+              soilMoisturePercent: status.soilMoisturePercent!,
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (status.isTooWet && status.soilMoisturePercent != null) ...[
+            SoilMoistureSufficientBanner(
+              soilMoisturePercent: status.soilMoisturePercent!,
+            ),
+            const SizedBox(height: 16),
+          ],
+
           // 재배 공간
           if (status.growSpace != null) ...[
             _GrowSpaceCard(name: status.growSpace!.name),
@@ -339,7 +388,20 @@ class _IotStatusPageState extends State<IotStatusPage> {
     }
 
     final pct = soil.soilMoisturePercent;
-    final isLow = pct < 30;
+    if (pct == null) {
+      return _IotCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            _CardTitle(icon: Icons.grass_outlined, label: '토양 수분'),
+            SizedBox(height: 16),
+            Text('토양 수분 데이터 없음', style: TextStyle(color: AppColors.bodyMuted, fontSize: 14)),
+          ],
+        ),
+      );
+    }
+
+    final isLow = pct < IotThresholds.soilMoistureShortage;
     final isMid = pct < 60;
 
     Color trackColor;
@@ -411,19 +473,21 @@ class _IotStatusPageState extends State<IotStatusPage> {
   }
 
   Widget _buildControlSection() {
+    final isTooWet = _status?.isTooWet == true;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('제어', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.ink)),
         const SizedBox(height: 12),
         _ControlButton(
-          label: '물 주기',
-          description: '펌프를 작동해 물을 줍니다',
+          label: isTooWet ? '수분 충분' : '물 주기',
+          description: isTooWet ? '지금은 물을 더 주지 않아도 괜찮아요' : '펌프를 작동해 물을 줍니다',
           icon: Icons.water_drop_rounded,
-          iconBg: const Color(0xFFDEEFFB),
-          iconColor: const Color(0xFF3A8FC8),
+          iconBg: isTooWet ? AppColors.infoBg : const Color(0xFFDEEFFB),
+          iconColor: isTooWet ? AppColors.infoText : const Color(0xFF3A8FC8),
           isLoading: _isWatering,
-          isDisabled: _anyBusy,
+          isDisabled: _anyBusy || isTooWet,
           onPressed: _onWater,
         ),
         const SizedBox(height: 10),
@@ -461,9 +525,12 @@ class _IotStatusPageState extends State<IotStatusPage> {
           width: double.infinity,
           height: 48,
           child: OutlinedButton.icon(
-            onPressed: (_isLoading || _anyBusy) ? null : _loadLatest,
+            onPressed: (_isLoading || _anyBusy) ? null : () {
+              _hasShownWaterShortageNotice = false;
+              _loadLatest();
+            },
             icon: const Icon(Icons.refresh_rounded, size: 18),
-            label: const Text('센서 데이터 새로고침'),
+            label: const Text('최신 상태 다시 불러오기'),
           ),
         ),
       ],

@@ -1,3 +1,5 @@
+import '../core/constants/iot_thresholds.dart';
+
 // IoT 상태 모델
 // GET /api/user-plants/{userPlantId}/iot/latest 응답
 
@@ -29,6 +31,20 @@ class IotLatestStatus {
             ? PlantImageData.fromJson(json['latestImage'])
             : null,
       );
+
+  bool get isWaterShortage {
+    final value = soil?.soilMoisturePercent;
+    return value != null && value < IotThresholds.soilMoistureShortage;
+  }
+
+  bool get isTooWet {
+    final value = soil?.soilMoisturePercent;
+    return value != null && value >= IotThresholds.soilMoistureTooWet;
+  }
+
+  bool get canWater => !isTooWet;
+
+  double? get soilMoisturePercent => soil?.soilMoisturePercent;
 }
 
 class GrowSpaceInfo {
@@ -70,22 +86,28 @@ class EnvironmentData {
 class SoilData {
   final int? sensorDataId;
   final int? soilMoistureRaw;
-  final double soilMoisturePercent;
+  final double? soilMoisturePercent;
   final String? measuredAt;
 
   SoilData({
     this.sensorDataId,
     this.soilMoistureRaw,
-    required this.soilMoisturePercent,
+    this.soilMoisturePercent,
     this.measuredAt,
   });
 
   factory SoilData.fromJson(Map<String, dynamic> json) => SoilData(
         sensorDataId: json['sensorDataId'],
         soilMoistureRaw: json['soilMoistureRaw'],
-        soilMoisturePercent: (json['soilMoisturePercent'] ?? 0).toDouble(),
+        soilMoisturePercent: _toNullableDouble(json['soilMoisturePercent']),
         measuredAt: json['measuredAt'],
       );
+}
+
+double? _toNullableDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString());
 }
 
 class PlantImageData {
