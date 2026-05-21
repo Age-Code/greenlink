@@ -7,6 +7,7 @@ import '../models/iot_models.dart';
 // ============================================================
 // IotService
 //   - GET  /api/user-plants/{id}/iot/latest  → IotLatestStatus
+//   - POST /api/user-plants/{id}/iot/refresh → SensorRefreshResponse
 //   - POST /api/user-plants/{id}/iot/water   → IotCommandResponse
 //   - POST /api/user-plants/{id}/iot/light/on
 //   - POST /api/user-plants/{id}/iot/light/off
@@ -32,7 +33,34 @@ class IotService {
     } catch (e) {
       debugPrint('[IotService] ❌ IoT 상태 조회 예외: $e');
       return ApiResponse<IotLatestStatus>(
-          success: false, message: '서버에 연결할 수 없습니다. ($e)');
+        success: false,
+        message: '서버에 연결할 수 없습니다. ($e)',
+      );
+    }
+  }
+
+  /// 라즈베리파이 환경 센서 새로고침 요청
+  /// 온도·습도·조도만 즉시 측정 대상이며 토양수분은 ESP32 주기 업로드를 따른다.
+  Future<ApiResponse<SensorRefreshResponse>> requestSensorRefresh(
+    int userPlantId,
+  ) async {
+    debugPrint('[IotService] 🔄 센서 새로고침 요청 (plantId=$userPlantId)');
+    try {
+      final response = await _client.post(ApiPaths.iotRefresh(userPlantId));
+      final result = ApiResponse<SensorRefreshResponse>.fromJson(
+        response,
+        (data) => SensorRefreshResponse.fromJson(data),
+      );
+      debugPrint(
+        '[IotService] ${result.success ? "✅" : "❌"} 센서 새로고침: ${result.message}',
+      );
+      return result;
+    } catch (e) {
+      debugPrint('[IotService] ❌ 센서 새로고침 예외: $e');
+      return ApiResponse<SensorRefreshResponse>(
+        success: false,
+        message: '센서 새로고침 중 오류가 발생했습니다. ($e)',
+      );
     }
   }
 
@@ -45,12 +73,16 @@ class IotService {
         response,
         (data) => IotCommandResponse.fromJson(data),
       );
-      debugPrint('[IotService] ${result.success ? "✅" : "❌"} 물 주기: ${result.message}');
+      debugPrint(
+        '[IotService] ${result.success ? "✅" : "❌"} 물 주기: ${result.message}',
+      );
       return result;
     } catch (e) {
       debugPrint('[IotService] ❌ 물 주기 예외: $e');
       return ApiResponse<IotCommandResponse>(
-          success: false, message: '서버에 연결할 수 없습니다. ($e)');
+        success: false,
+        message: '서버에 연결할 수 없습니다. ($e)',
+      );
     }
   }
 
@@ -63,12 +95,16 @@ class IotService {
         response,
         (data) => data is Map<String, dynamic> ? data : {},
       );
-      debugPrint('[IotService] ${result.success ? "✅" : "❌"} LED 켜기: ${result.message}');
+      debugPrint(
+        '[IotService] ${result.success ? "✅" : "❌"} LED 켜기: ${result.message}',
+      );
       return result;
     } catch (e) {
       debugPrint('[IotService] ❌ LED 켜기 예외: $e');
       return ApiResponse<Map<String, dynamic>>(
-          success: false, message: '서버에 연결할 수 없습니다. ($e)');
+        success: false,
+        message: '서버에 연결할 수 없습니다. ($e)',
+      );
     }
   }
 
@@ -81,12 +117,16 @@ class IotService {
         response,
         (data) => data is Map<String, dynamic> ? data : {},
       );
-      debugPrint('[IotService] ${result.success ? "✅" : "❌"} LED 끄기: ${result.message}');
+      debugPrint(
+        '[IotService] ${result.success ? "✅" : "❌"} LED 끄기: ${result.message}',
+      );
       return result;
     } catch (e) {
       debugPrint('[IotService] ❌ LED 끄기 예외: $e');
       return ApiResponse<Map<String, dynamic>>(
-          success: false, message: '서버에 연결할 수 없습니다. ($e)');
+        success: false,
+        message: '서버에 연결할 수 없습니다. ($e)',
+      );
     }
   }
 

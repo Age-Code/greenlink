@@ -18,7 +18,8 @@ class IotLatestStatus {
     this.latestImage,
   });
 
-  factory IotLatestStatus.fromJson(Map<String, dynamic> json) => IotLatestStatus(
+  factory IotLatestStatus.fromJson(Map<String, dynamic> json) =>
+      IotLatestStatus(
         userPlantId: json['userPlantId'] ?? 0,
         growSpace: json['growSpace'] != null
             ? GrowSpaceInfo.fromJson(json['growSpace'])
@@ -54,9 +55,9 @@ class GrowSpaceInfo {
   GrowSpaceInfo({required this.growSpaceId, required this.name});
 
   factory GrowSpaceInfo.fromJson(Map<String, dynamic> json) => GrowSpaceInfo(
-        growSpaceId: json['growSpaceId'] ?? 0,
-        name: json['name'] ?? '',
-      );
+    growSpaceId: json['growSpaceId'] ?? 0,
+    name: json['name'] ?? '',
+  );
 }
 
 class EnvironmentData {
@@ -74,7 +75,8 @@ class EnvironmentData {
     this.measuredAt,
   });
 
-  factory EnvironmentData.fromJson(Map<String, dynamic> json) => EnvironmentData(
+  factory EnvironmentData.fromJson(Map<String, dynamic> json) =>
+      EnvironmentData(
         sensorDataId: json['sensorDataId'],
         temperature: (json['temperature'] ?? 0).toDouble(),
         humidity: (json['humidity'] ?? 0).toDouble(),
@@ -97,11 +99,11 @@ class SoilData {
   });
 
   factory SoilData.fromJson(Map<String, dynamic> json) => SoilData(
-        sensorDataId: json['sensorDataId'],
-        soilMoistureRaw: json['soilMoistureRaw'],
-        soilMoisturePercent: _toNullableDouble(json['soilMoisturePercent']),
-        measuredAt: json['measuredAt'],
-      );
+    sensorDataId: json['sensorDataId'],
+    soilMoistureRaw: json['soilMoistureRaw'],
+    soilMoisturePercent: _toNullableDouble(json['soilMoisturePercent']),
+    measuredAt: json['measuredAt'],
+  );
 }
 
 double? _toNullableDouble(dynamic value) {
@@ -113,7 +115,7 @@ double? _toNullableDouble(dynamic value) {
 class PlantImageData {
   final int? plantImageId;
   final String imageUrl;
-  final String? aiImageUrl;   // AI 변환 이미지 (없을 수 있음)
+  final String? aiImageUrl; // AI 변환 이미지 (없을 수 있음)
   final String? capturedAt;
 
   PlantImageData({
@@ -124,11 +126,11 @@ class PlantImageData {
   });
 
   factory PlantImageData.fromJson(Map<String, dynamic> json) => PlantImageData(
-        plantImageId: json['plantImageId'],
-        imageUrl: json['imageUrl'] ?? '',
-        aiImageUrl: json['aiImageUrl'],
-        capturedAt: json['capturedAt'],
-      );
+    plantImageId: json['plantImageId'],
+    imageUrl: json['imageUrl'] ?? '',
+    aiImageUrl: json['aiImageUrl'],
+    capturedAt: json['capturedAt'],
+  );
 }
 
 /// POST /api/user-plants/{id}/iot/water 응답
@@ -149,4 +151,57 @@ class IotCommandResponse {
         commandType: json['commandType'] ?? '',
         commandStatus: json['commandStatus'] ?? '',
       );
+}
+
+/// POST /api/user-plants/{id}/iot/refresh 응답
+class SensorRefreshResponse {
+  final int? userPlantId;
+  final int? commandId;
+  final String? commandType;
+  final String? commandStatus;
+  final String? target;
+  final bool? alreadyPending;
+  final String? duplicateReason;
+  final List<String> refreshTargets;
+  final List<String> excludedTargets;
+
+  SensorRefreshResponse({
+    this.userPlantId,
+    this.commandId,
+    this.commandType,
+    this.commandStatus,
+    this.target,
+    this.alreadyPending,
+    this.duplicateReason,
+    this.refreshTargets = const [],
+    this.excludedTargets = const [],
+  });
+
+  factory SensorRefreshResponse.fromJson(Map<String, dynamic> json) {
+    return SensorRefreshResponse(
+      userPlantId: _toNullableInt(json['userPlantId']),
+      commandId: _toNullableInt(json['commandId']),
+      commandType: json['commandType']?.toString(),
+      commandStatus: json['commandStatus']?.toString(),
+      target: json['target']?.toString(),
+      alreadyPending: json['alreadyPending'] is bool
+          ? json['alreadyPending'] as bool
+          : null,
+      duplicateReason: json['duplicateReason']?.toString(),
+      refreshTargets: _toStringList(json['refreshTargets']),
+      excludedTargets: _toStringList(json['excludedTargets']),
+    );
+  }
+}
+
+int? _toNullableInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value.toString());
+}
+
+List<String> _toStringList(dynamic value) {
+  if (value is! List) return [];
+  return value.map((e) => e.toString()).toList();
 }
