@@ -75,7 +75,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     if (!mounted) return;
     setState(() => _isWatering = false);
     _showSnack(res.success ? (res.message.isNotEmpty ? res.message : '물 주기 요청이 전송되었습니다.') : res.message, success: res.success);
-    if (res.success) await _loadLatest();
+    await _loadLatest();
   }
 
   Future<void> _onLightOn() async {

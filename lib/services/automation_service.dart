@@ -20,9 +20,9 @@ class AutomationService {
   // 자동화 설정 조회
   // ──────────────────────────────────────────────────────────
   Future<ApiResponse<AutomationSettingModel>> getAutomationSetting(
-      int userPlantId) async {
-    debugPrint(
-        '[AutomationService] 📋 자동화 설정 조회 (plantId=$userPlantId)');
+    int userPlantId,
+  ) async {
+    debugPrint('[AutomationService] 📋 자동화 설정 조회 (plantId=$userPlantId)');
     try {
       final response = await _client.get(ApiPaths.automation(userPlantId));
       final result = ApiResponse<AutomationSettingModel>.fromJson(
@@ -32,14 +32,15 @@ class AutomationService {
       if (result.success && result.data != null) {
         debugPrint('[AutomationService] ✅ 자동화 설정 조회 성공');
       } else {
-        debugPrint(
-            '[AutomationService] ⚠️ 자동화 설정 조회 실패: ${result.message}');
+        debugPrint('[AutomationService] ⚠️ 자동화 설정 조회 실패: ${result.message}');
       }
       return result;
     } catch (e) {
       debugPrint('[AutomationService] ❌ 자동화 설정 조회 예외: $e');
       return ApiResponse<AutomationSettingModel>(
-          success: false, message: '자동화 설정을 불러오지 못했습니다. ($e)');
+        success: false,
+        message: '자동화 설정을 불러오지 못했습니다. ($e)',
+      );
     }
   }
 
@@ -57,6 +58,7 @@ class AutomationService {
       autoWaterEnabled: setting.autoWaterEnabled,
       autoLightEnabled: setting.autoLightEnabled,
       autoOptimizeEnabled: setting.autoOptimizeEnabled,
+      wateringSafetyEnabled: setting.wateringSafetyEnabled,
       decisionMode: setting.decisionMode,
       minLearningDataCount: setting.minLearningDataCount,
       waterThresholdPercent: setting.waterThresholdPercent,
@@ -69,15 +71,19 @@ class AutomationService {
     );
 
     debugPrint(
-        '[AutomationService] 📝 PATCH /automation payload: ${jsonEncode(payload)}');
+      '[AutomationService] 📝 PATCH /automation payload: ${jsonEncode(payload)}',
+    );
 
     try {
-      final response =
-          await _client.patch(ApiPaths.automation(userPlantId), body: payload);
+      final response = await _client.patch(
+        ApiPaths.automation(userPlantId),
+        body: payload,
+      );
 
       if (response['success'] != true) {
         debugPrint(
-            '[AutomationService] ❌ PATCH 실패 status=${response['status']} message=${response['message']}');
+          '[AutomationService] ❌ PATCH 실패 status=${response['status']} message=${response['message']}',
+        );
         debugPrint('[AutomationService]   payload was: ${jsonEncode(payload)}');
       }
 
@@ -86,13 +92,16 @@ class AutomationService {
         (data) => AutomationSettingModel.fromJson(data),
       );
       debugPrint(
-          '[AutomationService] ${result.success ? "✅" : "❌"} 자동화 설정 저장: ${result.message}');
+        '[AutomationService] ${result.success ? "✅" : "❌"} 자동화 설정 저장: ${result.message}',
+      );
       return result;
     } catch (e) {
       debugPrint('[AutomationService] ❌ 자동화 설정 저장 예외: $e');
       debugPrint('[AutomationService]   payload was: ${jsonEncode(payload)}');
       return ApiResponse<AutomationSettingModel>(
-          success: false, message: '자동화 설정 저장에 실패했습니다. ($e)');
+        success: false,
+        message: '자동화 설정 저장에 실패했습니다. ($e)',
+      );
     }
   }
 
@@ -100,18 +109,16 @@ class AutomationService {
   // 최신 학습 모델 조회 (없으면 null 반환)
   // ──────────────────────────────────────────────────────────
   Future<AutomationModelModel?> getLatestAutomationModel(
-      int userPlantId) async {
-    debugPrint(
-        '[AutomationService] 🤖 학습 모델 조회 (plantId=$userPlantId)');
+    int userPlantId,
+  ) async {
+    debugPrint('[AutomationService] 🤖 학습 모델 조회 (plantId=$userPlantId)');
     try {
-      final response =
-          await _client.get(ApiPaths.automationModel(userPlantId));
+      final response = await _client.get(ApiPaths.automationModel(userPlantId));
       if (response['success'] == true && response['data'] != null) {
         debugPrint('[AutomationService] ✅ 학습 모델 조회 성공');
         return AutomationModelModel.fromJson(response['data']);
       } else {
-        debugPrint(
-            '[AutomationService] ℹ️ 학습 모델 없음: ${response['message']}');
+        debugPrint('[AutomationService] ℹ️ 학습 모델 없음: ${response['message']}');
         return null;
       }
     } catch (e) {
@@ -124,22 +131,27 @@ class AutomationService {
   // 학습 실행
   // ──────────────────────────────────────────────────────────
   Future<ApiResponse<AutomationModelModel>> trainAutomationModel(
-      int userPlantId) async {
+    int userPlantId,
+  ) async {
     debugPrint('[AutomationService] 🏋️ 학습 실행 (plantId=$userPlantId)');
     try {
-      final response =
-          await _client.post(ApiPaths.automationTrain(userPlantId));
+      final response = await _client.post(
+        ApiPaths.automationTrain(userPlantId),
+      );
       final result = ApiResponse<AutomationModelModel>.fromJson(
         response,
         (data) => AutomationModelModel.fromJson(data),
       );
       debugPrint(
-          '[AutomationService] ${result.success ? "✅" : "❌"} 학습 실행: ${result.message}');
+        '[AutomationService] ${result.success ? "✅" : "❌"} 학습 실행: ${result.message}',
+      );
       return result;
     } catch (e) {
       debugPrint('[AutomationService] ❌ 학습 실행 예외: $e');
       return ApiResponse<AutomationModelModel>(
-          success: false, message: '학습 실행에 실패했습니다. ($e)');
+        success: false,
+        message: '학습 실행에 실패했습니다. ($e)',
+      );
     }
   }
 
@@ -147,34 +159,46 @@ class AutomationService {
   // 자동화 로그 조회
   // ──────────────────────────────────────────────────────────
   Future<ApiResponse<List<AutomationLogModel>>> getAutomationLogs(
-      int userPlantId) async {
-    debugPrint(
-        '[AutomationService] 📜 자동화 로그 조회 (plantId=$userPlantId)');
+    int userPlantId,
+  ) async {
+    debugPrint('[AutomationService] 📜 자동화 로그 조회 (plantId=$userPlantId)');
     try {
       final response = await _client.get(ApiPaths.automationLogs(userPlantId));
       if (response['success'] == true) {
         final rawList = response['data'];
         if (rawList == null) {
           return ApiResponse<List<AutomationLogModel>>(
-              success: true, message: '로그 없음', data: []);
+            success: true,
+            message: '로그 없음',
+            data: [],
+          );
         }
         final list = (rawList as List)
             .map((e) => AutomationLogModel.fromJson(e))
             .toList();
-        debugPrint(
-            '[AutomationService] ✅ 자동화 로그 조회 성공 (${list.length}건)');
+        debugPrint('[AutomationService] ✅ 자동화 로그 조회 성공 (${list.length}건)');
         return ApiResponse<List<AutomationLogModel>>(
-            success: true, message: response['message'] ?? '', data: list);
+          success: true,
+          message: response['message'] ?? '',
+          data: list,
+        );
       } else {
         debugPrint(
-            '[AutomationService] ⚠️ 자동화 로그 조회 실패: ${response['message']}');
+          '[AutomationService] ⚠️ 자동화 로그 조회 실패: ${response['message']}',
+        );
         return ApiResponse<List<AutomationLogModel>>(
-            success: false, message: response['message'] ?? '', data: []);
+          success: false,
+          message: response['message'] ?? '',
+          data: [],
+        );
       }
     } catch (e) {
       debugPrint('[AutomationService] ❌ 자동화 로그 조회 예외: $e');
       return ApiResponse<List<AutomationLogModel>>(
-          success: false, message: '자동화 로그를 불러오지 못했습니다. ($e)', data: []);
+        success: false,
+        message: '자동화 로그를 불러오지 못했습니다. ($e)',
+        data: [],
+      );
     }
   }
 }
@@ -219,6 +243,7 @@ Map<String, dynamic> buildAutomationPatchPayload({
   required bool autoWaterEnabled,
   required bool autoLightEnabled,
   required bool autoOptimizeEnabled,
+  required bool wateringSafetyEnabled,
   required String decisionMode,
   required dynamic minLearningDataCount,
   required dynamic waterThresholdPercent,
@@ -239,13 +264,17 @@ Map<String, dynamic> buildAutomationPatchPayload({
     'autoWaterEnabled': autoWaterEnabled,
     'autoLightEnabled': autoLightEnabled,
     'autoOptimizeEnabled': autoOptimizeEnabled,
+    'wateringSafetyEnabled': wateringSafetyEnabled,
     'decisionMode': decisionMode.isEmpty ? 'HYBRID' : decisionMode,
     'minLearningDataCount': minDataCount < 1 ? 30 : minDataCount,
     'waterThresholdPercent': parseDoubleOrDefault(waterThresholdPercent, 35.0),
     'waterCooldownMinutes': parseIntOrDefault(waterCooldownMinutes, 30),
     'lightOnThresholdLux': lightOn,
     'lightOffThresholdLux': lightOff,
-    'lightStartTime': toServerTimeValue(lightStartTime, defaultValue: '00:00:00'),
+    'lightStartTime': toServerTimeValue(
+      lightStartTime,
+      defaultValue: '00:00:00',
+    ),
     'lightEndTime': toServerTimeValue(lightEndTime, defaultValue: '23:59:00'),
     'lightCooldownMinutes': parseIntOrDefault(lightCooldownMinutes, 10),
   };

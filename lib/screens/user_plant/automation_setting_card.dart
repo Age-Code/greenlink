@@ -9,6 +9,7 @@ class AutomationStatusCard extends StatelessWidget {
   final ValueChanged<bool> onWaterChanged;
   final ValueChanged<bool> onLightChanged;
   final ValueChanged<bool> onOptimizeChanged;
+  final ValueChanged<bool>? onWateringSafetyChanged;
   final ValueChanged<String> onDecisionModeChanged;
 
   const AutomationStatusCard({
@@ -17,6 +18,7 @@ class AutomationStatusCard extends StatelessWidget {
     required this.onWaterChanged,
     required this.onLightChanged,
     required this.onOptimizeChanged,
+    required this.onWateringSafetyChanged,
     required this.onDecisionModeChanged,
   }) : super(key: key);
 
@@ -48,25 +50,52 @@ class AutomationStatusCard extends StatelessWidget {
             onChanged: onOptimizeChanged,
           ),
           const _CardDivider(),
+          _SafetySwitchRow(
+            value: setting.wateringSafetyEnabled,
+            onChanged: onWateringSafetyChanged,
+          ),
+          const _CardDivider(),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Row(
               children: [
-                const Icon(Icons.tune_rounded, size: 18, color: AppColors.bodyMuted),
+                const Icon(
+                  Icons.tune_rounded,
+                  size: 18,
+                  color: AppColors.bodyMuted,
+                ),
                 const SizedBox(width: 10),
                 const Expanded(
-                  child: Text('자동화 판단 방식', style: TextStyle(fontSize: 15, color: AppColors.ink)),
+                  child: Text(
+                    '자동화 판단 방식',
+                    style: TextStyle(fontSize: 15, color: AppColors.ink),
+                  ),
                 ),
                 DropdownButton<String>(
                   value: setting.decisionMode,
                   underline: const SizedBox(),
-                  style: const TextStyle(fontSize: 13, color: AppColors.primaryStrong, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.primaryStrong,
+                    fontWeight: FontWeight.w500,
+                  ),
                   items: const [
-                    DropdownMenuItem(value: 'RULE_BASED', child: Text('기본 기준값만 사용')),
-                    DropdownMenuItem(value: 'HYBRID', child: Text('학습값 우선, 없으면 기본값')),
-                    DropdownMenuItem(value: 'LEARNING_BASED', child: Text('학습 모델 우선 사용')),
+                    DropdownMenuItem(
+                      value: 'RULE_BASED',
+                      child: Text('기본 기준값만 사용'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'HYBRID',
+                      child: Text('학습값 우선, 없으면 기본값'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'LEARNING_BASED',
+                      child: Text('학습 모델 우선 사용'),
+                    ),
                   ],
-                  onChanged: (v) { if (v != null) onDecisionModeChanged(v); },
+                  onChanged: (v) {
+                    if (v != null) onDecisionModeChanged(v);
+                  },
                 ),
               ],
             ),
@@ -81,7 +110,12 @@ class AutomationStatusCard extends StatelessWidget {
 class AutomationThresholdCard extends StatefulWidget {
   final AutomationSettingModel setting;
   final bool isSaving;
-  final Future<void> Function(AutomationSettingModel updated, String startTime, String endTime) onSave;
+  final Future<void> Function(
+    AutomationSettingModel updated,
+    String startTime,
+    String endTime,
+  )
+  onSave;
 
   const AutomationThresholdCard({
     Key? key,
@@ -91,7 +125,8 @@ class AutomationThresholdCard extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<AutomationThresholdCard> createState() => _AutomationThresholdCardState();
+  State<AutomationThresholdCard> createState() =>
+      _AutomationThresholdCardState();
 }
 
 class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
@@ -111,11 +146,21 @@ class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
   }
 
   void _initControllers(AutomationSettingModel s) {
-    _waterThreshold = TextEditingController(text: s.waterThresholdPercent.toStringAsFixed(1));
-    _waterCooldown = TextEditingController(text: s.waterCooldownMinutes.toString());
-    _lightOn = TextEditingController(text: s.lightOnThresholdLux.toStringAsFixed(1));
-    _lightOff = TextEditingController(text: s.lightOffThresholdLux.toStringAsFixed(1));
-    _lightCooldown = TextEditingController(text: s.lightCooldownMinutes.toString());
+    _waterThreshold = TextEditingController(
+      text: s.waterThresholdPercent.toStringAsFixed(1),
+    );
+    _waterCooldown = TextEditingController(
+      text: s.waterCooldownMinutes.toString(),
+    );
+    _lightOn = TextEditingController(
+      text: s.lightOnThresholdLux.toStringAsFixed(1),
+    );
+    _lightOff = TextEditingController(
+      text: s.lightOffThresholdLux.toStringAsFixed(1),
+    );
+    _lightCooldown = TextEditingController(
+      text: s.lightCooldownMinutes.toString(),
+    );
     _minData = TextEditingController(text: s.minLearningDataCount.toString());
     _lightStartTime = _toHHmm(s.lightStartTime);
     _lightEndTime = _toHHmm(s.lightEndTime);
@@ -153,8 +198,11 @@ class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
       final formatted =
           '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
       setState(() {
-        if (isStart) _lightStartTime = formatted;
-        else _lightEndTime = formatted;
+        if (isStart) {
+          _lightStartTime = formatted;
+        } else {
+          _lightEndTime = formatted;
+        }
       });
     }
   }
@@ -166,9 +214,11 @@ class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
       autoWaterEnabled: widget.setting.autoWaterEnabled,
       autoLightEnabled: widget.setting.autoLightEnabled,
       autoOptimizeEnabled: widget.setting.autoOptimizeEnabled,
+      wateringSafetyEnabled: widget.setting.wateringSafetyEnabled,
       decisionMode: widget.setting.decisionMode,
       minLearningDataCount: int.tryParse(_minData.text.trim()) ?? 30,
-      waterThresholdPercent: double.tryParse(_waterThreshold.text.trim()) ?? 35.0,
+      waterThresholdPercent:
+          double.tryParse(_waterThreshold.text.trim()) ?? 35.0,
       waterCooldownMinutes: int.tryParse(_waterCooldown.text.trim()) ?? 30,
       lightOnThresholdLux: double.tryParse(_lightOn.text.trim()) ?? 300.0,
       lightOffThresholdLux: double.tryParse(_lightOff.text.trim()) ?? 500.0,
@@ -186,10 +236,25 @@ class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
       title: '기준값 설정',
       child: Column(
         children: [
-          _NumInput(label: '물 주기 기준 토양수분', unit: '%', controller: _waterThreshold, isDecimal: true),
+          _NumInput(
+            label: '물 주기 기준 토양수분',
+            unit: '%',
+            controller: _waterThreshold,
+            isDecimal: true,
+          ),
           _NumInput(label: '물 주기 쿨다운', unit: '분', controller: _waterCooldown),
-          _NumInput(label: 'LED ON 기준 조도', unit: 'lux', controller: _lightOn, isDecimal: true),
-          _NumInput(label: 'LED OFF 기준 조도', unit: 'lux', controller: _lightOff, isDecimal: true),
+          _NumInput(
+            label: 'LED ON 기준 조도',
+            unit: 'lux',
+            controller: _lightOn,
+            isDecimal: true,
+          ),
+          _NumInput(
+            label: 'LED OFF 기준 조도',
+            unit: 'lux',
+            controller: _lightOff,
+            isDecimal: true,
+          ),
           const SizedBox(height: 4),
           _TimePickerRow(
             label: '조명 시작 시간',
@@ -211,14 +276,23 @@ class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
             child: ElevatedButton.icon(
               onPressed: widget.isSaving ? null : _handleSave,
               icon: widget.isSaving
-                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onPrimary))
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.onPrimary,
+                      ),
+                    )
                   : const Icon(Icons.save_outlined, size: 18),
               label: Text(widget.isSaving ? '저장 중...' : '설정 저장'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryStrong,
                 foregroundColor: AppColors.canvas,
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
             ),
           ),
@@ -235,7 +309,11 @@ class _AutoCard extends StatelessWidget {
   final String title;
   final Widget child;
 
-  const _AutoCard({required this.icon, required this.title, required this.child});
+  const _AutoCard({
+    required this.icon,
+    required this.title,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -244,7 +322,13 @@ class _AutoCard extends StatelessWidget {
         color: AppColors.surfaceCard,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.hairline),
-        boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 24, offset: Offset(0, 8))],
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0A000000),
+            blurRadius: 24,
+            offset: Offset(0, 8),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -253,12 +337,23 @@ class _AutoCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 36, height: 36,
-                decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(10)),
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: Icon(icon, size: 18, color: AppColors.primaryStrong),
               ),
               const SizedBox(width: 12),
-              Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.ink)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.ink,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -275,7 +370,12 @@ class _SwitchRow extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
 
-  const _SwitchRow({required this.label, required this.icon, required this.value, required this.onChanged});
+  const _SwitchRow({
+    required this.label,
+    required this.icon,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -283,15 +383,103 @@ class _SwitchRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: value ? AppColors.primaryStrong : AppColors.bodyMuted),
+          Icon(
+            icon,
+            size: 18,
+            color: value ? AppColors.primaryStrong : AppColors.bodyMuted,
+          ),
           const SizedBox(width: 10),
-          Expanded(child: Text(label, style: const TextStyle(fontSize: 15, color: AppColors.ink))),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 15, color: AppColors.ink),
+            ),
+          ),
           Switch(
             value: value,
             onChanged: onChanged,
             activeThumbColor: AppColors.primaryStrong,
             activeTrackColor: AppColors.primarySoft,
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SafetySwitchRow extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+
+  const _SafetySwitchRow({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '안전 설정',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryStrong,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(
+                Icons.health_and_safety_outlined,
+                size: 18,
+                color: value ? AppColors.primaryStrong : AppColors.bodyMuted,
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  '급수 보호모드',
+                  style: TextStyle(fontSize: 15, color: AppColors.ink),
+                ),
+              ),
+              Switch(
+                value: value,
+                onChanged: onChanged,
+                activeThumbColor: AppColors.primaryStrong,
+                activeTrackColor: AppColors.primarySoft,
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            '켜져 있으면 토양 수분이 높거나 짧은 시간에 물주기를 여러 번 요청할 때 자동으로 차단합니다.',
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.bodyMuted,
+              height: 1.45,
+            ),
+          ),
+          if (!value) ...[
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF7E6),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFFFE1A8)),
+              ),
+              child: const Text(
+                '보호모드가 꺼져 있어요. 시연 또는 테스트 상황에서만 사용하세요.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF9A5B00),
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -326,7 +514,10 @@ class _NumInput extends StatelessWidget {
         children: [
           Expanded(
             flex: 3,
-            child: Text(label, style: const TextStyle(fontSize: 14, color: AppColors.bodyMuted)),
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 14, color: AppColors.bodyMuted),
+            ),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -343,11 +534,29 @@ class _NumInput extends StatelessWidget {
               style: const TextStyle(fontSize: 15, color: AppColors.ink),
               decoration: InputDecoration(
                 suffixText: unit,
-                suffixStyle: const TextStyle(fontSize: 13, color: AppColors.bodyMuted),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.hairline)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.hairline)),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.primaryFocus, width: 1.5)),
+                suffixStyle: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.bodyMuted,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: AppColors.hairline),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: AppColors.hairline),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryFocus,
+                    width: 1.5,
+                  ),
+                ),
                 isDense: true,
               ),
             ),
@@ -363,7 +572,11 @@ class _TimePickerRow extends StatelessWidget {
   final String value;
   final VoidCallback onTap;
 
-  const _TimePickerRow({required this.label, required this.value, required this.onTap});
+  const _TimePickerRow({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -373,7 +586,10 @@ class _TimePickerRow extends StatelessWidget {
         children: [
           Expanded(
             flex: 3,
-            child: Text(label, style: const TextStyle(fontSize: 14, color: AppColors.bodyMuted)),
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 14, color: AppColors.bodyMuted),
+            ),
           ),
           const SizedBox(width: 8),
           GestureDetector(
@@ -386,9 +602,20 @@ class _TimePickerRow extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.access_time_rounded, size: 16, color: AppColors.primaryStrong),
+                  const Icon(
+                    Icons.access_time_rounded,
+                    size: 16,
+                    color: AppColors.primaryStrong,
+                  ),
                   const SizedBox(width: 6),
-                  Text(value, style: const TextStyle(fontSize: 15, color: AppColors.ink, fontWeight: FontWeight.w500)),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: AppColors.ink,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ],
               ),
             ),

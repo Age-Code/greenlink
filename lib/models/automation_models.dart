@@ -13,6 +13,7 @@ class AutomationSettingModel {
   final bool autoWaterEnabled;
   final bool autoLightEnabled;
   final bool autoOptimizeEnabled;
+  final bool wateringSafetyEnabled;
   final String decisionMode;
   final int minLearningDataCount;
   final double waterThresholdPercent;
@@ -31,6 +32,7 @@ class AutomationSettingModel {
     this.autoWaterEnabled = true,
     this.autoLightEnabled = true,
     this.autoOptimizeEnabled = true,
+    this.wateringSafetyEnabled = true,
     this.decisionMode = 'HYBRID',
     this.minLearningDataCount = 30,
     this.waterThresholdPercent = 35.0,
@@ -51,6 +53,7 @@ class AutomationSettingModel {
       autoWaterEnabled: json['autoWaterEnabled'] ?? true,
       autoLightEnabled: json['autoLightEnabled'] ?? true,
       autoOptimizeEnabled: json['autoOptimizeEnabled'] ?? true,
+      wateringSafetyEnabled: json['wateringSafetyEnabled'] ?? true,
       decisionMode: json['decisionMode'] ?? 'HYBRID',
       minLearningDataCount: _parseInt(json['minLearningDataCount'], 30),
       waterThresholdPercent: _parseDouble(json['waterThresholdPercent'], 35.0),
@@ -122,12 +125,15 @@ class AutomationModelModel {
     return AutomationModelModel(
       automationModelId: json['automationModelId'],
       userPlantId: json['userPlantId'],
-      recommendedWaterThresholdPercent:
-          _parseDoubleOpt(json['recommendedWaterThresholdPercent']),
-      recommendedLightOnThresholdLux:
-          _parseDoubleOpt(json['recommendedLightOnThresholdLux']),
-      recommendedLightOffThresholdLux:
-          _parseDoubleOpt(json['recommendedLightOffThresholdLux']),
+      recommendedWaterThresholdPercent: _parseDoubleOpt(
+        json['recommendedWaterThresholdPercent'],
+      ),
+      recommendedLightOnThresholdLux: _parseDoubleOpt(
+        json['recommendedLightOnThresholdLux'],
+      ),
+      recommendedLightOffThresholdLux: _parseDoubleOpt(
+        json['recommendedLightOffThresholdLux'],
+      ),
       soilDataCount: json['soilDataCount'],
       lightDataCount: json['lightDataCount'],
       waterCommandCount: json['waterCommandCount'],
