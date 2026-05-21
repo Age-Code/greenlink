@@ -13,7 +13,8 @@ import 'automation_cards.dart';
 class AutomationSection extends StatefulWidget {
   final int userPlantId;
 
-  const AutomationSection({Key? key, required this.userPlantId}) : super(key: key);
+  const AutomationSection({Key? key, required this.userPlantId})
+    : super(key: key);
 
   @override
   State<AutomationSection> createState() => _AutomationSectionState();
@@ -38,6 +39,7 @@ class _AutomationSectionState extends State<AutomationSection> {
   bool _autoWaterEnabled = true;
   bool _autoLightEnabled = true;
   bool _autoOptimizeEnabled = true;
+  bool _wateringSafetyEnabled = true;
   String _decisionMode = 'HYBRID';
 
   @override
@@ -48,16 +50,15 @@ class _AutomationSectionState extends State<AutomationSection> {
 
   // ── 전체 로드 ─────────────────────────────────────────────
   Future<void> _loadAll() async {
-    await Future.wait([
-      _loadSetting(),
-      _loadModel(),
-      _loadLogs(),
-    ]);
+    await Future.wait([_loadSetting(), _loadModel(), _loadLogs()]);
   }
 
   // ── 자동화 설정 조회 ──────────────────────────────────────
   Future<void> _loadSetting() async {
-    setState(() { _isLoadingSetting = true; _errorMessage = null; });
+    setState(() {
+      _isLoadingSetting = true;
+      _errorMessage = null;
+    });
     final res = await _service.getAutomationSetting(widget.userPlantId);
     if (!mounted) return;
     if (res.success && res.data != null) {
@@ -66,6 +67,7 @@ class _AutomationSectionState extends State<AutomationSection> {
         _autoWaterEnabled = res.data!.autoWaterEnabled;
         _autoLightEnabled = res.data!.autoLightEnabled;
         _autoOptimizeEnabled = res.data!.autoOptimizeEnabled;
+        _wateringSafetyEnabled = res.data!.wateringSafetyEnabled;
         _decisionMode = res.data!.decisionMode;
         _isLoadingSetting = false;
       });
@@ -82,7 +84,10 @@ class _AutomationSectionState extends State<AutomationSection> {
     setState(() => _isLoadingModel = true);
     final model = await _service.getLatestAutomationModel(widget.userPlantId);
     if (!mounted) return;
-    setState(() { _model = model; _isLoadingModel = false; });
+    setState(() {
+      _model = model;
+      _isLoadingModel = false;
+    });
   }
 
   // ── 자동화 로그 조회 ──────────────────────────────────────
@@ -97,7 +102,11 @@ class _AutomationSectionState extends State<AutomationSection> {
   }
 
   // ── 설정 저장 ─────────────────────────────────────────────
-  Future<void> _saveSetting(AutomationSettingModel updated, String startTime, String endTime) async {
+  Future<void> _saveSetting(
+    AutomationSettingModel updated,
+    String startTime,
+    String endTime,
+  ) async {
     setState(() => _isSavingSetting = true);
     final res = await _service.updateAutomationSetting(
       widget.userPlantId,
@@ -114,6 +123,40 @@ class _AutomationSectionState extends State<AutomationSection> {
       await _loadLogs();
     } else {
       _showSnack('자동화 설정 저장에 실패했습니다. ❌');
+    }
+  }
+
+  Future<void> _updateWateringSafety(bool enabled) async {
+    final previous = _wateringSafetyEnabled;
+
+    setState(() {
+      _wateringSafetyEnabled = enabled;
+      _isSavingSetting = true;
+    });
+
+    final res = await _service.updateAutomationSetting(
+      widget.userPlantId,
+      _currentSetting(),
+    );
+
+    if (!mounted) return;
+
+    setState(() => _isSavingSetting = false);
+
+    if (res.success && res.data != null) {
+      setState(() {
+        _setting = res.data;
+        _autoWaterEnabled = res.data!.autoWaterEnabled;
+        _autoLightEnabled = res.data!.autoLightEnabled;
+        _autoOptimizeEnabled = res.data!.autoOptimizeEnabled;
+        _wateringSafetyEnabled = res.data!.wateringSafetyEnabled;
+        _decisionMode = res.data!.decisionMode;
+      });
+      _showSnack(enabled ? '급수 보호모드가 켜졌습니다.' : '급수 보호모드가 꺼졌습니다.');
+      await _loadLogs();
+    } else {
+      setState(() => _wateringSafetyEnabled = previous);
+      _showSnack(res.message.isNotEmpty ? res.message : '급수 보호모드 저장에 실패했습니다.');
     }
   }
 
@@ -141,12 +184,14 @@ class _AutomationSectionState extends State<AutomationSection> {
 
   // ── 현재 로컬 설정 반영한 모델 ────────────────────────────
   AutomationSettingModel _currentSetting() {
-    final base = _setting ??
+    final base =
+        _setting ??
         AutomationSettingModel(
           userPlantId: widget.userPlantId,
           autoWaterEnabled: _autoWaterEnabled,
           autoLightEnabled: _autoLightEnabled,
           autoOptimizeEnabled: _autoOptimizeEnabled,
+          wateringSafetyEnabled: _wateringSafetyEnabled,
           decisionMode: _decisionMode,
         );
     return AutomationSettingModel(
@@ -155,6 +200,7 @@ class _AutomationSectionState extends State<AutomationSection> {
       autoWaterEnabled: _autoWaterEnabled,
       autoLightEnabled: _autoLightEnabled,
       autoOptimizeEnabled: _autoOptimizeEnabled,
+      wateringSafetyEnabled: _wateringSafetyEnabled,
       decisionMode: _decisionMode,
       minLearningDataCount: base.minLearningDataCount,
       waterThresholdPercent: base.waterThresholdPercent,
@@ -173,8 +219,14 @@ class _AutomationSectionState extends State<AutomationSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ── 섹션 헤더 ──────────────────────────────────────
-        const Text('자동화 관리',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.ink)),
+        const Text(
+          '자동화 관리',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.ink,
+          ),
+        ),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(12),
@@ -186,32 +238,49 @@ class _AutomationSectionState extends State<AutomationSection> {
           child: const Text(
             '자동화 관리는 토양수분과 조도 데이터를 기반으로 물 주기와 조명을 자동으로 제어합니다. '
             '학습 기반 자동 최적화를 켜면 누적된 센서 데이터와 제어 기록을 분석해 식물별 기준값을 추천하거나 자동 반영할 수 있습니다.',
-            style: TextStyle(fontSize: 12, color: AppColors.bodyMuted, height: 1.5),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.bodyMuted,
+              height: 1.5,
+            ),
           ),
         ),
         const SizedBox(height: 16),
 
         // ── 로딩 / 에러 ────────────────────────────────────
         if (_isLoadingSetting)
-          const Center(child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: CircularProgressIndicator(color: AppColors.primaryStrong, strokeWidth: 2),
-          ))
-        else if (_errorMessage != null)
-          Center(child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
-              children: [
-                Text(_errorMessage!, style: const TextStyle(color: AppColors.dangerText, fontSize: 14)),
-                const SizedBox(height: 10),
-                TextButton.icon(
-                  onPressed: _loadAll,
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('다시 시도'),
-                ),
-              ],
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: CircularProgressIndicator(
+                color: AppColors.primaryStrong,
+                strokeWidth: 2,
+              ),
             ),
-          ))
+          )
+        else if (_errorMessage != null)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Column(
+                children: [
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(
+                      color: AppColors.dangerText,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextButton.icon(
+                    onPressed: _loadAll,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('다시 시도'),
+                  ),
+                ],
+              ),
+            ),
+          )
         else ...[
           // ── Card 1: 자동화 상태 ─────────────────────────
           AutomationStatusCard(
@@ -219,6 +288,9 @@ class _AutomationSectionState extends State<AutomationSection> {
             onWaterChanged: (v) => setState(() => _autoWaterEnabled = v),
             onLightChanged: (v) => setState(() => _autoLightEnabled = v),
             onOptimizeChanged: (v) => setState(() => _autoOptimizeEnabled = v),
+            onWateringSafetyChanged: _isSavingSetting
+                ? null
+                : _updateWateringSafety,
             onDecisionModeChanged: (v) => setState(() => _decisionMode = v),
           ),
           const SizedBox(height: 16),

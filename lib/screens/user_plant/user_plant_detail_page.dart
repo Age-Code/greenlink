@@ -7,6 +7,8 @@ import '../../core/utils/plant_image_utils.dart';
 import '../../core/widgets/greenlink_card.dart';
 import '../../core/widgets/greenlink_button.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/soil_moisture_sufficient_banner.dart';
+import '../../widgets/water_shortage_banner.dart';
 import '../iot/iot_status_page.dart';
 import 'automation_section.dart';
 
@@ -28,6 +30,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
   bool _isHarvesting = false;
 
   PlantImageData? _latestImageData;
+  IotLatestStatus? _latestStatus;
   String? _capturedAt;
 
   @override
@@ -54,11 +57,13 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     try {
       final res = await _iotService.getLatestStatus(widget.userPlantId);
       if (!mounted) return;
-      final img = res.data?.latestImage;
-      if (img != null) {
+      final latest = res.data;
+      final img = latest?.latestImage;
+      if (res.success && latest != null) {
         setState(() {
+          _latestStatus = latest;
           _latestImageData = img;
-          _capturedAt = img.capturedAt;
+          _capturedAt = img?.capturedAt;
         });
       }
     } catch (e) {
@@ -214,6 +219,21 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (_latestStatus?.isWaterShortage == true &&
+                      _latestStatus?.soilMoisturePercent != null) ...[
+                    WaterShortageBanner(
+                      plantName: _plant?.nickname,
+                      soilMoisturePercent: _latestStatus!.soilMoisturePercent!,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  if (_latestStatus?.isTooWet == true &&
+                      _latestStatus?.soilMoisturePercent != null) ...[
+                    SoilMoistureSufficientBanner(
+                      soilMoisturePercent: _latestStatus!.soilMoisturePercent!,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   _buildMainCard(statusMsg),
                   const SizedBox(height: 32),
                   _buildSectionTitle('성장 정보'),
