@@ -1,6 +1,7 @@
 from pathlib import Path
 from urllib.parse import urlparse
 import argparse
+import os
 import requests
 
 from rembg import new_session
@@ -17,6 +18,7 @@ OUTPUT_DIR = BASE_DIR / "outputs"
 STYLE_IMAGE_PATH = BASE_DIR / "style_plant.png"
 
 BACKEND_BASE_URL = "http://54.180.203.50:8080"
+AI_WORKER_SECRET = os.environ.get("AI_WORKER_SECRET", "gl-ai-worker-secret-change-me")
 
 
 def download_image(url: str, output_path: Path) -> Path:
@@ -106,6 +108,7 @@ def save_ai_result_to_backend(
     response = requests.post(
         api_url,
         json=payload,
+        headers={"X-AI-Worker-Secret": AI_WORKER_SECRET},
         timeout=30,
     )
 
