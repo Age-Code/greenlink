@@ -1,8 +1,12 @@
+// 공통 Chip 위젯
+
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 
+// ChipStatus — 공통 Chip 위젯
 enum ChipStatus { neutral, positive, warning, danger, info }
 
+// GreenlinkChip — 공통 Chip 위젯
 class GreenlinkChip extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -15,6 +19,7 @@ class GreenlinkChip extends StatelessWidget {
     required this.onSelected,
   }) : super(key: key);
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return FilterChip(
@@ -38,7 +43,7 @@ class GreenlinkChip extends StatelessWidget {
   }
 }
 
-/// 상태 chip — IoT 데이터, 식물 상태, 퀘스트 상태 등
+// GreenlinkStatusChip — 공통 Chip 위젯
 class GreenlinkStatusChip extends StatelessWidget {
   final String label;
   final ChipStatus status;
@@ -49,6 +54,7 @@ class GreenlinkStatusChip extends StatelessWidget {
     this.status = ChipStatus.neutral,
   }) : super(key: key);
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     Color bg;

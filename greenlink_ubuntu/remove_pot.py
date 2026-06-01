@@ -1,3 +1,5 @@
+# 배경/화분 제거 — rembg 전처리 후 하단 화분 영역 투명화
+
 from pathlib import Path
 from rembg import remove, new_session
 from PIL import Image
@@ -13,6 +15,7 @@ BOTTOM_PAD_PX = 28
 FALLBACK_TRIM_RATIO = 0.24
 
 
+# 하단 투명 padding 추가 — crop 후 식물 하단 여백 확보
 def add_bottom_padding(rgba: Image.Image, bottom_pad_px: int):
     if bottom_pad_px <= 0:
         return rgba
@@ -23,12 +26,8 @@ def add_bottom_padding(rgba: Image.Image, bottom_pad_px: int):
     return rgba_canvas
 
 
+# 하단 화분 영역 투명화 — rembg 결과의 하단 비율 제거
 def simple_remove_lower_pot(rgba: Image.Image) -> Image.Image:
-    """
-    1차 MVP용 단순 화분 제거.
-    rembg로 배경 제거 후, 객체 하단 일부를 잘라서 화분을 제거한다.
-    기존 고급 cut 알고리즘은 다음 단계에서 붙인다.
-    """
 
     alpha = np.array(rgba.getchannel("A"), dtype=np.uint8)
     mask = alpha > ALPHA_THRESHOLD
@@ -55,6 +54,7 @@ def simple_remove_lower_pot(rgba: Image.Image) -> Image.Image:
     return Image.fromarray(rgba_np, mode="RGBA")
 
 
+# 배경/화분 제거 — rembg 후 투명 PNG와 debug 이미지 저장
 def remove_background_and_pot(
     input_path: Path,
     output_transparent_path: Path,

@@ -9,11 +9,10 @@ import lombok.*;
 
 import java.util.List;
 
+// AuthDto — API 요청/응답 DTO
 public class AuthDto {
 
-    /**
-     * 회원가입 요청 DTO
-     */
+    // 회원가입 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -33,9 +32,7 @@ public class AuthDto {
         private String nickname;
     }
 
-    /**
-     * 회원가입 응답 DTO
-     */
+    // 회원가입 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -47,6 +44,7 @@ public class AuthDto {
         private String nickname;
         private List<GrantedItemDto> grantedItems;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static SignupResDto of(User user, List<UserItem> grantedUserItems) {
             return SignupResDto.builder()
                     .userId(user.getId())
@@ -61,9 +59,7 @@ public class AuthDto {
         }
     }
 
-    /**
-     * 회원가입 시 기본 지급 아이템 DTO
-     */
+    // 회원가입 시 기본 지급 아이템 DTO
     @Getter
     @Setter
     @Builder
@@ -75,6 +71,7 @@ public class AuthDto {
         private String itemType;
         private String status;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static GrantedItemDto from(UserItem userItem) {
             return GrantedItemDto.builder()
                     .itemId(userItem.getItem().getId())
@@ -85,9 +82,7 @@ public class AuthDto {
         }
     }
 
-    /**
-     * 로그인 요청 DTO
-     */
+    // 로그인 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -102,9 +97,7 @@ public class AuthDto {
         private String password;
     }
 
-    /**
-     * 로그인 응답 DTO
-     */
+    // 로그인 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -114,6 +107,7 @@ public class AuthDto {
         private String accessToken;
         private LoginUserDto user;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static LoginResDto of(String accessToken, User user) {
             return LoginResDto.builder()
                     .accessToken(accessToken)
@@ -122,9 +116,7 @@ public class AuthDto {
         }
     }
 
-    /**
-     * 로그인 응답 내부 사용자 정보 DTO
-     */
+    // 로그인 응답 내부 사용자 정보 DTO
     @Getter
     @Setter
     @Builder
@@ -136,6 +128,7 @@ public class AuthDto {
         private String nickname;
         private String role;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static LoginUserDto from(User user) {
             return LoginUserDto.builder()
                     .userId(user.getId())
@@ -146,6 +139,7 @@ public class AuthDto {
         }
     }
 
+    // OAuthLoginReqDto DTO — API 요청/응답 데이터
     @Getter
     @Setter
     @NoArgsConstructor

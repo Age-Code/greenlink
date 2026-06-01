@@ -8,6 +8,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
+// S3Config — 애플리케이션 설정
 @Configuration
 public class S3Config {
 
@@ -20,6 +21,7 @@ public class S3Config {
     @Value("${cloud.aws.region}")
     private String region;
 
+    // S3 Client Bean 생성
     @Bean
     public S3Client s3Client() {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(

@@ -1,7 +1,10 @@
+// 물 부족 배너 위젯
+
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
+// WaterShortageBanner — 물 부족 배너 위젯
 class WaterShortageBanner extends StatelessWidget {
   final String? plantName;
   final double soilMoisturePercent;
@@ -12,6 +15,7 @@ class WaterShortageBanner extends StatelessWidget {
     this.plantName,
   });
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     final trimmedName = plantName?.trim();

@@ -1,32 +1,16 @@
+// 사용자 식물 서비스 — 식재, 조회, 수확 API 호출
+
 import 'package:flutter/foundation.dart';
 import '../core/network/api_client.dart';
 import '../core/network/api_response.dart';
 import '../core/constants/api_paths.dart';
 import '../models/user_plant_models.dart';
 
-// ============================================================
-// UserPlantService
-// TEST 3: 내 식물 목록 조회
-//   [x] GET /api/user-plants — Authorization 헤더 포함
-//   [x] 식물 목록 표시, status 필터 동작
-//   [x] 카드 클릭 → UserPlantDetailPage
-//
-// TEST 4: 식물 상세 조회
-//   [x] GET /api/user-plants/{userPlantId}
-//   [x] imageUrl, nickname, plantName, status, remainingDays 표시
-//   [x] equippedPot null → 안내 표시
-//   [x] equippedPot 있음 → 화분 카드 표시
-//
-// TEST 6: 씨앗 심기
-//   [x] POST /api/user-plants — userItemId, nickname 전송
-//   [x] 성공 → UserPlantDetailPage 이동
-//
-// TEST 7/8: 화분/영양제 연결 식물 조회
-//   [x] getUserPlants(status: 'GROWING') 목록 확인
-// ============================================================
+// UserPlantService — Backend API 호출
 class UserPlantService {
   final ApiClient _client = ApiClient();
 
+  // 사용자 식물 목록 조회 API 호출
   Future<ApiResponse<List<UserPlantSummary>>> getUserPlants({String? status}) async {
     debugPrint('[UserPlantService] 🌱 내 식물 목록 조회 (status=$status)');
     try {
@@ -46,6 +30,7 @@ class UserPlantService {
     }
   }
 
+  // 사용자 식물 상세 조회 API 호출
   Future<ApiResponse<UserPlantDetail>> getUserPlantDetail(int userPlantId) async {
     debugPrint('[UserPlantService] 🔍 식물 상세 조회 (id=$userPlantId)');
     try {
@@ -65,6 +50,7 @@ class UserPlantService {
     }
   }
 
+  // 씨앗 심기 API 호출
   Future<ApiResponse<UserPlantSummary>> plantSeed(int userItemId, String nickname) async {
     debugPrint('[UserPlantService] 🌱 씨앗 심기 (userItemId=$userItemId, nickname=$nickname)');
     try {
@@ -86,6 +72,7 @@ class UserPlantService {
     }
   }
 
+  // 식물 별명 수정 API 호출
   Future<ApiResponse<void>> updateUserPlantNickname(int userPlantId, String nickname) async {
     debugPrint('[UserPlantService] ✏️ 이름 수정 (id=$userPlantId, nickname=$nickname)');
     try {
@@ -103,6 +90,7 @@ class UserPlantService {
     }
   }
 
+  // 식물 수확 API 호출
   Future<ApiResponse<void>> harvestUserPlant(int userPlantId) async {
     debugPrint('[UserPlantService] 🌾 수확 (id=$userPlantId)');
     try {

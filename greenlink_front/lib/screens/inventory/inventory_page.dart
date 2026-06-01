@@ -1,3 +1,5 @@
+// 인벤토리 화면 — 보유 아이템 조회와 사용 진입
+
 import 'package:flutter/material.dart';
 import '../../models/user_item_models.dart';
 import '../../services/user_item_service.dart';
@@ -5,13 +7,16 @@ import '../../core/widgets/greenlink_card.dart';
 import '../../theme/app_theme.dart';
 import 'inventory_action_sheets.dart';
 
+// InventoryPage — 화면 위젯
 class InventoryPage extends StatefulWidget {
   const InventoryPage({Key? key}) : super(key: key);
 
+  // State 객체 생성
   @override
   InventoryPageState createState() => InventoryPageState();
 }
 
+// InventoryPageState — 인벤토리 화면 — 보유 아이템 조회와 사용 진입
 class InventoryPageState extends State<InventoryPage> {
   final UserItemService _itemService = UserItemService();
 
@@ -26,17 +31,20 @@ class InventoryPageState extends State<InventoryPage> {
     'NUTRIENT': '영양제',
   };
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadItems();
   }
 
+  // 화면 데이터 새로고침
   void refresh() {
     debugPrint('[InventoryPage] 🔄 refresh inventory');
     _loadItems();
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadItems() async {
     setState(() => _isLoading = true);
     final typeParam = _selectedType == 'ALL' ? null : _selectedType;
@@ -50,11 +58,13 @@ class InventoryPageState extends State<InventoryPage> {
     }
   }
 
+  // 아이템 타입 필터 변경 — 목록 재조회
   void _onTypeChanged(String type) {
     setState(() => _selectedType = type);
     _loadItems();
   }
 
+  // 아이템 선택 처리 — 타입별 액션 시트 표시
   void _onItemTap(UserItemGroup group) {
     final firstOwned = group.items.where((i) => i.status == 'OWNED').toList();
     if (firstOwned.isEmpty) {
@@ -97,6 +107,7 @@ class InventoryPageState extends State<InventoryPage> {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,6 +148,7 @@ class InventoryPageState extends State<InventoryPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildFilters() {
     return SizedBox(
       height: 40,
@@ -168,6 +180,7 @@ class InventoryPageState extends State<InventoryPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildItemCard(UserItemGroup group) {
     final usable = group.usableCount > 0;
 
@@ -262,6 +275,7 @@ class InventoryPageState extends State<InventoryPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildEmptyState() {
     return Center(
       child: Padding(

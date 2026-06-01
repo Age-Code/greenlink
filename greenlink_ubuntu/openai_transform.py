@@ -1,3 +1,5 @@
+# OpenAI 스타일 변환 — gpt-image-1.5 edit으로 GreenLink 스타일 이미지 생성
+
 from pathlib import Path
 import base64
 import os
@@ -59,6 +61,7 @@ The style must come from Image 2.
 
 
 
+# OpenAI 스타일 변환 — source/style 이미지로 gpt-image edit 실행
 def transform_to_greenlink_style(
     source_transparent_path: Path,
     style_image_path: Path,

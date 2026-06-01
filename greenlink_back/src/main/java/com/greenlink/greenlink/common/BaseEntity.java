@@ -8,6 +8,7 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+// BaseEntity — 공통 컴포넌트
 @Getter
 @MappedSuperclass
 public abstract class BaseEntity {
@@ -21,6 +22,7 @@ public abstract class BaseEntity {
     @Column(nullable = false)
     private boolean deleted = false;
 
+    // 생성 시각 초기화
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
@@ -28,15 +30,18 @@ public abstract class BaseEntity {
         this.modifiedAt = now;
     }
 
+    // 수정 시각 갱신
     @PreUpdate
     protected void onUpdate() {
         this.modifiedAt = LocalDateTime.now();
     }
 
+    // delete 삭제
     public void delete() {
         this.deleted = true;
     }
 
+    // restore 처리
     public void restore() {
         this.deleted = false;
     }

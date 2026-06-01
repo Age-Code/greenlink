@@ -24,6 +24,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
+// UserQuestService — 비즈니스 로직 처리
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -42,21 +43,16 @@ public class UserQuestService {
     ) {
         User user = findActiveUser(userId);
 
-        /*
-         * 현재 날짜 기준으로 오늘/이번 주/이번 달에 해당하는 user_quest가 없으면 생성한다.
-         * DAILY, WEEKLY, MONTHLY는 현재 기간 기준으로 생성되고,
-         * ACHIEVEMENT는 한 번만 생성된다.
-         */
+                // 현재 날짜 기준으로 오늘/이번 주/이번 달에 해당하는 user_quest가 없으면 생성한다. — DAILY, WEEKLY, MONTHLY는 현재 기간 기준으로 생성되고,
+
         createCurrentUserQuestsIfNotExists(user);
 
         LocalDate today = LocalDate.now();
 
         List<UserQuest> userQuests = userQuestRepository.findAllByUserAndDeletedFalse(user);
 
-        /*
-         * 기존에 생성되어 있던 과거 기간 퀘스트는 상태를 EXPIRED로 갱신할 수 있다.
-         * 단, 목록 응답에서는 아래 isVisibleCurrentQuest()로 현재 기간 퀘스트만 보여준다.
-         */
+                // 기존에 생성되어 있던 과거 기간 퀘스트는 상태를 EXPIRED로 갱신할 수 있다. — 단, 목록 응답에서는 아래 isVisibleCurrentQuest()로 현재 기간 퀘스트만 보여준다.
+
         userQuests.forEach(this::expireIfNeeded);
 
         return userQuests.stream()
@@ -76,21 +72,11 @@ public class UserQuestService {
 
         expireIfNeeded(userQuest);
 
-        /*
-         * 1차 MVP에서는 상세 조회는 그대로 허용한다.
-         * 목록에서는 과거 DAILY/WEEKLY/MONTHLY를 숨기지만,
-         * 상세 API는 이미 알고 있는 ID에 대한 조회이므로 막지 않는다.
-         *
-         * 만약 과거 기간 퀘스트 상세 조회도 막고 싶다면 아래 주석을 해제하면 된다.
-         *
-         * if (!isVisibleCurrentQuest(userQuest, LocalDate.now())) {
-         *     throw new IllegalArgumentException("현재 조회할 수 없는 퀘스트입니다.");
-         * }
-         */
-
+        // 과거 기간 퀘스트 상세 조회는 허용한다.
         return QuestDto.UserQuestDetailResDto.from(userQuest);
     }
 
+    // 퀘스트 보상 수령 처리
     @Transactional
     public QuestDto.UserQuestRewardResDto receiveReward(Long userId, Long userQuestId) {
         User user = findActiveUser(userId);
@@ -100,11 +86,7 @@ public class UserQuestService {
 
         expireIfNeeded(userQuest);
 
-        /*
-         * 보상 수령은 과거 기간 퀘스트를 막는 편이 안전하다.
-         * 예를 들어 지난주 WEEKLY 퀘스트가 ACHIEVABLE 상태로 남아 있더라도,
-         * 현재 목록에는 보이지 않게 했으므로 보상도 현재 기간 퀘스트 또는 업적 퀘스트만 허용한다.
-         */
+        // 보상 수령은 현재 기간 퀘스트 또는 업적 퀘스트만 허용한다.
         if (!isVisibleCurrentQuest(userQuest, LocalDate.now())) {
             throw new IllegalStateException("현재 기간의 퀘스트만 보상을 수령할 수 있습니다.");
         }
@@ -138,6 +120,7 @@ public class UserQuestService {
         );
     }
 
+    // create Current User Quests If Not Exists 생성
     private void createCurrentUserQuestsIfNotExists(User user) {
         List<Quest> activeQuests = questRepository.findAllByActiveTrueAndDeletedFalse();
         LocalDate today = LocalDate.now();
@@ -147,6 +130,7 @@ public class UserQuestService {
         }
     }
 
+    // create Current User Quest If Not Exists 생성
     private void createCurrentUserQuestIfNotExists(User user, Quest quest, LocalDate today) {
         if (quest.getQuestType() == QuestType.ACHIEVEMENT || quest.getResetCycle() == ResetCycle.NONE) {
             userQuestRepository.findFirstByUserAndQuestAndDeletedFalse(user, quest)
@@ -167,17 +151,14 @@ public class UserQuestService {
     private boolean isVisibleCurrentQuest(UserQuest userQuest, LocalDate today) {
         Quest quest = userQuest.getQuest();
 
-        /*
-         * 업적 퀘스트는 기간형 퀘스트가 아니므로 계속 보여준다.
-         * 예: 허브 3종 키우기, 식물 10개 수확하기 등
-         */
+                // 업적 퀘스트는 기간형 퀘스트가 아니므로 계속 보여준다.
+
         if (quest.getQuestType() == QuestType.ACHIEVEMENT) {
             return true;
         }
 
-        /*
-         * resetCycle이 NONE인 퀘스트도 기간 제한이 없으므로 계속 보여준다.
-         */
+                // resetCycle이 NONE인 퀘스트도 기간 제한이 없으므로 계속 보여준다.
+
         if (quest.getResetCycle() == ResetCycle.NONE) {
             return true;
         }
@@ -204,6 +185,7 @@ public class UserQuestService {
         };
     }
 
+    // 기간 만료 퀘스트 처리
     private void expireIfNeeded(UserQuest userQuest) {
         if (userQuest.getStatus() != UserQuestStatus.IN_PROGRESS) {
             return;
@@ -214,6 +196,7 @@ public class UserQuestService {
         }
     }
 
+    // find Active User 조회 — 없으면 예외 또는 Optional 반환
     private User findActiveUser(Long userId) {
         return userRepository.findById(userId)
                 .filter(user -> !user.isDeleted())

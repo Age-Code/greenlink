@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+// AutomationLog — 도메인 모델
 @Entity
 @Getter
 @Setter
@@ -20,84 +21,39 @@ public class AutomationLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 자동화 판단 대상 식물
-     */
+    // 자동화 판단 대상 식물
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_plant_id", nullable = false)
     private UserPlant userPlant;
 
-    /**
-     * 자동화 판단/실행 유형
-     *
-     * 예:
-     * AUTO_WATER
-     * AUTO_LIGHT_ON
-     * AUTO_LIGHT_OFF
-     * SKIP_WATER
-     * SKIP_LIGHT
-     */
+    // 자동화 판단/실행 유형
     @Enumerated(EnumType.STRING)
     @Column(name = "automation_type", nullable = false, length = 50)
     private AutomationType automationType;
 
-    /**
-     * 자동화 판단 근거 센서/조건
-     *
-     * 예:
-     * SOIL_MOISTURE
-     * LIGHT
-     * TIME
-     * COOLDOWN
-     * COMMAND_DUPLICATED
-     */
+    // 자동화 판단 근거 센서/조건
     @Enumerated(EnumType.STRING)
     @Column(name = "trigger_sensor_type", nullable = false, length = 50)
     private TriggerSensorType triggerSensorType;
 
-    /**
-     * 자동화 판단에 사용된 실제 값
-     *
-     * 예:
-     * 토양수분 29.7
-     * 조도 120.0
-     */
+    // 자동화 판단에 사용된 실제 값
     @Column(name = "trigger_value")
     private Double triggerValue;
 
-    /**
-     * 자동화 판단 기준값
-     *
-     * 예:
-     * 물 주기 기준 35.0
-     * LED ON 기준 300.0
-     * LED OFF 기준 500.0
-     */
+    // 자동화 판단 기준값
     @Column(name = "threshold_value")
     private Double thresholdValue;
 
-    /**
-     * 자동화로 생성된 명령
-     *
-     * 자동화가 실제 명령을 생성하지 않고 스킵된 경우 null일 수 있다.
-     */
+    // 자동화로 생성된 명령 — 자동화가 실제 명령을 생성하지 않고 스킵된 경우 null일 수 있다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "command_id")
     private DeviceCommand command;
 
-    /**
-     * 자동화 판단 결과 메시지
-     *
-     * 예:
-     * 토양수분 29.7%로 자동 급수 명령 생성
-     * 최근 30분 안에 급수 명령이 있어 자동 급수 스킵
-     */
+    // 자동화 판단 결과 메시지
     @Column(name = "message", length = 500)
     private String message;
 
-    /**
-     * 소프트 삭제 여부
-     */
+    // 소프트 삭제 여부
     @Builder.Default
     @Column(nullable = false)
     private Boolean deleted = false;
@@ -105,6 +61,7 @@ public class AutomationLog {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    // 생성 시각 초기화
     @PrePersist
     public void onCreate() {
         if (createdAt == null) {
@@ -116,9 +73,7 @@ public class AutomationLog {
         }
     }
 
-    /**
-     * 자동화 실행 로그 생성
-     */
+    // 자동화 실행 로그 생성
     public static AutomationLog createExecutedLog(
             UserPlant userPlant,
             AutomationType automationType,
@@ -140,9 +95,7 @@ public class AutomationLog {
                 .build();
     }
 
-    /**
-     * 자동화 스킵 로그 생성
-     */
+    // 자동화 스킵 로그 생성
     public static AutomationLog createSkippedLog(
             UserPlant userPlant,
             AutomationType automationType,
@@ -163,6 +116,7 @@ public class AutomationLog {
                 .build();
     }
 
+    // soft delete 처리
     public void softDelete() {
         this.deleted = true;
     }

@@ -1,7 +1,10 @@
+// 과습 배너 위젯
+
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
+// SoilMoistureSufficientBanner — 과습 배너 위젯
 class SoilMoistureSufficientBanner extends StatelessWidget {
   final double soilMoisturePercent;
 
@@ -10,6 +13,7 @@ class SoilMoistureSufficientBanner extends StatelessWidget {
     required this.soilMoisturePercent,
   });
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Container(

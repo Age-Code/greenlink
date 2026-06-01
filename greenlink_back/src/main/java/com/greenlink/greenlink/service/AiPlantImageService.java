@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+// AiPlantImageService — 비즈니스 로직 처리
 @Service
 @RequiredArgsConstructor
 public class AiPlantImageService {
@@ -17,6 +18,7 @@ public class AiPlantImageService {
     private final PlantImageRepository plantImageRepository;
     private final AiPlantImageRepository aiPlantImageRepository;
 
+    // save Ai Image Result 저장
     @Transactional
     public AiPlantImageDto.AiImageResDto saveAiImageResult(
             Long plantImageId,

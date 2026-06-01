@@ -1,3 +1,5 @@
+// 자동화 서비스 — 설정, 학습, 모델, 로그 API 호출
+
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import '../core/network/api_client.dart';
@@ -5,20 +7,11 @@ import '../core/network/api_response.dart';
 import '../core/constants/api_paths.dart';
 import '../models/automation_models.dart';
 
-// ============================================================
-// AutomationService
-//   - GET    /api/user-plants/{id}/automation        → AutomationSettingModel
-//   - PATCH  /api/user-plants/{id}/automation        → AutomationSettingModel
-//   - POST   /api/user-plants/{id}/automation/train  → AutomationModelModel
-//   - GET    /api/user-plants/{id}/automation/model  → AutomationModelModel?
-//   - GET    /api/user-plants/{id}/automation/logs   → List<AutomationLogModel>
-// ============================================================
+// AutomationService — Backend API 호출
 class AutomationService {
   final ApiClient _client = ApiClient();
 
-  // ──────────────────────────────────────────────────────────
-  // 자동화 설정 조회
-  // ──────────────────────────────────────────────────────────
+  // 자동화 설정 조회 API 호출
   Future<ApiResponse<AutomationSettingModel>> getAutomationSetting(
     int userPlantId,
   ) async {
@@ -44,10 +37,7 @@ class AutomationService {
     }
   }
 
-  // ──────────────────────────────────────────────────────────
-  // 자동화 설정 수정 (PATCH)
-  //   - payload sanitize 후 전송
-  // ──────────────────────────────────────────────────────────
+  // 자동화 설정 수정 — payload 보정 후 PATCH 호출
   Future<ApiResponse<AutomationSettingModel>> updateAutomationSetting(
     int userPlantId,
     AutomationSettingModel setting, {
@@ -105,9 +95,7 @@ class AutomationService {
     }
   }
 
-  // ──────────────────────────────────────────────────────────
-  // 최신 학습 모델 조회 (없으면 null 반환)
-  // ──────────────────────────────────────────────────────────
+  // 최신 자동화 학습 모델 조회 — 없으면 null 반환
   Future<AutomationModelModel?> getLatestAutomationModel(
     int userPlantId,
   ) async {
@@ -127,9 +115,7 @@ class AutomationService {
     }
   }
 
-  // ──────────────────────────────────────────────────────────
-  // 학습 실행
-  // ──────────────────────────────────────────────────────────
+  // 자동화 학습 실행 API 호출
   Future<ApiResponse<AutomationModelModel>> trainAutomationModel(
     int userPlantId,
   ) async {
@@ -155,9 +141,7 @@ class AutomationService {
     }
   }
 
-  // ──────────────────────────────────────────────────────────
-  // 자동화 로그 조회
-  // ──────────────────────────────────────────────────────────
+  // 자동화 로그 조회 API 호출
   Future<ApiResponse<List<AutomationLogModel>>> getAutomationLogs(
     int userPlantId,
   ) async {
@@ -203,11 +187,7 @@ class AutomationService {
   }
 }
 
-// ──────────────────────────────────────────────────────────
-// Payload sanitize 유틸리티 함수
-// ──────────────────────────────────────────────────────────
-
-/// "HH:mm" → "HH:mm:ss", 이미 "HH:mm:ss"면 그대로
+// 서버 시간값 변환 — HH:mm은 HH:mm:ss로 보정
 String toServerTimeValue(String? value, {String defaultValue = '00:00:00'}) {
   if (value == null || value.trim().isEmpty) return defaultValue;
   final text = value.trim();
@@ -215,13 +195,14 @@ String toServerTimeValue(String? value, {String defaultValue = '00:00:00'}) {
   return text;
 }
 
-/// "HH:mm:ss" → "HH:mm" (time input용)
+// 시간 입력값 변환 — HH:mm:ss를 HH:mm으로 축약
 String toTimeInputValue(String? value) {
   if (value == null || value.trim().isEmpty) return '';
   if (value.length >= 5) return value.substring(0, 5);
   return value;
 }
 
+// double 파싱 — 실패 시 기본값 반환
 double parseDoubleOrDefault(dynamic value, double defaultValue) {
   if (value == null) return defaultValue;
   if (value is num) return value.toDouble();
@@ -230,6 +211,7 @@ double parseDoubleOrDefault(dynamic value, double defaultValue) {
   return double.tryParse(text) ?? defaultValue;
 }
 
+// int 파싱 — 실패 시 기본값 반환
 int parseIntOrDefault(dynamic value, int defaultValue) {
   if (value == null) return defaultValue;
   if (value is int) return value;
@@ -239,6 +221,7 @@ int parseIntOrDefault(dynamic value, int defaultValue) {
   return int.tryParse(text) ?? defaultValue;
 }
 
+// 자동화 PATCH payload 생성 — 수치와 시간값 보정
 Map<String, dynamic> buildAutomationPatchPayload({
   required bool autoWaterEnabled,
   required bool autoLightEnabled,

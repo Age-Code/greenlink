@@ -7,8 +7,10 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+// UserDto — API 요청/응답 DTO
 public class UserDto {
 
+    // MeResDto DTO — API 요청/응답 데이터
     @Getter
     @Setter
     @Builder
@@ -21,6 +23,7 @@ public class UserDto {
         private String role;
         private LocalDateTime createdAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static MeResDto from(User user) {
             return MeResDto.builder()
                     .userId(user.getId())
@@ -32,6 +35,7 @@ public class UserDto {
         }
     }
 
+    // UpdateNicknameReqDto DTO — API 요청/응답 데이터
     @Getter
     @Setter
     @NoArgsConstructor
@@ -43,6 +47,7 @@ public class UserDto {
         private String nickname;
     }
 
+    // UpdateNicknameResDto DTO — API 요청/응답 데이터
     @Getter
     @Setter
     @Builder
@@ -52,6 +57,7 @@ public class UserDto {
         private Long userId;
         private String nickname;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static UpdateNicknameResDto from(User user) {
             return UpdateNicknameResDto.builder()
                     .userId(user.getId())

@@ -1,18 +1,17 @@
+// 앱 테마 — 색상, 폰트, 컴포넌트 스타일
+
 import 'package:flutter/material.dart';
 
-/// GreenLink Design System — 브랜드 컬러 토큰
+// 앱 색상 토큰
 class AppColors {
-  // ── Brand greens
   static const Color primary = Color(0xFF98D471); // logo leaf green
   static const Color primaryFocus = Color(0xFF7FC65A); // selected border / focus ring
   static const Color primaryStrong = Color(0xFF5FAF3E); // text links on white bg
   static const Color primaryOnDark = Color(0xFFB8E59F); // emphasis on dark sections
   static const Color primarySoft = Color(0xFFEAF7DD); // chip bg / success bg
 
-  // ── on-primary text (primary는 밝은 연두이므로 white 대신 near-black)
   static const Color onPrimary = Color(0xFF1F241F);
 
-  // ── Surface / Canvas
   static const Color canvas = Color(0xFFFFFFFF);
   static const Color canvasSoft = Color(0xFFFAF6EE); // logo cream
   static const Color canvasGreenTint = Color(0xFFF2F8EC); // very faint green
@@ -21,10 +20,8 @@ class AppColors {
   static const Color surfaceDark = Color(0xFF1F241F); // dark section
   static const Color surfaceDark2 = Color(0xFF252B25); // dark card bg
 
-  // ── Hairline / Border
   static const Color hairline = Color(0x14000000); // rgba(0,0,0,0.08)
 
-  // ── Text
   static const Color ink = Color(0xFF1D1D1F); // heading / key text
   static const Color body = Color(0xFF2A2A2A); // body text
   static const Color bodyMuted = Color(0xFF6E746C); // secondary / metadata
@@ -32,29 +29,25 @@ class AppColors {
   static const Color bodyOnDark = Color(0xFFFFFFFF);
   static const Color bodyMutedOnDark = Color(0xFFC9D3C6);
 
-  // ── Status — success
   static const Color successBg = Color(0xFFEAF7DD);
   static const Color successText = Color(0xFF3F7F30);
   static const Color successBorder = Color(0xFFB8E59F);
 
-  // ── Status — warning
   static const Color warningBg = Color(0xFFFFF4D8);
   static const Color warningText = Color(0xFF8A6500);
   static const Color warningBorder = Color(0xFFF0D88A);
 
-  // ── Status — danger
   static const Color dangerBg = Color(0xFFFDECEC);
   static const Color dangerText = Color(0xFFB04444);
   static const Color dangerBorder = Color(0xFFF2B8B8);
 
-  // ── Status — info
   static const Color infoBg = Color(0xFFEEF6F8);
   static const Color infoText = Color(0xFF3F7480);
   static const Color infoBorder = Color(0xFFB8DDE5);
 }
 
+// 앱 테마 설정
 class AppTheme {
-  // ── 하위 호환을 위한 static shortcut ──────────────────────────
   static const Color background = AppColors.canvasSoft;
   static const Color cardBackground = AppColors.surfaceCard;
   static const Color primaryGreen = AppColors.primary;
@@ -79,7 +72,6 @@ class AppTheme {
         background: AppColors.canvas,
         error: AppColors.dangerText,
       ),
-      // ── AppBar ─────────────────────────────────────────────
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.canvas,
         surfaceTintColor: Colors.transparent,
@@ -98,7 +90,6 @@ class AppTheme {
           bottom: BorderSide(color: AppColors.hairline, width: 1),
         ),
       ),
-      // ── Typography ─────────────────────────────────────────
       fontFamily: 'Inter',
       textTheme: const TextTheme(
         // display → page title 32px/600
@@ -120,7 +111,6 @@ class AppTheme {
         labelMedium: TextStyle(color: AppColors.bodyMuted, fontSize: 14, fontWeight: FontWeight.w400),
         labelSmall: TextStyle(color: AppColors.bodySoft, fontSize: 13, fontWeight: FontWeight.w400),
       ),
-      // ── Card ───────────────────────────────────────────────
       cardTheme: CardThemeData(
         color: AppColors.surfaceCard,
         shape: RoundedRectangleBorder(
@@ -131,7 +121,6 @@ class AppTheme {
         shadowColor: Colors.transparent,
         margin: EdgeInsets.zero,
       ),
-      // ── ElevatedButton → Primary ───────────────────────────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -143,7 +132,6 @@ class AppTheme {
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, height: 1.4),
         ),
       ),
-      // ── OutlinedButton → Secondary ─────────────────────────
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primaryStrong,
@@ -153,7 +141,6 @@ class AppTheme {
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
       ),
-      // ── TextButton → Ghost ─────────────────────────────────
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primaryStrong,
@@ -161,7 +148,6 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         ),
       ),
-      // ── Chip ───────────────────────────────────────────────
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.canvas,
         selectedColor: AppColors.primarySoft,
@@ -171,7 +157,6 @@ class AppTheme {
         shape: const StadiumBorder(),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       ),
-      // ── Input ──────────────────────────────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.canvas,
@@ -199,7 +184,6 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.dangerText, width: 1.5),
         ),
       ),
-      // ── BottomNavigationBar ────────────────────────────────
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.canvas,
         selectedItemColor: AppColors.primaryStrong,
@@ -209,7 +193,6 @@ class AppTheme {
         selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         unselectedLabelStyle: TextStyle(fontSize: 12),
       ),
-      // ── Dialog ─────────────────────────────────────────────
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.canvas,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -217,19 +200,16 @@ class AppTheme {
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
       ),
-      // ── SnackBar ───────────────────────────────────────────
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.surfaceDark,
         contentTextStyle: const TextStyle(color: AppColors.bodyOnDark, fontSize: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         behavior: SnackBarBehavior.floating,
       ),
-      // ── Progress ───────────────────────────────────────────
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: AppColors.primaryStrong,
         linearTrackColor: AppColors.primarySoft,
       ),
-      // ── Divider ────────────────────────────────────────────
       dividerTheme: const DividerThemeData(
         color: AppColors.hairline,
         thickness: 1,

@@ -1,3 +1,5 @@
+// 로그인 화면 — 이메일/Kakao/Google 로그인
+
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
@@ -5,14 +7,14 @@ import '../../core/widgets/greenlink_button.dart';
 import 'signup_page.dart';
 import '../main_page.dart';
 
-// ============================================================
-// LoginPage — TEST 1: 로그인
-// ============================================================
+// LoginPage — 화면 위젯
 class LoginPage extends StatefulWidget {
+  // State 객체 생성
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
+// _LoginPageState — 화면 상태와 이벤트 처리
 class _LoginPageState extends State<LoginPage> {
   final _emailCtrl = TextEditingController(text: '');
   final _passwordCtrl = TextEditingController(text: '');
@@ -21,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   String? _errorMessage;
   bool _obscurePassword = true;
 
+  // 리소스 정리
   @override
   void dispose() {
     _emailCtrl.dispose();
@@ -28,6 +31,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  // 이메일 로그인 처리 — 성공 시 메인 화면 이동
   void _login() async {
     final email = _emailCtrl.text.trim();
     final password = _passwordCtrl.text;
@@ -54,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // Kakao 로그인 처리
   void _loginWithKakao() async {
     setState(() { _isLoading = true; _errorMessage = null; });
     final res = await _authService.loginWithKakao();
@@ -66,6 +71,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // Google 로그인 처리
   void _loginWithGoogle() async {
     setState(() { _isLoading = true; _errorMessage = null; });
     final res = await _authService.loginWithGoogle();
@@ -78,6 +84,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,7 +96,6 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 56),
-              // ── Logo ────────────────────────────────────────
               Center(
                 child: Column(
                   children: [
@@ -123,7 +129,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 48),
 
-              // ── Email ────────────────────────────────────────
               const Text('이메일', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.body)),
               const SizedBox(height: 8),
               TextField(
@@ -137,7 +142,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 16),
 
-              // ── Password ─────────────────────────────────────
               const Text('비밀번호', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.body)),
               const SizedBox(height: 8),
               TextField(
@@ -159,7 +163,6 @@ class _LoginPageState extends State<LoginPage> {
                 onSubmitted: (_) => _login(),
               ),
 
-              // ── Error ────────────────────────────────────────
               if (_errorMessage != null) ...[
                 const SizedBox(height: 12),
                 Container(
@@ -177,7 +180,6 @@ class _LoginPageState extends State<LoginPage> {
               ],
               const SizedBox(height: 32),
 
-              // ── Login Button ─────────────────────────────────
               GreenlinkButton(
                 text: '로그인',
                 isLoading: _isLoading,
@@ -195,7 +197,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 40),
 
-              // ── Social Divider ───────────────────────────────
               Row(
                 children: [
                   const Expanded(child: Divider(color: AppColors.hairline)),
@@ -211,7 +212,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 24),
 
-              // ── Social Buttons ───────────────────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -243,6 +243,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+// _SocialLoginButton — 내부 위젯
 class _SocialLoginButton extends StatelessWidget {
   final VoidCallback? onTap;
   final Color color;
@@ -262,6 +263,7 @@ class _SocialLoginButton extends StatelessWidget {
     this.hasBorder = false,
   });
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return InkWell(

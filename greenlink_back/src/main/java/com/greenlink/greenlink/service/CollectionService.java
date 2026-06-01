@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// CollectionService — 비즈니스 로직 처리
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -50,6 +51,7 @@ public class CollectionService {
         return CollectionDto.DetailResDto.of(plant, harvestedPlants);
     }
 
+    // to Collection List Response 처리
     private CollectionDto.ListResDto toCollectionListResponse(User user, Plant plant) {
         List<UserPlant> harvestedPlants =
                 userPlantRepository.findAllByUserAndPlantAndStatusAndDeletedFalseOrderByHarvestedAtAsc(
@@ -73,6 +75,7 @@ public class CollectionService {
         );
     }
 
+    // find Active User 조회 — 없으면 예외 또는 Optional 반환
     private User findActiveUser(Long userId) {
         return userRepository.findById(userId)
                 .filter(user -> !user.isDeleted())

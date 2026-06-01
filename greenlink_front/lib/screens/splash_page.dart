@@ -1,3 +1,5 @@
+// 스플래시 화면 — 토큰 확인 후 홈 또는 로그인 이동
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/network/api_client.dart';
@@ -5,19 +7,16 @@ import '../theme/app_theme.dart';
 import 'auth/login_page.dart';
 import 'main_page.dart';
 
-// ============================================================
-// SplashPage
-// - 앱 시작 시 토큰 유무 확인
-// - 토큰 있으면 → MainPage
-// - 토큰 없으면 → LoginPage
-// - ApiClient.onUnauthorized 콜백 등록 (401 시 자동 로그아웃)
-// ============================================================
+// SplashPage — 화면 위젯
 class SplashPage extends StatefulWidget {
+  // State 객체 생성
   @override
   _SplashPageState createState() => _SplashPageState();
 }
 
+// _SplashPageState — 화면 상태와 이벤트 처리
 class _SplashPageState extends State<SplashPage> {
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
@@ -33,6 +32,7 @@ class _SplashPageState extends State<SplashPage> {
     _checkAuth();
   }
 
+  // 인증 확인 — 토큰 유무에 따라 다음 화면 이동
   Future<void> _checkAuth() async {
     await Future.delayed(const Duration(milliseconds: 1200));
     final prefs = await SharedPreferences.getInstance();
@@ -47,6 +47,7 @@ class _SplashPageState extends State<SplashPage> {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Scaffold(

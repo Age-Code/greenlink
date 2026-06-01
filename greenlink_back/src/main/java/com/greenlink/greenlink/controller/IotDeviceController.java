@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// IotDeviceController — API 요청 처리
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/iot")
@@ -22,14 +23,7 @@ public class IotDeviceController {
     private final IotDeviceDataService iotDeviceDataService;
     private final IotCommandService iotCommandService;
 
-    /**
-     * 라즈베리파이 환경 데이터 전송
-     *
-     * POST /api/iot/raspberry/environment
-     *
-     * Header:
-     * X-DEVICE-KEY: RPI-CAPSTONE-001
-     */
+    // 라즈베리파이 환경 데이터 전송
     @PostMapping("/raspberry/environment")
     public ApiResponse<IotDeviceDto.RaspberryEnvironmentResDto> saveRaspberryEnvironment(
             @RequestHeader("X-DEVICE-KEY") String deviceKey,
@@ -41,14 +35,7 @@ public class IotDeviceController {
         return ApiResponse.success("라즈베리파이 환경 데이터가 저장되었습니다.", response);
     }
 
-    /**
-     * ESP 토양수분 데이터 전송
-     *
-     * POST /api/iot/esp/soil-moisture
-     *
-     * Header:
-     * X-DEVICE-KEY: ESP-BASIL-001
-     */
+    // ESP 토양수분 데이터 전송
     @PostMapping("/esp/soil-moisture")
     public ApiResponse<IotDeviceDto.EspSoilMoistureResDto> saveEspSoilMoisture(
             @RequestHeader("X-DEVICE-KEY") String deviceKey,
@@ -60,22 +47,7 @@ public class IotDeviceController {
         return ApiResponse.success("ESP 토양수분 데이터가 저장되었습니다.", response);
     }
 
-    /**
-     * 라즈베리파이 식물 이미지 업로드
-     *
-     * POST /api/iot/plant-images
-     *
-     * Header:
-     * X-DEVICE-KEY: RPI-CAPSTONE-001
-     *
-     * Content-Type:
-     * multipart/form-data
-     *
-     * Form Data:
-     * file: image.jpg
-     * userPlantId: 1
-     * capturedAt: 2026-04-27T09:00:00
-     */
+    // 라즈베리파이 식물 이미지 업로드
     @PostMapping(
             value = "/plant-images",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -99,14 +71,7 @@ public class IotDeviceController {
         return ApiResponse.success("식물 이미지가 저장되었습니다.", response);
     }
 
-    /**
-     * 라즈베리파이 대기 명령 조회
-     *
-     * GET /api/iot/commands/pending
-     *
-     * Header:
-     * X-DEVICE-KEY: RPI-CAPSTONE-001
-     */
+    // 라즈베리파이 대기 명령 조회
     @GetMapping("/commands/pending")
     public ApiResponse<List<IotDeviceDto.PendingCommandResDto>> getPendingCommands(
             @RequestHeader("X-DEVICE-KEY") String deviceKey
@@ -117,14 +82,7 @@ public class IotDeviceController {
         return ApiResponse.success("대기 중인 명령 조회 성공", response);
     }
 
-    /**
-     * 명령 처리 시작 보고
-     *
-     * PATCH /api/iot/commands/{commandId}/processing
-     *
-     * Header:
-     * X-DEVICE-KEY: RPI-CAPSTONE-001
-     */
+    // 명령 처리 시작 보고
     @PatchMapping("/commands/{commandId}/processing")
     public ApiResponse<IotDeviceDto.CommandProcessingResDto> markCommandProcessing(
             @RequestHeader("X-DEVICE-KEY") String deviceKey,
@@ -136,20 +94,7 @@ public class IotDeviceController {
         return ApiResponse.success("명령 처리 상태가 변경되었습니다.", response);
     }
 
-    /**
-     * 명령 처리 완료 보고
-     *
-     * PATCH /api/iot/commands/{commandId}/complete
-     *
-     * Header:
-     * X-DEVICE-KEY: RPI-CAPSTONE-001
-     *
-     * Body:
-     * {
-     *   "success": true,
-     *   "resultMessage": "급수 완료"
-     * }
-     */
+    // 명령 처리 완료 보고
     @PatchMapping("/commands/{commandId}/complete")
     public ApiResponse<IotDeviceDto.CommandCompleteResDto> completeCommand(
             @RequestHeader("X-DEVICE-KEY") String deviceKey,

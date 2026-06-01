@@ -6,8 +6,10 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+// AiPlantImageDto — API 요청/응답 DTO
 public class AiPlantImageDto {
 
+    // SaveAiImageReqDto DTO — API 요청/응답 데이터
     @Getter
     @Setter
     @NoArgsConstructor
@@ -16,6 +18,7 @@ public class AiPlantImageDto {
         private String finalAiUrl;
     }
 
+    // AiImageResDto DTO — API 요청/응답 데이터
     @Getter
     @Builder
     @NoArgsConstructor
@@ -29,6 +32,7 @@ public class AiPlantImageDto {
         private AiImageStatus status;
         private LocalDateTime createdAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static AiImageResDto from(AiPlantImage aiPlantImage) {
             return AiImageResDto.builder()
                     .aiPlantImageId(aiPlantImage.getId())

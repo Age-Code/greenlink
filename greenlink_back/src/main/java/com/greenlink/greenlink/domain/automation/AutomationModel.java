@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+// AutomationModel — 도메인 모델
 @Entity
 @Getter
 @Builder
@@ -18,75 +19,44 @@ public class AutomationModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 학습 대상 식물
-     */
+    // 학습 대상 식물
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_plant_id", nullable = false)
     private UserPlant userPlant;
 
-    /**
-     * 학습된 추천 자동 급수 기준값
-     *
-     * 예:
-     * 34.5라면 토양수분이 34.5% 이하일 때 물 주기 추천
-     */
+    // 학습된 추천 자동 급수 기준값
     @Column(name = "recommended_water_threshold_percent")
     private Double recommendedWaterThresholdPercent;
 
-    /**
-     * 학습된 추천 LED ON 기준값
-     */
+    // 학습된 추천 LED ON 기준값
     @Column(name = "recommended_light_on_threshold_lux")
     private Double recommendedLightOnThresholdLux;
 
-    /**
-     * 학습된 추천 LED OFF 기준값
-     */
+    // 학습된 추천 LED OFF 기준값
     @Column(name = "recommended_light_off_threshold_lux")
     private Double recommendedLightOffThresholdLux;
 
-    /**
-     * 학습에 사용된 토양수분 데이터 개수
-     */
+    // 학습에 사용된 토양수분 데이터 개수
     @Column(name = "soil_data_count")
     private Integer soilDataCount;
 
-    /**
-     * 학습에 사용된 조도 데이터 개수
-     */
+    // 학습에 사용된 조도 데이터 개수
     @Column(name = "light_data_count")
     private Integer lightDataCount;
 
-    /**
-     * 학습에 사용된 급수 명령 개수
-     */
+    // 학습에 사용된 급수 명령 개수
     @Column(name = "water_command_count")
     private Integer waterCommandCount;
 
-    /**
-     * 시간당 평균 토양수분 감소량
-     *
-     * 예:
-     * 1.8이면 시간당 토양수분이 평균 1.8% 감소한다는 의미
-     */
+    // 시간당 평균 토양수분 감소량
     @Column(name = "avg_dry_rate_per_hour")
     private Double avgDryRatePerHour;
 
-    /**
-     * 물 주기 후 평균 토양수분 회복량
-     *
-     * 예:
-     * 22.4이면 물을 준 뒤 평균 22.4% 회복
-     */
+    // 물 주기 후 평균 토양수분 회복량
     @Column(name = "avg_water_recovery_percent")
     private Double avgWaterRecoveryPercent;
 
-    /**
-     * 모델 신뢰도
-     *
-     * 0.0 ~ 1.0 사이 값
-     */
+    // 모델 신뢰도 — 0.0 ~ 1.0 사이 값
     @Column(name = "confidence_score")
     private Double confidenceScore;
 
@@ -94,21 +64,15 @@ public class AutomationModel {
     @Column(name = "model_status", nullable = false)
     private AutomationModelStatus modelStatus;
 
-    /**
-     * 학습에 사용한 데이터 시작 시점
-     */
+    // 학습에 사용한 데이터 시작 시점
     @Column(name = "trained_from")
     private LocalDateTime trainedFrom;
 
-    /**
-     * 학습에 사용한 데이터 종료 시점
-     */
+    // 학습에 사용한 데이터 종료 시점
     @Column(name = "trained_to")
     private LocalDateTime trainedTo;
 
-    /**
-     * 마지막 학습 시각
-     */
+    // 마지막 학습 시각
     @Column(name = "last_trained_at")
     private LocalDateTime lastTrainedAt;
 
@@ -122,6 +86,7 @@ public class AutomationModel {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
+    // 생성 시각 초기화
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
@@ -147,11 +112,13 @@ public class AutomationModel {
         }
     }
 
+    // 수정 시각 갱신
     @PreUpdate
     protected void onUpdate() {
         modifiedAt = LocalDateTime.now();
     }
 
+    // create Ready Model 생성
     public static AutomationModel createReadyModel(
             UserPlant userPlant,
             Double recommendedWaterThresholdPercent,
@@ -185,6 +152,7 @@ public class AutomationModel {
                 .build();
     }
 
+    // create Insufficient Data Model 생성
     public static AutomationModel createInsufficientDataModel(
             UserPlant userPlant,
             Integer soilDataCount,
@@ -207,6 +175,7 @@ public class AutomationModel {
                 .build();
     }
 
+    // create Failed Model 생성
     public static AutomationModel createFailedModel(
             UserPlant userPlant,
             String reason,
@@ -224,6 +193,7 @@ public class AutomationModel {
                 .build();
     }
 
+    // soft delete 처리
     public void softDelete() {
         this.deleted = true;
     }

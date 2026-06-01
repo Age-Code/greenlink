@@ -22,146 +22,85 @@ import java.time.LocalTime;
                 )
         }
 )
+// AutomationSetting — 도메인 모델
 public class AutomationSetting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 자동화 설정 소유 사용자
-     */
+    // 자동화 설정 소유 사용자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    /**
-     * 자동화 설정 대상 식물
-     */
+    // 자동화 설정 대상 식물
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_plant_id", nullable = false)
     private UserPlant userPlant;
 
-    /**
-     * 자동 물 주기 사용 여부
-     */
+    // 자동 물 주기 사용 여부
     @Column(name = "auto_water_enabled", nullable = false)
     @Builder.Default
     private Boolean autoWaterEnabled = false;
 
-    /**
-     * 자동 조명 사용 여부
-     */
+    // 자동 조명 사용 여부
     @Column(name = "auto_light_enabled", nullable = false)
     @Builder.Default
     private Boolean autoLightEnabled = false;
 
-    /**
-     * 학습 기반 자동 최적화 사용 여부
-     *
-     * false:
-     * - 학습 모델이 있어도 자동으로 기준값을 수정하지 않음
-     *
-     * true:
-     * - 데이터가 충분하고 신뢰도가 높으면 학습 결과를 자동화 판단에 반영
-     */
+    // 학습 기반 자동 최적화 사용 여부
     @Column(name = "auto_optimize_enabled", nullable = false)
     @Builder.Default
     private Boolean autoOptimizeEnabled = false;
 
-    /**
-     * 과습 안전 모드 사용 여부
-     *
-     * true:
-     * - 토양수분이 급수 기준보다 충분히 높으면 수동/자동 급수를 차단
-     */
+    // 과습 안전 모드 사용 여부
     @Column(name = "watering_safety_enabled", nullable = false)
     @Builder.Default
     private boolean wateringSafetyEnabled = false;
 
-    /**
-     * 자동화 판단 방식
-     *
-     * RULE_BASED:
-     * - 사용자가 설정한 기본 기준값만 사용
-     *
-     * LEARNING_BASED:
-     * - 학습 모델 기준값만 사용
-     *
-     * HYBRID:
-     * - 학습 모델이 충분하면 학습값 사용
-     * - 부족하면 기본 기준값 사용
-     */
+    // 자동화 판단 방식
     @Enumerated(EnumType.STRING)
     @Column(name = "decision_mode", nullable = false)
     @Builder.Default
     private AutomationDecisionMode decisionMode = AutomationDecisionMode.HYBRID;
 
-    /**
-     * 학습 모델을 사용하기 위한 최소 센서 데이터 개수
-     */
+    // 학습 모델을 사용하기 위한 최소 센서 데이터 개수
     @Column(name = "min_learning_data_count", nullable = false)
     @Builder.Default
     private Integer minLearningDataCount = 30;
 
-    /**
-     * 자동 급수 기준 토양수분 퍼센트
-     *
-     * 예:
-     * 35.0이면 토양수분이 35% 이하일 때 물 주기 후보
-     */
+    // 자동 급수 기준 토양수분 퍼센트
     @Column(name = "water_threshold_percent", nullable = false)
     @Builder.Default
     private Double waterThresholdPercent = 35.0;
 
-    /**
-     * 자동 급수 쿨다운 시간
-     *
-     * 단위: 분
-     */
+    // 자동 급수 쿨다운 시간 — 단위: 분
     @Column(name = "water_cooldown_minutes", nullable = false)
     @Builder.Default
     private Integer waterCooldownMinutes = 30;
 
-    /**
-     * LED ON 기준 조도
-     *
-     * 예:
-     * 300.0이면 조도가 300 lux 이하일 때 LED ON 후보
-     */
+    // LED ON 기준 조도
     @Column(name = "light_on_threshold_lux", nullable = false)
     @Builder.Default
     private Double lightOnThresholdLux = 300.0;
 
-    /**
-     * LED OFF 기준 조도
-     *
-     * 예:
-     * 500.0이면 조도가 500 lux 이상일 때 LED OFF 후보
-     */
+    // LED OFF 기준 조도
     @Column(name = "light_off_threshold_lux", nullable = false)
     @Builder.Default
     private Double lightOffThresholdLux = 500.0;
 
-    /**
-     * 자동 조명 시작 시간
-     */
+    // 자동 조명 시작 시간
     @Column(name = "light_start_time", nullable = false)
     @Builder.Default
     private LocalTime lightStartTime = LocalTime.of(8, 0);
 
-    /**
-     * 자동 조명 종료 시간
-     */
+    // 자동 조명 종료 시간
     @Column(name = "light_end_time", nullable = false)
     @Builder.Default
     private LocalTime lightEndTime = LocalTime.of(18, 0);
 
-    /**
-     * 자동 조명 쿨다운 시간
-     *
-     * 단위: 분
-     */
+    // 자동 조명 쿨다운 시간 — 단위: 분
     @Column(name = "light_cooldown_minutes", nullable = false)
     @Builder.Default
     private Integer lightCooldownMinutes = 10;
@@ -176,6 +115,7 @@ public class AutomationSetting {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
+    // 생성 시각 초기화
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
@@ -241,16 +181,13 @@ public class AutomationSetting {
         }
     }
 
+    // 수정 시각 갱신
     @PreUpdate
     protected void onUpdate() {
         modifiedAt = LocalDateTime.now();
     }
 
-    /**
-     * 자동화 설정 수정
-     *
-     * null로 들어온 값은 기존 값을 유지한다.
-     */
+    // 자동화 설정 수정 — null로 들어온 값은 기존 값을 유지한다.
     public void updateSetting(
             Boolean autoWaterEnabled,
             Boolean autoLightEnabled,
@@ -314,15 +251,12 @@ public class AutomationSetting {
         }
     }
 
+    // update Watering Safety Enabled 수정
     public void updateWateringSafetyEnabled(boolean enabled) {
         this.wateringSafetyEnabled = enabled;
     }
 
-    /**
-     * 학습 결과를 자동 설정값에 반영
-     *
-     * 학습 모델의 추천값을 automation_setting에 실제 적용할 때 사용한다.
-     */
+    // 학습 결과를 자동 설정값에 반영 — 학습 모델의 추천값을 automation_setting에 실제 적용할 때 사용한다.
     public void applyLearningThresholds(
             Double recommendedWaterThresholdPercent,
             Double recommendedLightOnThresholdLux,
@@ -341,6 +275,7 @@ public class AutomationSetting {
         }
     }
 
+    // create Default 생성
     public static AutomationSetting createDefault(
             User user,
             UserPlant userPlant
@@ -365,6 +300,7 @@ public class AutomationSetting {
                 .build();
     }
 
+    // soft delete 처리
     public void softDelete() {
         this.deleted = true;
     }

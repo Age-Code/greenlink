@@ -6,6 +6,7 @@ import com.greenlink.greenlink.service.AiPlantImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+// AiPlantImageController — API 요청 처리
 @RestController
 @RequestMapping("/api/ai/plant-images")
 @RequiredArgsConstructor
@@ -13,11 +14,7 @@ public class AiPlantImageController {
 
     private final AiPlantImageService aiPlantImageService;
 
-    /**
-     * AI 변환 결과 저장
-     *
-     * POST /api/ai/plant-images/{plantImageId}/result
-     */
+    // AI 변환 결과 저장
     @PostMapping("/{plantImageId}/result")
     public ApiResponse<AiPlantImageDto.AiImageResDto> saveAiImageResult(
             @PathVariable Long plantImageId,

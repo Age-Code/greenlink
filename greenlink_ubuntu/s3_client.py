@@ -1,3 +1,5 @@
+# S3 업로드 — PNG 업로드 후 공개 URL 반환
+
 from pathlib import Path
 import os
 import mimetypes
@@ -20,6 +22,7 @@ s3 = boto3.client(
 )
 
 
+# S3에 PNG 업로드 후 공개 URL 반환
 def upload_file_to_s3(local_path: Path, s3_key: str) -> str:
     if not local_path.exists():
         raise FileNotFoundError(f"파일을 찾을 수 없습니다: {local_path}")

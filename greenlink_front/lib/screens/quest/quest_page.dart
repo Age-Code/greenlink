@@ -1,3 +1,5 @@
+// 퀘스트 화면 — 퀘스트 조회, 필터, 보상 수령
+
 import 'package:flutter/material.dart';
 import '../../models/quest_models.dart';
 import '../../services/quest_service.dart';
@@ -7,13 +9,16 @@ import '../../widgets/quest_detail_bottom_sheet.dart';
 import '../attend/attend_page.dart';
 import '../main_page.dart';
 
+// QuestPage — 화면 위젯
 class QuestPage extends StatefulWidget {
   const QuestPage({Key? key}) : super(key: key);
 
+  // State 객체 생성
   @override
   QuestPageState createState() => QuestPageState();
 }
 
+// QuestPageState — 퀘스트 화면 — 퀘스트 조회, 필터, 보상 수령
 class QuestPageState extends State<QuestPage> {
   final QuestService _questService = QuestService();
 
@@ -40,17 +45,20 @@ class QuestPageState extends State<QuestPage> {
     'ACHIEVEMENT': '업적',
   };
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadQuests();
   }
 
+  // 화면 데이터 새로고침
   void refresh() {
     debugPrint('[QuestPage] 🔄 refresh quests');
     _loadQuests();
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadQuests() async {
     setState(() => _isLoading = true);
     final res = await _questService.getUserQuests();
@@ -67,6 +75,7 @@ class QuestPageState extends State<QuestPage> {
     }
   }
 
+  // 필터 적용 — 현재 선택값 기준으로 목록 갱신
   void _applyFilters() {
     if (_allQuests == null) return;
     _filteredQuests = _allQuests!.where((q) {
@@ -76,9 +85,12 @@ class QuestPageState extends State<QuestPage> {
     }).toList();
   }
 
+  // 퀘스트 상태 필터 변경
   void _onStatusChanged(String status) => setState(() { _selectedStatus = status; _applyFilters(); });
+  // 퀘스트 타입 필터 변경
   void _onTypeChanged(String type) => setState(() { _selectedQuestType = type; _applyFilters(); });
 
+  // 보상 수령 처리
   Future<void> _receiveReward(UserQuestSummary quest) async {
     final res = await _questService.receiveReward(quest.userQuestId);
     if (!mounted) return;
@@ -90,6 +102,7 @@ class QuestPageState extends State<QuestPage> {
     }
   }
 
+  // 사용자 안내 UI 표시
   void _showRewardSuccessDialog(QuestRewardResponse rewardData) {
     showDialog(
       context: context,
@@ -156,6 +169,7 @@ class QuestPageState extends State<QuestPage> {
     );
   }
 
+  // 사용자 안내 UI 표시
   void _showDetailBottomSheet(UserQuestSummary quest) {
     showModalBottomSheet(
       context: context,
@@ -171,6 +185,7 @@ class QuestPageState extends State<QuestPage> {
     );
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -226,6 +241,7 @@ class QuestPageState extends State<QuestPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildSummaryCard() {
     final int inProgress = _allQuests!.where((q) => q.status == 'IN_PROGRESS').length;
     final int achievable = _allQuests!.where((q) => q.status == 'ACHIEVABLE').length;
@@ -245,6 +261,7 @@ class QuestPageState extends State<QuestPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildFilters() {
     return Column(
       children: [
@@ -307,6 +324,7 @@ class QuestPageState extends State<QuestPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildQuestCard(UserQuestSummary quest) {
     final bool isExpired = quest.status == 'EXPIRED';
     final bool isAchievable = quest.status == 'ACHIEVABLE';
@@ -394,6 +412,7 @@ class QuestPageState extends State<QuestPage> {
     );
   }
 
+  // 상태 표시값 변환
   String _statusMessage(String status) {
     switch (status) {
       case 'IN_PROGRESS': return '조금만 더 해볼까요?';
@@ -404,6 +423,7 @@ class QuestPageState extends State<QuestPage> {
     }
   }
 
+  // 화면 섹션 렌더링
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
@@ -427,8 +447,8 @@ class QuestPageState extends State<QuestPage> {
   }
 }
 
-// ── Sub-widgets ───────────────────────────────────────────────
 
+// _SummaryItem — 내부 위젯
 class _SummaryItem extends StatelessWidget {
   final String label;
   final int count;
@@ -436,6 +456,7 @@ class _SummaryItem extends StatelessWidget {
 
   const _SummaryItem({required this.label, required this.count, this.isHighlight = false});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -456,6 +477,7 @@ class _SummaryItem extends StatelessWidget {
   }
 }
 
+// _TypeBadge — 내부 위젯
 class _TypeBadge extends StatelessWidget {
   final String type;
   const _TypeBadge({required this.type});
@@ -470,6 +492,7 @@ class _TypeBadge extends StatelessWidget {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -483,10 +506,12 @@ class _TypeBadge extends StatelessWidget {
   }
 }
 
+// _StatusBadge — 내부 위젯
 class _StatusBadge extends StatelessWidget {
   final String status;
   const _StatusBadge({required this.status});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     Color bg;

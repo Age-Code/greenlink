@@ -1,3 +1,5 @@
+// 사용자 식물 상세 화면 — 성장 정보, IoT, 자동화 진입
+
 import 'package:flutter/material.dart';
 import '../../models/user_plant_models.dart';
 import '../../models/iot_models.dart';
@@ -12,15 +14,18 @@ import '../../widgets/water_shortage_banner.dart';
 import '../iot/iot_status_page.dart';
 import 'automation_section.dart';
 
+// UserPlantDetailPage — 화면 위젯
 class UserPlantDetailPage extends StatefulWidget {
   final int userPlantId;
 
   const UserPlantDetailPage({Key? key, required this.userPlantId}) : super(key: key);
 
+  // State 객체 생성
   @override
   _UserPlantDetailPageState createState() => _UserPlantDetailPageState();
 }
 
+// _UserPlantDetailPageState — 화면 상태와 이벤트 처리
 class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
   final UserPlantService _plantService = UserPlantService();
   final IotService _iotService = IotService();
@@ -33,12 +38,14 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
   IotLatestStatus? _latestStatus;
   String? _capturedAt;
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadDetail();
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadDetail() async {
     setState(() => _isLoading = true);
     final res = await _plantService.getUserPlantDetail(widget.userPlantId);
@@ -53,6 +60,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     }
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadLatestImage() async {
     try {
       final res = await _iotService.getLatestStatus(widget.userPlantId);
@@ -71,6 +79,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     }
   }
 
+  // 수확 처리 — 성공 시 상태 갱신
   Future<void> _harvestPlant() async {
     if (_plant == null || _isHarvesting) return;
     setState(() => _isHarvesting = true);
@@ -86,6 +95,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     }
   }
 
+  // 사용자 안내 UI 표시
   void _showEditNameBottomSheet() {
     if (_plant == null) return;
     final nameController = TextEditingController(text: _plant!.nickname);
@@ -158,6 +168,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     );
   }
 
+  // 날짜 문자열 포맷 — 파싱 실패 시 원문 반환
   String _formatDate(String? isoString) {
     if (isoString == null) return '-';
     try {
@@ -166,6 +177,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     } catch (_) { return isoString; }
   }
 
+  // 표시용 문자열 포맷
   String _formatDateTimeStr(String? isoString) {
     if (isoString == null) return '-';
     try {
@@ -175,6 +187,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     } catch (_) { return isoString; }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -260,10 +273,12 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildSectionTitle(String title) {
     return Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.ink));
   }
 
+  // 화면 섹션 렌더링
   Widget _buildMainCard(String statusMsg) {
     final displayUrl = getDetailPlantImageUrl(
       aiImageUrl: _latestImageData?.aiImageUrl,
@@ -371,6 +386,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildGrowthInfoCard() {
     return GreenlinkCard(
       child: Column(
@@ -392,6 +408,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildPotCard() {
     if (_plant!.equippedPot == null) {
       return GreenlinkCard(
@@ -449,6 +466,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildIotCard() {
     return GreenlinkCard(
       color: AppColors.surfaceDark,
@@ -499,6 +517,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildBottomAction() {
     final isHarvestable = _plant!.status == 'HARVESTABLE';
 
@@ -518,6 +537,7 @@ class _UserPlantDetailPageState extends State<UserPlantDetailPage> {
   }
 }
 
+// _InfoRow — 내부 위젯
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
@@ -525,6 +545,7 @@ class _InfoRow extends StatelessWidget {
 
   const _InfoRow({required this.label, required this.value, this.valueColor});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -547,8 +568,10 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
+// _Hairline — 내부 위젯
 class _Hairline extends StatelessWidget {
   const _Hairline();
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return const Divider(height: 1, color: AppColors.hairline);

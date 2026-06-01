@@ -9,11 +9,10 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+// UserPlantDto — API 요청/응답 DTO
 public class UserPlantDto {
 
-    /**
-     * 내 식물 생성 요청 DTO
-     */
+    // 내 식물 생성 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -27,9 +26,7 @@ public class UserPlantDto {
         private String nickname;
     }
 
-    /**
-     * 내 식물 생성 응답 DTO
-     */
+    // 내 식물 생성 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -44,6 +41,7 @@ public class UserPlantDto {
         private LocalDateTime plantedAt;
         private LocalDateTime expectedHarvestableAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static CreateResDto from(UserPlant userPlant) {
             LocalDateTime expectedHarvestableAt = userPlant.getPlantedAt()
                     .plusDays(userPlant.getPlant().getGrowthDays());
@@ -60,9 +58,7 @@ public class UserPlantDto {
         }
     }
 
-    /**
-     * 내 식물 목록 응답 DTO
-     */
+    // 내 식물 목록 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -79,6 +75,7 @@ public class UserPlantDto {
         private long remainingDays;
         private String imageUrl;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static ListResDto from(UserPlant userPlant, LocalDate today) {
             return ListResDto.builder()
                     .userPlantId(userPlant.getId())
@@ -94,9 +91,7 @@ public class UserPlantDto {
         }
     }
 
-    /**
-     * 장착 화분 응답 DTO
-     */
+    // 장착 화분 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -108,6 +103,7 @@ public class UserPlantDto {
         private String name;
         private String imageUrl;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static EquippedPotDto from(UserItem userItem) {
             return EquippedPotDto.builder()
                     .userItemId(userItem.getId())
@@ -118,9 +114,7 @@ public class UserPlantDto {
         }
     }
 
-    /**
-     * 내 식물 상세 응답 DTO
-     */
+    // 내 식물 상세 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -139,6 +133,7 @@ public class UserPlantDto {
         private long remainingDays;
         private EquippedPotDto equippedPot;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static DetailResDto of(
                 UserPlant userPlant,
                 LocalDate today,
@@ -160,9 +155,7 @@ public class UserPlantDto {
         }
     }
 
-    /**
-     * 식물 이름 수정 요청 DTO
-     */
+    // 식물 이름 수정 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -173,9 +166,7 @@ public class UserPlantDto {
         private String nickname;
     }
 
-    /**
-     * 식물 이름 수정 응답 DTO
-     */
+    // 식물 이름 수정 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -185,6 +176,7 @@ public class UserPlantDto {
         private Long userPlantId;
         private String nickname;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static UpdateNicknameResDto from(UserPlant userPlant) {
             return UpdateNicknameResDto.builder()
                     .userPlantId(userPlant.getId())
@@ -193,9 +185,7 @@ public class UserPlantDto {
         }
     }
 
-    /**
-     * 식물 수확 응답 DTO
-     */
+    // 식물 수확 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -208,6 +198,7 @@ public class UserPlantDto {
         private String status;
         private LocalDateTime harvestedAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static HarvestResDto from(UserPlant userPlant) {
             return HarvestResDto.builder()
                     .userPlantId(userPlant.getId())

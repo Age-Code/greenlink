@@ -1,3 +1,6 @@
+// 사용자 아이템 API 모델
+
+// UserItemGroup — 사용자 아이템 API 모델
 class UserItemGroup {
   final int itemId;
   final String name;
@@ -15,6 +18,7 @@ class UserItemGroup {
     required this.usableCount, required this.usedCount, required this.items,
   });
 
+  // JSON 응답을 모델로 변환
   factory UserItemGroup.fromJson(Map<String, dynamic> json) {
     return UserItemGroup(
       itemId: json['itemId'] ?? 0,
@@ -30,6 +34,7 @@ class UserItemGroup {
   }
 }
 
+// UserItemDetail — 사용자 아이템 API 모델
 class UserItemDetail {
   final int userItemId;
   final String status;
@@ -37,6 +42,7 @@ class UserItemDetail {
 
   UserItemDetail({required this.userItemId, required this.status, this.userPlantId});
 
+  // JSON 응답을 모델로 변환
   factory UserItemDetail.fromJson(Map<String, dynamic> json) => UserItemDetail(
     userItemId: json['userItemId'] ?? 0,
     status: json['status'] ?? 'OWNED',

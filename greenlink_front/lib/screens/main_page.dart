@@ -1,3 +1,5 @@
+// 메인 화면 — 홈/인벤토리/도감/퀘스트 탭 네비게이션
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/app_theme.dart';
@@ -6,19 +8,17 @@ import 'inventory/inventory_page.dart';
 import 'collection/collection_page.dart';
 import 'quest/quest_page.dart';
 
-// ============================================================
 // MainPage — 하단 네비게이션 구조
 // 탭 구성 (변경 금지):
 //   0: 홈
 //   1: 인벤토리
 //   2: 도감
 //   3: 퀘스트
-//
 // 탭 전환 시 해당 탭 GlobalKey를 통해 refresh() 호출
-// ============================================================
 
-/// 각 탭 페이지가 구현해야 할 refresh 인터페이스
+// 탭 새로고침 인터페이스
 abstract class RefreshablePage {
+  // 화면 데이터 새로고침
   void refresh();
 }
 
@@ -27,17 +27,21 @@ final GlobalKey<InventoryPageState> inventoryPageKey =
     GlobalKey<InventoryPageState>();
 final GlobalKey<QuestPageState> questPageKey = GlobalKey<QuestPageState>();
 
+// 메인 화면 — 탭 네비게이션 관리
 class MainPage extends StatefulWidget {
   final int initialIndex;
   const MainPage({Key? key, this.initialIndex = 0}) : super(key: key);
 
+  // State 객체 생성
   @override
   _MainPageState createState() => _MainPageState();
 }
 
+// _MainPageState — 화면 상태와 이벤트 처리
 class _MainPageState extends State<MainPage> {
   late int _currentIndex;
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
@@ -51,6 +55,7 @@ class _MainPageState extends State<MainPage> {
     QuestPage(key: questPageKey),
   ];
 
+  // 탭 선택 처리 — 같은 탭이면 새로고침
   void _onTabTapped(int index) {
     HapticFeedback.selectionClick();
     if (index == _currentIndex) {
@@ -63,6 +68,7 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  // 현재 탭 새로고침 — RefreshablePage이면 refresh 호출
   void _refreshTab(int index) {
     switch (index) {
       case 0:
@@ -77,6 +83,7 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,6 +96,7 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildBottomNav() {
     return Container(
       decoration: const BoxDecoration(
@@ -137,6 +145,7 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
+// _NavItem — 내부 위젯
 class _NavItem extends StatelessWidget {
   final IconData icon;
   final IconData iconOutlined;
@@ -152,6 +161,7 @@ class _NavItem extends StatelessWidget {
     required this.onTap,
   });
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

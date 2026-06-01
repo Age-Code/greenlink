@@ -1,9 +1,11 @@
+// 자동화 설정 카드 — 급수/조명 임계치와 안전 모드 입력
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../models/automation_models.dart';
 import '../../theme/app_theme.dart';
 
-// ── Card 1: 자동화 상태 ────────────────────────────────────
+// AutomationStatusCard — 카드 위젯
 class AutomationStatusCard extends StatelessWidget {
   final AutomationSettingModel setting;
   final ValueChanged<bool> onWaterChanged;
@@ -22,6 +24,7 @@ class AutomationStatusCard extends StatelessWidget {
     required this.onDecisionModeChanged,
   }) : super(key: key);
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return _AutoCard(
@@ -106,7 +109,7 @@ class AutomationStatusCard extends StatelessWidget {
   }
 }
 
-// ── Card 2: 기준값 설정 ────────────────────────────────────
+// AutomationThresholdCard — 카드 위젯
 class AutomationThresholdCard extends StatefulWidget {
   final AutomationSettingModel setting;
   final bool isSaving;
@@ -124,11 +127,13 @@ class AutomationThresholdCard extends StatefulWidget {
     required this.onSave,
   }) : super(key: key);
 
+  // State 객체 생성
   @override
   State<AutomationThresholdCard> createState() =>
       _AutomationThresholdCardState();
 }
 
+// _AutomationThresholdCardState — 화면 상태와 이벤트 처리
 class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
   late TextEditingController _waterThreshold;
   late TextEditingController _waterCooldown;
@@ -139,12 +144,14 @@ class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
   String _lightStartTime = '00:00';
   String _lightEndTime = '23:59';
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _initControllers(widget.setting);
   }
 
+  // 초기값 설정
   void _initControllers(AutomationSettingModel s) {
     _waterThreshold = TextEditingController(
       text: s.waterThresholdPercent.toStringAsFixed(1),
@@ -166,6 +173,7 @@ class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
     _lightEndTime = _toHHmm(s.lightEndTime);
   }
 
+  // 부모 설정 변경 반영
   @override
   void didUpdateWidget(AutomationThresholdCard old) {
     super.didUpdateWidget(old);
@@ -174,6 +182,7 @@ class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
     }
   }
 
+  // 리소스 정리
   @override
   void dispose() {
     _waterThreshold.dispose();
@@ -185,8 +194,10 @@ class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
     super.dispose();
   }
 
+  // 시간 문자열 변환 — HH:mm 형식으로 축약
   String _toHHmm(String t) => t.length >= 5 ? t.substring(0, 5) : t;
 
+  // 선택 UI 표시 — 선택값을 상태에 반영
   Future<void> _pickTime(BuildContext ctx, bool isStart) async {
     final parts = (isStart ? _lightStartTime : _lightEndTime).split(':');
     final init = TimeOfDay(
@@ -207,6 +218,7 @@ class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
     }
   }
 
+  // 이벤트 처리 — 입력값 검증 후 콜백 호출
   void _handleSave() {
     final updated = AutomationSettingModel(
       automationSettingId: widget.setting.automationSettingId,
@@ -229,6 +241,7 @@ class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
     widget.onSave(updated, _lightStartTime, _lightEndTime);
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return _AutoCard(
@@ -302,8 +315,8 @@ class _AutomationThresholdCardState extends State<AutomationThresholdCard> {
   }
 }
 
-// ── 공용 서브 위젯들 ────────────────────────────────────────
 
+// _AutoCard — 카드 위젯
 class _AutoCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -315,6 +328,7 @@ class _AutoCard extends StatelessWidget {
     required this.child,
   });
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -364,6 +378,7 @@ class _AutoCard extends StatelessWidget {
   }
 }
 
+// _SwitchRow — 내부 위젯
 class _SwitchRow extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -377,6 +392,7 @@ class _SwitchRow extends StatelessWidget {
     required this.onChanged,
   });
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -407,12 +423,14 @@ class _SwitchRow extends StatelessWidget {
   }
 }
 
+// _SafetySwitchRow — 내부 위젯
 class _SafetySwitchRow extends StatelessWidget {
   final bool value;
   final ValueChanged<bool>? onChanged;
 
   const _SafetySwitchRow({required this.value, required this.onChanged});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -486,13 +504,16 @@ class _SafetySwitchRow extends StatelessWidget {
   }
 }
 
+// _CardDivider — 내부 위젯
 class _CardDivider extends StatelessWidget {
   const _CardDivider();
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) =>
       const Divider(height: 1, color: AppColors.hairline);
 }
 
+// _NumInput — 내부 위젯
 class _NumInput extends StatelessWidget {
   final String label;
   final String unit;
@@ -506,6 +527,7 @@ class _NumInput extends StatelessWidget {
     this.isDecimal = false,
   });
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -567,6 +589,7 @@ class _NumInput extends StatelessWidget {
   }
 }
 
+// _TimePickerRow — 내부 위젯
 class _TimePickerRow extends StatelessWidget {
   final String label;
   final String value;
@@ -578,6 +601,7 @@ class _TimePickerRow extends StatelessWidget {
     required this.onTap,
   });
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Padding(

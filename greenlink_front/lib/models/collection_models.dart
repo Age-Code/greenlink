@@ -1,3 +1,6 @@
+// 도감 API 모델
+
+// CollectionPlant — 도감 API 모델
 class CollectionPlant {
   final int plantId;
   final String name;
@@ -13,6 +16,7 @@ class CollectionPlant {
     this.firstHarvestedAt,
   });
 
+  // JSON 응답을 모델로 변환
   factory CollectionPlant.fromJson(Map<String, dynamic> json) => CollectionPlant(
     plantId: json['plantId'] ?? 0,
     name: json['name'] ?? '',
@@ -24,6 +28,7 @@ class CollectionPlant {
   );
 }
 
+// CollectionDetail — 도감 API 모델
 class CollectionDetail {
   final int plantId;
   final String name;
@@ -40,6 +45,7 @@ class CollectionDetail {
     required this.harvestCount, required this.harvestedPlants,
   });
 
+  // JSON 응답을 모델로 변환
   factory CollectionDetail.fromJson(Map<String, dynamic> json) => CollectionDetail(
     plantId: json['plantId'] ?? 0,
     name: json['name'] ?? '',
@@ -52,6 +58,7 @@ class CollectionDetail {
   );
 }
 
+// HarvestedPlant — 도감 API 모델
 class HarvestedPlant {
   final int userPlantId;
   final String nickname;
@@ -64,6 +71,7 @@ class HarvestedPlant {
     this.plantedAt, this.harvestedAt,
   });
 
+  // JSON 응답을 모델로 변환
   factory HarvestedPlant.fromJson(Map<String, dynamic> json) => HarvestedPlant(
     userPlantId: json['userPlantId'] ?? 0,
     nickname: json['nickname'] ?? '',

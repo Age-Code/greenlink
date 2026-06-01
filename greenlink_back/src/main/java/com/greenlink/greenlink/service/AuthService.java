@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+// AuthService — 비즈니스 로직 처리
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -39,6 +40,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
+    // 회원가입 처리 — 사용자 생성 및 기본 데이터 지급
     @Transactional
     public AuthDto.SignupResDto signup(AuthDto.SignupReqDto request) {
         validateDuplicateEmail(request.getEmail());
@@ -60,6 +62,7 @@ public class AuthService {
         return AuthDto.SignupResDto.of(savedUser, grantedItems);
     }
 
+    // 로그인 처리 — 비밀번호 검증 후 JWT 발급
     public AuthDto.LoginResDto login(AuthDto.LoginReqDto request) {
         User user = userRepository.findByEmailAndDeletedFalse(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
@@ -77,6 +80,7 @@ public class AuthService {
         return AuthDto.LoginResDto.of(accessToken, user);
     }
 
+    // OAuth 로그인 처리
     @Transactional
     public AuthDto.LoginResDto oauthLogin(OAuthUserInfo userInfo) {
         User user = userRepository
@@ -86,11 +90,8 @@ public class AuthService {
                 )
                 .orElseGet(() -> createOAuthUserFromOAuthInfo(userInfo));
 
-        /*
-         * 중요:
-         * 기존에 OAuth로 가입되어 있었지만 기본 아이템을 못 받은 유저를 보정한다.
-         * 이미 받은 유저는 중복 지급되지 않는다.
-         */
+                // 중요: — 기존에 OAuth로 가입되어 있었지만 기본 아이템을 못 받은 유저를 보정한다.
+
         grantDefaultItemsIfMissing(user);
 
         createAchievementUserQuestsIfMissing(user);
@@ -104,6 +105,7 @@ public class AuthService {
         return AuthDto.LoginResDto.of(accessToken, user);
     }
 
+    // create OAuth User From OAuth Info 생성
     private User createOAuthUserFromOAuthInfo(OAuthUserInfo userInfo) {
         String socialPassword = passwordEncoder.encode(
                 "SOCIAL_LOGIN_" + userInfo.getProvider() + "_" + userInfo.getProviderId()
@@ -121,12 +123,14 @@ public class AuthService {
         return userRepository.save(user);
     }
 
+    // validate Duplicate Email 검증
     private void validateDuplicateEmail(String email) {
         if (userRepository.existsByEmailAndDeletedFalse(email)) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
     }
 
+    // grant Default Items If Missing 지급
     private List<UserItem> grantDefaultItemsIfMissing(User user) {
         Item basilSeed = itemRepository.findByNameAndDeletedFalse(DEFAULT_SEED_NAME)
                 .orElseThrow(() -> new IllegalStateException("기본 지급 아이템인 바질 씨앗이 등록되어 있지 않습니다."));
@@ -163,6 +167,7 @@ public class AuthService {
         return grantedItems;
     }
 
+    // create Achievement User Quests If Missing 생성
     private void createAchievementUserQuestsIfMissing(User user) {
         List<Quest> achievementQuests =
                 questRepository.findAllByQuestTypeAndActiveTrueAndDeletedFalse(

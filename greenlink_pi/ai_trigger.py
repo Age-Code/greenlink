@@ -1,22 +1,16 @@
+# AI 트리거 — Ubuntu AI Worker /process POST
+
 import requests
 
 from config import AI_WORKER_URL
 
 
+# AI Worker 호출 — 업로드 이미지 URL로 /process 요청
 def trigger_ai_worker(
     plant_image_id: int,
     user_plant_id: int,
     image_url: str,
 ):
-    """
-    사진 업로드 성공 후 AI Worker에 변환 요청을 보낸다.
-
-    AI Worker는 다음을 수행한다.
-    1. imageUrl 다운로드
-    2. AI 이미지 변환
-    3. 최종 결과 S3 업로드
-    4. 백엔드 ai_plant_image 저장
-    """
 
     name = f"user_plant_{user_plant_id}_image_{plant_image_id}"
 

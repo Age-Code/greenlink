@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+// UserService — 비즈니스 로직 처리
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -20,6 +21,7 @@ public class UserService {
         return UserDto.MeResDto.from(user);
     }
 
+    // update Nickname 수정
     @Transactional
     public UserDto.UpdateNicknameResDto updateNickname(
             Long userId,
@@ -32,6 +34,7 @@ public class UserService {
         return UserDto.UpdateNicknameResDto.from(user);
     }
 
+    // find Active User 조회 — 없으면 예외 또는 Optional 반환
     private User findActiveUser(Long userId) {
         return userRepository.findById(userId)
                 .filter(user -> !user.isDeleted())

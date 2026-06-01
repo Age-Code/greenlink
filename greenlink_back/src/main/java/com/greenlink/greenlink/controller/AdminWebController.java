@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+// 관리자 Thymeleaf Controller — 웹 화면
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -19,54 +20,61 @@ public class AdminWebController {
 
     private final AdminService adminService;
 
+    // 로그인 처리 — 비밀번호 검증 후 JWT 발급
     @GetMapping("/login")
     public String login() {
         return "admin/login";
     }
 
+    // index 처리
     @GetMapping({"", "/", "/index"})
     public String index() {
         return "admin/index";
     }
 
-    // --- User Management ---
+    // user List 처리
     @GetMapping("/users")
     public String userList(Model model) {
         model.addAttribute("users", adminService.getAllUsers());
         return "admin/user/list";
     }
 
+    // user Detail 처리
     @GetMapping("/users/{id}")
     public String userDetail(@PathVariable Long id, Model model) {
         model.addAttribute("user", adminService.getUser(id));
         return "admin/user/detail";
     }
 
+    // toggle User Role 처리
     @PostMapping("/users/{id}/toggle-role")
     public String toggleUserRole(@PathVariable Long id) {
         adminService.toggleUserRole(id);
         return "redirect:/admin/users";
     }
 
+    // delete User 삭제
     @PostMapping("/users/{id}/delete")
     public String deleteUser(@PathVariable Long id) {
         adminService.deleteUser(id);
         return "redirect:/admin/users";
     }
 
-    // --- Plant Management ---
+    // plant List 처리
     @GetMapping("/plants")
     public String plantList(Model model) {
         model.addAttribute("plants", adminService.getAllPlants());
         return "admin/plant/list";
     }
 
+    // create Plant Form 생성
     @GetMapping("/plants/new")
     public String createPlantForm(Model model) {
         model.addAttribute("plantDto", new AdminDto.CreatePlantReqDto());
         return "admin/plant/create";
     }
 
+    // create Plant 생성
     @PostMapping("/plants")
     public String createPlant(@ModelAttribute AdminDto.CreatePlantReqDto plantDto, Model model) {
         try {
@@ -79,13 +87,14 @@ public class AdminWebController {
         }
     }
 
-    // --- Item Management ---
+    // item List 처리
     @GetMapping("/items")
     public String itemList(Model model) {
         model.addAttribute("items", adminService.getAllItems());
         return "admin/item/list";
     }
 
+    // create Item Form 생성
     @GetMapping("/items/new")
     public String createItemForm(Model model) {
         model.addAttribute("itemDto", new AdminDto.CreateItemReqDto());
@@ -93,6 +102,7 @@ public class AdminWebController {
         return "admin/item/create";
     }
 
+    // create Item 생성
     @PostMapping("/items")
     public String createItem(@ModelAttribute AdminDto.CreateItemReqDto itemDto, Model model) {
         try {
@@ -106,13 +116,14 @@ public class AdminWebController {
         }
     }
 
-    // --- Quest Management ---
+    // quest List 처리
     @GetMapping("/quests")
     public String questList(Model model) {
         model.addAttribute("quests", adminService.getAllQuests());
         return "admin/quest/list";
     }
 
+    // create Quest Form 생성
     @GetMapping("/quests/new")
     public String createQuestForm(Model model) {
         model.addAttribute("questDto", new AdminDto.CreateQuestReqDto());
@@ -122,6 +133,7 @@ public class AdminWebController {
         return "admin/quest/create";
     }
 
+    // create Quest 생성
     @PostMapping("/quests")
     public String createQuest(@ModelAttribute AdminDto.CreateQuestReqDto questDto, Model model) {
         try {
@@ -137,13 +149,14 @@ public class AdminWebController {
         }
     }
 
-    // --- IoT Management ---
+    // iot List 처리
     @GetMapping("/iot")
     public String iotList(Model model) {
         model.addAttribute("devices", adminService.getAllIotDevices());
         return "admin/iot/list";
     }
 
+    // create Iot Form 생성
     @GetMapping("/iot/new")
     public String createIotForm(Model model) {
         model.addAttribute("iotDto", new AdminDto.CreateIotDeviceReqDto());
@@ -151,6 +164,7 @@ public class AdminWebController {
         return "admin/iot/create";
     }
 
+    // create Iot 생성
     @PostMapping("/iot")
     public String createIot(@ModelAttribute AdminDto.CreateIotDeviceReqDto iotDto, Model model) {
         try {

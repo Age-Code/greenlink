@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+// RaspberrySensorData — 도메인 모델
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -15,16 +16,12 @@ public class RaspberrySensorData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 환경 센서 데이터는 식물 단위가 아니라 재배 공간 단위다.
-     */
+    // 환경 센서 데이터는 식물 단위가 아니라 재배 공간 단위다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "grow_space_id", nullable = false)
     private GrowSpace growSpace;
 
-    /**
-     * 데이터를 보낸 라즈베리파이 기기
-     */
+    // 데이터를 보낸 라즈베리파이 기기
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "iot_device_id", nullable = false)
     private IotDevice iotDevice;
@@ -47,6 +44,7 @@ public class RaspberrySensorData {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
+    // RaspberrySensorData 생성
     @Builder
     private RaspberrySensorData(
             GrowSpace growSpace,
@@ -69,6 +67,7 @@ public class RaspberrySensorData {
         this.deleted = false;
     }
 
+    // create 생성
     public static RaspberrySensorData create(
             GrowSpace growSpace,
             IotDevice iotDevice,
@@ -87,6 +86,7 @@ public class RaspberrySensorData {
                 .build();
     }
 
+    // 생성 시각 초기화
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
@@ -94,6 +94,7 @@ public class RaspberrySensorData {
         this.modifiedAt = now;
     }
 
+    // 수정 시각 갱신
     @PreUpdate
     public void preUpdate() {
         this.modifiedAt = LocalDateTime.now();

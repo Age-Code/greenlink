@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// UserItem — 도메인 모델
 @Getter
 @Entity
 @Table(name = "user_item")
@@ -38,12 +39,14 @@ public class UserItem extends BaseEntity {
     @Column(nullable = false, length = 30)
     private UserItemStatus status;
 
+    // UserItem 생성
     private UserItem(User user, Item item, UserItemStatus status) {
         this.user = user;
         this.item = item;
         this.status = status;
     }
 
+    // create Owned 생성
     public static UserItem createOwned(User user, Item item) {
         return new UserItem(user, item, UserItemStatus.OWNED);
     }
@@ -64,6 +67,7 @@ public class UserItem extends BaseEntity {
         return this.status == UserItemStatus.USED && !this.isDeleted();
     }
 
+    // 씨앗 사용 처리
     public void useSeed() {
         validateItemType(ItemType.SEED);
         validateOwned();
@@ -72,6 +76,7 @@ public class UserItem extends BaseEntity {
         this.userPlant = null;
     }
 
+    // 화분 장착 처리
     public void equipPot(UserPlant userPlant) {
         validateItemType(ItemType.POT);
         validateOwned();
@@ -80,6 +85,7 @@ public class UserItem extends BaseEntity {
         this.status = UserItemStatus.EQUIPPED;
     }
 
+    // 화분 해제 처리
     public void unequipPot() {
         validateItemType(ItemType.POT);
 
@@ -91,6 +97,7 @@ public class UserItem extends BaseEntity {
         this.status = UserItemStatus.OWNED;
     }
 
+    // 영양제 사용 처리
     public void useNutrient(UserPlant userPlant) {
         validateItemType(ItemType.NUTRIENT);
         validateOwned();
@@ -99,6 +106,7 @@ public class UserItem extends BaseEntity {
         this.status = UserItemStatus.USED;
     }
 
+    // validate Owned 검증
     private void validateOwned() {
         if (this.status != UserItemStatus.OWNED) {
             throw new IllegalStateException("보유 중인 아이템만 사용할 수 있습니다.");
@@ -109,6 +117,7 @@ public class UserItem extends BaseEntity {
         }
     }
 
+    // validate Item Type 검증
     private void validateItemType(ItemType requiredType) {
         if (this.item.getItemType() != requiredType) {
             throw new IllegalStateException(requiredType + " 타입의 아이템이 아닙니다.");

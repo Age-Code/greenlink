@@ -12,6 +12,7 @@ import org.springframework.web.client.RestClientException;
 
 import java.util.Map;
 
+// KakaoOAuthClient — 비즈니스 로직 처리
 @Component
 @RequiredArgsConstructor
 public class KakaoOAuthClient {
@@ -35,6 +36,7 @@ public class KakaoOAuthClient {
         return requestUserInfo(accessToken);
     }
 
+    // OAuth access token 요청
     private String requestAccessToken(String code, String redirectUri) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -73,6 +75,7 @@ public class KakaoOAuthClient {
         }
     }
 
+    // OAuth 사용자 정보 요청
     private OAuthUserInfo requestUserInfo(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);

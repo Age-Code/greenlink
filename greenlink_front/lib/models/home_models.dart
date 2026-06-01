@@ -1,3 +1,6 @@
+// 홈 API 모델
+
+// HomeResponse — API 응답 모델
 class HomeResponse {
   final HomeUser user;
   final HomeUserPlant? mainUserPlant;
@@ -6,6 +9,7 @@ class HomeResponse {
 
   HomeResponse({required this.user, this.mainUserPlant, this.attendanceSummary, this.questSummary});
 
+  // JSON 응답을 모델로 변환
   factory HomeResponse.fromJson(Map<String, dynamic> json) => HomeResponse(
     user: HomeUser.fromJson(json['user']),
     mainUserPlant: json['mainUserPlant'] != null ? HomeUserPlant.fromJson(json['mainUserPlant']) : null,
@@ -14,13 +18,15 @@ class HomeResponse {
   );
 }
 
+// HomeUser — 홈 API 모델
 class HomeUser {
   final int userId;
   final String nickname;
   final String? profileImageUrl;
 
   HomeUser({required this.userId, required this.nickname, this.profileImageUrl});
-  
+
+  // JSON 응답을 모델로 변환
   factory HomeUser.fromJson(Map<String, dynamic> json) => HomeUser(
     userId: json['userId'] ?? 0,
     nickname: json['nickname'] ?? '',
@@ -28,6 +34,7 @@ class HomeUser {
   );
 }
 
+// HomeUserPlant — 홈 API 모델
 class HomeUserPlant {
   final int userPlantId;
   final int plantId;
@@ -44,6 +51,7 @@ class HomeUserPlant {
     this.daysAfterPlanting, this.remainingDays,
   });
 
+  // JSON 응답을 모델로 변환
   factory HomeUserPlant.fromJson(Map<String, dynamic> json) => HomeUserPlant(
     userPlantId: json['userPlantId'] ?? 0,
     plantId: json['plantId'] ?? 0,

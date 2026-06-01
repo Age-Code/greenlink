@@ -1,3 +1,5 @@
+// 홈 화면 — 사용자 식물 상태와 수확 진입
+
 import 'package:flutter/material.dart';
 import '../../models/home_models.dart';
 import '../../models/iot_models.dart';
@@ -14,13 +16,16 @@ import '../user_plant/seed_planting_page.dart';
 import '../user_plant/user_plant_detail_page.dart';
 import '../settings_page.dart';
 
+// HomePage — 화면 위젯
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
+  // State 객체 생성
   @override
   HomePageState createState() => HomePageState();
 }
 
+// HomePageState — 홈 화면 — 사용자 식물 상태와 수확 진입
 class HomePageState extends State<HomePage> {
   final HomeService _homeService = HomeService();
   final UserPlantService _plantService = UserPlantService();
@@ -33,23 +38,27 @@ class HomePageState extends State<HomePage> {
   final PageController _pageController = PageController(viewportFraction: 0.88);
   int _currentPage = 0;
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadData();
   }
 
+  // 리소스 정리
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
 
+  // 화면 데이터 새로고침
   void refresh() {
     debugPrint('[HomePage] 🔄 refresh home');
     _loadData();
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
 
@@ -100,6 +109,7 @@ class HomePageState extends State<HomePage> {
     setState(() => _isLoading = false);
   }
 
+  // 수확 처리 — 성공 시 상태 갱신
   void _harvestPlant(UserPlantSummary plant) async {
     final res = await _plantService.harvestUserPlant(plant.userPlantId);
     if (!mounted) return;
@@ -115,6 +125,7 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -169,6 +180,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildTopBar(dynamic user) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 20, 20, 0),
@@ -227,6 +239,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildEmptyPlantState() {
     return Center(
       child: Padding(
@@ -275,6 +288,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildPlantCarousel() {
     return Column(
       children: [
@@ -334,6 +348,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildPlantCard(UserPlantSummary plant) {
     String statusText = '';
     String remainingText = '';
@@ -371,7 +386,6 @@ class HomePageState extends State<HomePage> {
         color: AppColors.surfaceCard,
         child: Column(
           children: [
-            // ── Hero image area ────────────────────────────
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -457,7 +471,6 @@ class HomePageState extends State<HomePage> {
               ),
             ),
 
-            // ── Info area ──────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
               child: Column(
@@ -534,12 +547,14 @@ class HomePageState extends State<HomePage> {
   }
 }
 
+// _IconBtn — 내부 위젯
 class _IconBtn extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
 
   const _IconBtn({required this.icon, required this.onTap});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

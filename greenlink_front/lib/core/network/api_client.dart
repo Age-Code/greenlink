@@ -1,19 +1,19 @@
+// HTTP 클라이언트 — JWT 헤더 부착, 401 처리
+
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'token_storage.dart';
 
-// ============================================================
-// ApiClient — 모든 HTTP 요청의 공통 처리
-// 디버깅: 요청/응답 URL, method, status code, 인증 헤더 출력
-// ============================================================
+// HTTP 클라이언트 — 공통 헤더와 응답 처리
 class ApiClient {
   static const String baseUrl = 'https://likepigs.shop/api';
   final TokenStorage _tokenStorage = TokenStorage();
 
-  /// 401 발생 시 호출할 콜백 (SplashPage/Navigator 연결용)
+  // 401 발생 시 호출할 콜백
   static Function()? onUnauthorized;
 
+  // 요청 헤더 생성 — 토큰이 있으면 Authorization 추가
   Future<Map<String, String>> _getHeaders() async {
     final token = await _tokenStorage.getAccessToken();
     final headers = {'Content-Type': 'application/json'};
@@ -26,6 +26,7 @@ class ApiClient {
     return headers;
   }
 
+  // GET 요청 실행 — 공통 응답 처리
   Future<dynamic> get(String path) async {
     final url = '$baseUrl$path';
     debugPrint('[ApiClient] → GET $url');
@@ -38,6 +39,7 @@ class ApiClient {
     }
   }
 
+  // POST 요청 실행 — JSON body 전송 후 공통 응답 처리
   Future<dynamic> post(String path, {Map<String, dynamic>? body}) async {
     final url = '$baseUrl$path';
     debugPrint('[ApiClient] → POST $url');
@@ -55,6 +57,7 @@ class ApiClient {
     }
   }
 
+  // PATCH 요청 실행 — JSON body 전송 후 공통 응답 처리
   Future<dynamic> patch(String path, {Map<String, dynamic>? body}) async {
     final url = '$baseUrl$path';
     debugPrint('[ApiClient] → PATCH $url');
@@ -72,6 +75,7 @@ class ApiClient {
     }
   }
 
+  // HTTP 응답 처리 — 성공/401/오류 응답을 공통 형태로 변환
   dynamic _processResponse(String method, String url, http.Response response) {
     debugPrint('[ApiClient] ← $method $url → ${response.statusCode}');
 

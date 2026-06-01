@@ -1,31 +1,16 @@
+// 퀘스트 서비스 — 퀘스트 조회와 보상 수령 API 호출
+
 import 'package:flutter/foundation.dart';
 import '../core/network/api_client.dart';
 import '../core/network/api_response.dart';
 import '../core/constants/api_paths.dart';
 import '../models/quest_models.dart';
 
-// ============================================================
-// QuestService
-// TEST 11: 퀘스트 조회
-//   [x] GET /api/user-quests — Authorization 헤더 포함
-//   [x] 상태 필터 동작 (IN_PROGRESS, ACHIEVABLE, COMPLETED)
-//   [x] progressValue / targetValue 진행도 표시
-//   [x] ACHIEVABLE → 보상 받기 버튼 표시
-//
-// TEST 12: 퀘스트 상세 조회
-//   [x] GET /api/user-quests/{userQuestId}
-//   [x] description, rewardItem, rewardQuantity 표시
-//   [x] status별 안내 문구 표시
-//
-// TEST 13: 퀘스트 보상 수령
-//   [x] POST /api/user-quests/{userQuestId}/reward
-//   [x] ACHIEVABLE에서만 버튼 활성
-//   [x] 성공 → 보상 모달 → QuestPage 재조회
-//   [x] 해당 퀘스트 status == COMPLETED 확인
-// ============================================================
+// QuestService — Backend API 호출
 class QuestService {
   final ApiClient _client = ApiClient();
 
+  // 사용자 퀘스트 목록 조회 API 호출
   Future<ApiResponse<List<UserQuestSummary>>> getUserQuests({String? questType, String? status}) async {
     debugPrint('[QuestService] 📋 퀘스트 목록 조회 (type=$questType, status=$status)');
     try {
@@ -50,6 +35,7 @@ class QuestService {
     }
   }
 
+  // 사용자 퀘스트 상세 조회 API 호출
   Future<ApiResponse<UserQuestDetail>> getUserQuestDetail(int userQuestId) async {
     debugPrint('[QuestService] 🔍 퀘스트 상세 조회 (id=$userQuestId)');
     try {
@@ -69,6 +55,7 @@ class QuestService {
     }
   }
 
+  // 퀘스트 보상 수령 API 호출
   Future<ApiResponse<QuestRewardResponse>> receiveReward(int userQuestId) async {
     debugPrint('[QuestService] 🎁 보상 수령 (id=$userQuestId)');
     try {

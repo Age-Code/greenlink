@@ -12,13 +12,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+// AutomationDto — API 요청/응답 DTO
 public class AutomationDto {
 
-    /**
-     * 자동화 설정 조회 응답 DTO
-     *
-     * GET /api/user-plants/{userPlantId}/automation
-     */
+    // 자동화 설정 조회 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -34,23 +31,15 @@ public class AutomationDto {
 
         private Boolean autoLightEnabled;
 
-        /**
-         * 학습 기반 자동 최적화 사용 여부
-         */
+        // 학습 기반 자동 최적화 사용 여부
         private Boolean autoOptimizeEnabled;
 
         private boolean wateringSafetyEnabled;
 
-        /**
-         * 자동화 판단 방식
-         *
-         * RULE_BASED / LEARNING_BASED / HYBRID
-         */
+        // 자동화 판단 방식 — RULE_BASED / LEARNING_BASED / HYBRID
         private AutomationDecisionMode decisionMode;
 
-        /**
-         * 학습 모델을 사용하기 위한 최소 센서 데이터 개수
-         */
+        // 학습 모델을 사용하기 위한 최소 센서 데이터 개수
         private Integer minLearningDataCount;
 
         private Double waterThresholdPercent;
@@ -71,6 +60,7 @@ public class AutomationDto {
 
         private LocalDateTime modifiedAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static SettingResDto from(AutomationSetting setting) {
             return SettingResDto.builder()
                     .automationSettingId(setting.getId())
@@ -94,13 +84,7 @@ public class AutomationDto {
         }
     }
 
-    /**
-     * 자동화 설정 수정 요청 DTO
-     *
-     * PATCH /api/user-plants/{userPlantId}/automation
-     *
-     * null 값은 기존 설정을 유지한다.
-     */
+    // 자동화 설정 수정 요청 DTO
     @Getter
     @Setter
     @Builder
@@ -112,23 +96,15 @@ public class AutomationDto {
 
         private Boolean autoLightEnabled;
 
-        /**
-         * 학습 기반 자동 최적화 사용 여부
-         */
+        // 학습 기반 자동 최적화 사용 여부
         private Boolean autoOptimizeEnabled;
 
         private Boolean wateringSafetyEnabled;
 
-        /**
-         * 자동화 판단 방식
-         *
-         * RULE_BASED / LEARNING_BASED / HYBRID
-         */
+        // 자동화 판단 방식 — RULE_BASED / LEARNING_BASED / HYBRID
         private AutomationDecisionMode decisionMode;
 
-        /**
-         * 학습 모델을 사용하기 위한 최소 센서 데이터 개수
-         */
+        // 학습 모델을 사용하기 위한 최소 센서 데이터 개수
         private Integer minLearningDataCount;
 
         private Double waterThresholdPercent;
@@ -146,11 +122,7 @@ public class AutomationDto {
         private Integer lightCooldownMinutes;
     }
 
-    /**
-     * 자동화 로그 조회 응답 DTO
-     *
-     * GET /api/user-plants/{userPlantId}/automation/logs
-     */
+    // 자동화 로그 조회 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -176,6 +148,7 @@ public class AutomationDto {
 
         private LocalDateTime createdAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static LogResDto from(AutomationLog log) {
             return LogResDto.builder()
                     .automationLogId(log.getId())
@@ -195,11 +168,7 @@ public class AutomationDto {
         }
     }
 
-    /**
-     * 학습 모델 조회 응답 DTO
-     *
-     * 이후 학습 결과 조회 API에서 사용한다.
-     */
+    // 학습 모델 조회 응답 DTO — 이후 학습 결과 조회 API에서 사용한다.
     @Getter
     @Setter
     @Builder
@@ -241,6 +210,7 @@ public class AutomationDto {
 
         private LocalDateTime modifiedAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static ModelResDto from(AutomationModel model) {
             return ModelResDto.builder()
                     .automationModelId(model.getId())

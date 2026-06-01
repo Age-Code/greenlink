@@ -1,3 +1,5 @@
+// 자동화 섹션 — 설정/학습/모델/로그 조회
+
 import 'package:flutter/material.dart';
 import '../../models/automation_models.dart';
 import '../../services/automation_service.dart';
@@ -5,25 +7,22 @@ import '../../theme/app_theme.dart';
 import 'automation_setting_card.dart';
 import 'automation_cards.dart';
 
-// ============================================================
-// AutomationSection
-//   식물 상세 화면에 삽입되는 자동화 관리 섹션
-//   상태관리: setState (기존 패턴 유지)
-// ============================================================
+// AutomationSection — 자동화 섹션 — 설정/학습/모델/로그 조회
 class AutomationSection extends StatefulWidget {
   final int userPlantId;
 
   const AutomationSection({Key? key, required this.userPlantId})
     : super(key: key);
 
+  // State 객체 생성
   @override
   State<AutomationSection> createState() => _AutomationSectionState();
 }
 
+// _AutomationSectionState — 화면 상태와 이벤트 처리
 class _AutomationSectionState extends State<AutomationSection> {
   final AutomationService _service = AutomationService();
 
-  // ── 상태 ────────────────────────────────────────────────
   bool _isLoadingSetting = false;
   bool _isSavingSetting = false;
   bool _isTraining = false;
@@ -42,18 +41,19 @@ class _AutomationSectionState extends State<AutomationSection> {
   bool _wateringSafetyEnabled = true;
   String _decisionMode = 'HYBRID';
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadAll();
   }
 
-  // ── 전체 로드 ─────────────────────────────────────────────
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadAll() async {
     await Future.wait([_loadSetting(), _loadModel(), _loadLogs()]);
   }
 
-  // ── 자동화 설정 조회 ──────────────────────────────────────
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadSetting() async {
     setState(() {
       _isLoadingSetting = true;
@@ -79,7 +79,7 @@ class _AutomationSectionState extends State<AutomationSection> {
     }
   }
 
-  // ── 학습 모델 조회 ────────────────────────────────────────
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadModel() async {
     setState(() => _isLoadingModel = true);
     final model = await _service.getLatestAutomationModel(widget.userPlantId);
@@ -90,7 +90,7 @@ class _AutomationSectionState extends State<AutomationSection> {
     });
   }
 
-  // ── 자동화 로그 조회 ──────────────────────────────────────
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadLogs() async {
     setState(() => _isLoadingLogs = true);
     final res = await _service.getAutomationLogs(widget.userPlantId);
@@ -101,7 +101,7 @@ class _AutomationSectionState extends State<AutomationSection> {
     });
   }
 
-  // ── 설정 저장 ─────────────────────────────────────────────
+  // 자동화 설정 저장 — 성공 시 설정과 로그 재조회
   Future<void> _saveSetting(
     AutomationSettingModel updated,
     String startTime,
@@ -126,6 +126,7 @@ class _AutomationSectionState extends State<AutomationSection> {
     }
   }
 
+  // 과습 안전 모드 변경 — 저장 실패 시 이전 값 복원
   Future<void> _updateWateringSafety(bool enabled) async {
     final previous = _wateringSafetyEnabled;
 
@@ -160,7 +161,7 @@ class _AutomationSectionState extends State<AutomationSection> {
     }
   }
 
-  // ── 학습 실행 ─────────────────────────────────────────────
+  // 자동화 학습 실행 — 성공 시 설정/모델/로그 재조회
   Future<void> _trainModel() async {
     setState(() => _isTraining = true);
     final res = await _service.trainAutomationModel(widget.userPlantId);
@@ -175,6 +176,7 @@ class _AutomationSectionState extends State<AutomationSection> {
     }
   }
 
+  // 스낵바 표시 — 성공/오류 색상 분기
   void _showSnack(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -182,7 +184,7 @@ class _AutomationSectionState extends State<AutomationSection> {
     );
   }
 
-  // ── 현재 로컬 설정 반영한 모델 ────────────────────────────
+  // 현재 자동화 설정 모델 생성 — 미조회 상태는 화면 값으로 보정
   AutomationSettingModel _currentSetting() {
     final base =
         _setting ??
@@ -213,12 +215,12 @@ class _AutomationSectionState extends State<AutomationSection> {
     );
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── 섹션 헤더 ──────────────────────────────────────
         const Text(
           '자동화 관리',
           style: TextStyle(
@@ -247,7 +249,6 @@ class _AutomationSectionState extends State<AutomationSection> {
         ),
         const SizedBox(height: 16),
 
-        // ── 로딩 / 에러 ────────────────────────────────────
         if (_isLoadingSetting)
           const Center(
             child: Padding(
@@ -282,7 +283,6 @@ class _AutomationSectionState extends State<AutomationSection> {
             ),
           )
         else ...[
-          // ── Card 1: 자동화 상태 ─────────────────────────
           AutomationStatusCard(
             setting: _currentSetting(),
             onWaterChanged: (v) => setState(() => _autoWaterEnabled = v),
@@ -295,7 +295,6 @@ class _AutomationSectionState extends State<AutomationSection> {
           ),
           const SizedBox(height: 16),
 
-          // ── Card 2: 기준값 설정 ─────────────────────────
           AutomationThresholdCard(
             setting: _currentSetting(),
             isSaving: _isSavingSetting,
@@ -303,7 +302,6 @@ class _AutomationSectionState extends State<AutomationSection> {
           ),
           const SizedBox(height: 16),
 
-          // ── Card 3: 학습 모델 ───────────────────────────
           AutomationModelCard(
             model: _model,
             isTraining: _isTraining,
@@ -313,7 +311,6 @@ class _AutomationSectionState extends State<AutomationSection> {
           ),
           const SizedBox(height: 16),
 
-          // ── Card 4: 자동화 로그 ─────────────────────────
           AutomationLogCard(logs: _logs, isLoading: _isLoadingLogs),
         ],
       ],

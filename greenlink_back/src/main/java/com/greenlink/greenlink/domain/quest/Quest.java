@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// Quest — 도메인 모델
 @Getter
 @Entity
 @Table(name = "quest")
@@ -57,6 +58,7 @@ public class Quest extends BaseEntity {
     @Column(nullable = false)
     private Boolean active;
 
+    // Quest 생성
     private Quest(
             String title,
             String description,
@@ -79,6 +81,7 @@ public class Quest extends BaseEntity {
         this.active = active;
     }
 
+    // create 생성
     public static Quest create(
             String title,
             String description,
@@ -102,6 +105,7 @@ public class Quest extends BaseEntity {
         );
     }
 
+    // update 수정
     public void update(
             String title,
             String description,

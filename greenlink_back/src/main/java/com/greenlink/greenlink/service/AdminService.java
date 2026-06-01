@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+// AdminService — 비즈니스 로직 처리
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -21,6 +22,7 @@ public class AdminService {
     private final ItemRepository itemRepository;
     private final QuestRepository questRepository;
 
+    // create Plant 생성
     @Transactional
     public AdminDto.PlantResDto createPlant(AdminDto.CreatePlantReqDto request) {
         if (plantRepository.existsByNameAndDeletedFalse(request.getName())) {
@@ -39,6 +41,7 @@ public class AdminService {
         return AdminDto.PlantResDto.from(savedPlant);
     }
 
+    // create Item 생성
     @Transactional
     public AdminDto.ItemResDto createItem(AdminDto.CreateItemReqDto request) {
         if (itemRepository.existsByNameAndDeletedFalse(request.getName())) {
@@ -79,6 +82,7 @@ public class AdminService {
         return AdminDto.ItemResDto.from(savedItem);
     }
 
+    // create Quest 생성
     @Transactional
     public AdminDto.QuestResDto createQuest(AdminDto.CreateQuestReqDto request) {
         if (questRepository.existsByTitleAndDeletedFalse(request.getTitle())) {
@@ -124,11 +128,13 @@ public class AdminService {
         return userRepository.findById(id).orElse(null);
     }
 
+    // toggle User Role 처리
     @Transactional
     public void toggleUserRole(Long id) {
         userRepository.findById(id).ifPresent(com.greenlink.greenlink.domain.user.User::toggleRole);
     }
 
+    // delete User 삭제
     @Transactional
     public void deleteUser(Long id) {
         userRepository.findById(id).ifPresent(com.greenlink.greenlink.domain.user.User::delete);
@@ -150,6 +156,7 @@ public class AdminService {
         return iotDeviceRepository.findAllByDeletedFalse();
     }
 
+    // create Iot Device 생성
     @Transactional
     public AdminDto.IotDeviceResDto createIotDevice(AdminDto.CreateIotDeviceReqDto request) {
         if (iotDeviceRepository.existsByDeviceKeyAndDeletedFalse(request.getDeviceKey())) {

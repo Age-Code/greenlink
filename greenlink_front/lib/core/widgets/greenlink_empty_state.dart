@@ -1,7 +1,10 @@
+// 공통 빈 상태 위젯
+
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import 'greenlink_button.dart';
 
+// GreenlinkEmptyState — 공통 빈 상태 위젯
 class GreenlinkEmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -18,6 +21,7 @@ class GreenlinkEmptyState extends StatelessWidget {
     this.onButtonPressed,
   }) : super(key: key);
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Center(

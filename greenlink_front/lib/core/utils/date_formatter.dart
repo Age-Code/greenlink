@@ -1,4 +1,8 @@
+// 날짜 포맷 유틸리티
+
+// DateFormatter — 날짜 포맷 유틸리티
 class DateFormatter {
+  // 날짜 문자열 포맷
   static String formatDate(String? isoString) {
     if (isoString == null || isoString.isEmpty) return '-';
     try {
@@ -9,6 +13,7 @@ class DateFormatter {
     }
   }
 
+  // 한국어 날짜 문자열 포맷
   static String formatDateKorean(String? isoString) {
     if (isoString == null || isoString.isEmpty) return '-';
     try {

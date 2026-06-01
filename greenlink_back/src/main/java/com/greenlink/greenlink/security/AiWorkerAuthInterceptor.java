@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+// AI Worker 인증 인터셉터 — X-AI-Worker-Secret 헤더 검증, 불일치 시 401
 @Component
 public class AiWorkerAuthInterceptor implements HandlerInterceptor {
 
@@ -19,6 +20,7 @@ public class AiWorkerAuthInterceptor implements HandlerInterceptor {
         this.aiWorkerSecret = aiWorkerSecret;
     }
 
+    // AI Worker 요청 사전 검증 — X-AI-Worker-Secret 불일치 시 401
     @Override
     public boolean preHandle(
             HttpServletRequest request,

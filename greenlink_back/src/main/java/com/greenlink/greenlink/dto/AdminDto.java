@@ -12,13 +12,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+// AdminDto — API 요청/응답 DTO
 public class AdminDto {
 
-    /**
-     * 관리자 식물 등록 요청 DTO
-     *
-     * POST /api/admin/plants
-     */
+    // 관리자 식물 등록 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -40,9 +37,7 @@ public class AdminDto {
         private Integer growthDays;
     }
 
-    /**
-     * 관리자 식물 등록 응답 DTO
-     */
+    // 관리자 식물 등록 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -56,6 +51,7 @@ public class AdminDto {
         private String imageUrl;
         private Integer growthDays;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static PlantResDto from(Plant plant) {
             return PlantResDto.builder()
                     .plantId(plant.getId())
@@ -68,11 +64,7 @@ public class AdminDto {
         }
     }
 
-    /**
-     * 관리자 아이템 등록 요청 DTO
-     *
-     * POST /api/admin/items
-     */
+    // 관리자 아이템 등록 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -92,9 +84,7 @@ public class AdminDto {
         private Long linkedPlantId;
     }
 
-    /**
-     * 관리자 아이템 등록 응답 DTO
-     */
+    // 관리자 아이템 등록 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -108,6 +98,7 @@ public class AdminDto {
         private String imageUrl;
         private Long linkedPlantId;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static ItemResDto from(Item item) {
             Long linkedPlantId = item.getLinkedPlant() == null
                     ? null
@@ -124,11 +115,7 @@ public class AdminDto {
         }
     }
 
-    /**
-     * 관리자 퀘스트 등록 요청 DTO
-     *
-     * POST /api/admin/quests
-     */
+    // 관리자 퀘스트 등록 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -160,9 +147,7 @@ public class AdminDto {
         private ResetCycle resetCycle;
     }
 
-    /**
-     * 관리자 퀘스트 등록 응답 DTO
-     */
+    // 관리자 퀘스트 등록 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -181,6 +166,7 @@ public class AdminDto {
         private ResetCycle resetCycle;
         private Boolean active;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static QuestResDto from(Quest quest) {
             Long rewardItemId = quest.getRewardItem() == null
                     ? null
@@ -206,9 +192,7 @@ public class AdminDto {
         }
     }
 
-    /**
-     * 관리자 IoT 기기 등록 요청 DTO
-     */
+    // 관리자 IoT 기기 등록 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -227,9 +211,7 @@ public class AdminDto {
         private Long userPlantId;
     }
 
-    /**
-     * 관리자 IoT 기기 응답 DTO
-     */
+    // 관리자 IoT 기기 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -243,10 +225,11 @@ public class AdminDto {
         private Long growSpaceId;
         private Long userPlantId;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static IotDeviceResDto from(com.greenlink.greenlink.domain.iot.IotDevice iotDevice) {
             Long growSpaceId = iotDevice.getGrowSpace() == null ? null : iotDevice.getGrowSpace().getId();
             Long userPlantId = iotDevice.getUserPlant() == null ? null : iotDevice.getUserPlant().getId();
-            
+
             return IotDeviceResDto.builder()
                     .deviceId(iotDevice.getId())
                     .deviceName(iotDevice.getDeviceName())

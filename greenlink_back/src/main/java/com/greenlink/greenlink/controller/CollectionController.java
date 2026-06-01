@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// CollectionController — API 요청 처리
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/collections")

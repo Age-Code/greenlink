@@ -1,6 +1,9 @@
+// 공통 카드 위젯
+
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 
+// GreenlinkCard — 카드 위젯
 class GreenlinkCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -17,6 +20,7 @@ class GreenlinkCard extends StatelessWidget {
     this.borderRadius = 18.0,
   }) : super(key: key);
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     final cardColor = color ?? AppColors.surfaceCard;

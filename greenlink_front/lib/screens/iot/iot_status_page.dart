@@ -1,3 +1,5 @@
+// IoT 상태 화면 — 센서 조회, 물주기/조명/센서 새로고침 버튼
+
 import 'package:flutter/material.dart';
 import '../../models/iot_models.dart';
 import '../../services/iot_service.dart';
@@ -8,13 +10,7 @@ import '../../widgets/mjpeg_stream_view.dart';
 import '../../widgets/soil_moisture_sufficient_banner.dart';
 import '../../widgets/water_shortage_banner.dart';
 
-// ============================================================
-// IotStatusPage
-//   - 실시간 카메라: MjpegStreamView (http 직접 파싱)
-//   - 센서 데이터: 온도/습도/조도/토양수분
-//   - 물 주기 / LED 켜기·끄기 제어
-//   - IoT API 실패와 카메라 실패는 완전히 분리
-// ============================================================
+// IoT 상태 화면 — 센서/카메라/제어 명령 표시
 class IotStatusPage extends StatefulWidget {
   final int userPlantId;
   final String plantName;
@@ -25,10 +21,12 @@ class IotStatusPage extends StatefulWidget {
     required this.plantName,
   }) : super(key: key);
 
+  // State 객체 생성
   @override
   State<IotStatusPage> createState() => _IotStatusPageState();
 }
 
+// _IotStatusPageState — 화면 상태와 이벤트 처리
 class _IotStatusPageState extends State<IotStatusPage> {
   final IotService _iotService = IotService();
 
@@ -44,12 +42,14 @@ class _IotStatusPageState extends State<IotStatusPage> {
   int _cameraReloadKey = 0;
   bool _hasShownWaterShortageNotice = false;
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadLatest();
   }
 
+  // 최신 IoT 상태 조회 — 성공 시 화면 상태 반영
   Future<void> _loadLatest({bool showLoading = true}) async {
     if (showLoading) {
       setState(() {
@@ -75,6 +75,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     }
   }
 
+  // 센서 새로고침 요청 — 성공 시 2.5초 후 latest 재조회, 409면 스낵바
   Future<void> _onSensorRefresh() async {
     if (_isSensorRefreshing) return;
 
@@ -112,6 +113,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     }
   }
 
+  // 수동 물주기 요청 — 과습이면 차단하고 아니면 명령 전송
   Future<void> _onWater() async {
     if (_status?.isTooWet == true) {
       final moisture = _status!.soilMoisturePercent;
@@ -137,6 +139,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     await _loadLatest();
   }
 
+  // 조명 켜기 요청 — 성공 시 최신 상태 재조회
   Future<void> _onLightOn() async {
     setState(() => _isLightingOn = true);
     final res = await _iotService.lightOn(widget.userPlantId);
@@ -151,6 +154,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     if (res.success) await _loadLatest();
   }
 
+  // 조명 끄기 요청 — 성공 시 최신 상태 재조회
   Future<void> _onLightOff() async {
     setState(() => _isLightingOff = true);
     final res = await _iotService.lightOff(widget.userPlantId);
@@ -165,6 +169,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     if (res.success) await _loadLatest();
   }
 
+  // 스낵바 표시 — 성공/오류 색상 분기
   void _showSnack(String msg, {bool success = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -175,6 +180,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     );
   }
 
+  // 물 부족 알림 표시 — 같은 조회 주기에서 중복 방지
   void _showWaterShortageSnackIfNeeded(IotLatestStatus latest) {
     final moisture = latest.soilMoisturePercent;
     if (_hasShownWaterShortageNotice ||
@@ -192,6 +198,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     );
   }
 
+  // 일시 문자열 포맷 — 파싱 실패 시 원문 반환
   String _formatDateTime(String? raw) {
     if (raw == null || raw.isEmpty) return '-';
     try {
@@ -206,6 +213,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
   bool get _anyBusy =>
       _isWatering || _isLightingOn || _isLightingOff || _isSensorRefreshing;
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -246,6 +254,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildError() {
     return Center(
       child: Padding(
@@ -288,6 +297,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildContent() {
     final status = _status!;
     return SingleChildScrollView(
@@ -337,6 +347,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildLiveCameraCard() {
     return _IotCard(
       child: Column(
@@ -431,6 +442,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildEnvironmentGrid(EnvironmentData? env) {
     if (env == null) {
       return _IotCard(
@@ -515,24 +527,28 @@ class _IotStatusPageState extends State<IotStatusPage> {
     );
   }
 
+  // 온도 상태 라벨 반환
   String _tempStatus(double t) {
     if (t < 15) return '낮음';
     if (t > 30) return '높음';
     return '적정';
   }
 
+  // 습도 상태 라벨 반환
   String _humidityStatus(double h) {
     if (h < 30) return '건조';
     if (h > 80) return '높음';
     return '안정';
   }
 
+  // 조도 상태 라벨 반환
   String _lightStatus(double l) {
     if (l < 50) return '어두움';
     if (l < 200) return '보통';
     return '밝음';
   }
 
+  // 화면 섹션 렌더링
   Widget _buildSoilCard(SoilData? soil) {
     if (soil == null) {
       return _IotCard(
@@ -679,6 +695,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildSensorRefreshPanel() {
     return _IotCard(
       child: Row(
@@ -739,6 +756,7 @@ class _IotStatusPageState extends State<IotStatusPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildControlSection() {
     final isTooWet = _status?.isTooWet == true;
 
@@ -824,12 +842,13 @@ class _IotStatusPageState extends State<IotStatusPage> {
   }
 }
 
-// ── Shared sub-widgets ────────────────────────────────────────
 
+// _GrowSpaceCard — 카드 위젯
 class _GrowSpaceCard extends StatelessWidget {
   final String name;
   const _GrowSpaceCard({required this.name});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -861,10 +880,12 @@ class _GrowSpaceCard extends StatelessWidget {
   }
 }
 
+// _IotCard — 카드 위젯
 class _IotCard extends StatelessWidget {
   final Widget child;
   const _IotCard({required this.child});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -887,11 +908,13 @@ class _IotCard extends StatelessWidget {
   }
 }
 
+// _CardTitle — 내부 위젯
 class _CardTitle extends StatelessWidget {
   final IconData icon;
   final String label;
   const _CardTitle({required this.icon, required this.label});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -911,6 +934,7 @@ class _CardTitle extends StatelessWidget {
   }
 }
 
+// _SensorCard — 카드 위젯
 class _SensorCard extends StatelessWidget {
   final String label;
   final String value;
@@ -934,6 +958,7 @@ class _SensorCard extends StatelessWidget {
     required this.formatTime,
   });
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -1033,6 +1058,7 @@ class _SensorCard extends StatelessWidget {
   }
 }
 
+// _ControlButton — 내부 위젯
 class _ControlButton extends StatelessWidget {
   final String label;
   final String description;
@@ -1054,6 +1080,7 @@ class _ControlButton extends StatelessWidget {
     required this.onPressed,
   });
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     final disabled = isDisabled;

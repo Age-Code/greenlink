@@ -1,4 +1,6 @@
+// 사용자 모델
 
+// User — 사용자 모델
 class User {
   final int userId;
   final String email;
@@ -8,6 +10,7 @@ class User {
 
   User({required this.userId, required this.email, required this.nickname, required this.role, this.createdAt});
 
+  // JSON 응답을 모델로 변환
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       userId: json['userId'] ?? 0,

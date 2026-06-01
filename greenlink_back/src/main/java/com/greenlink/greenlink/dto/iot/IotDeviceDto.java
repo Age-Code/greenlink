@@ -12,16 +12,10 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+// IotDeviceDto — API 요청/응답 DTO
 public class IotDeviceDto {
 
-    /**
-     * 라즈베리파이 환경 데이터 전송 요청 DTO
-     *
-     * POST /api/iot/raspberry/environment
-     *
-     * Header:
-     * X-DEVICE-KEY: RPI-CAPSTONE-001
-     */
+    // 라즈베리파이 환경 데이터 전송 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -34,19 +28,11 @@ public class IotDeviceDto {
 
         private Double light;
 
-        /**
-         * 라즈베리파이에서 측정한 시각.
-         * null이면 서버에서 현재 시각으로 저장한다.
-         */
+        // 라즈베리파이에서 측정한 시각. — null이면 서버에서 현재 시각으로 저장한다.
         private LocalDateTime measuredAt;
     }
 
-    /**
-     * 라즈베리파이 환경 데이터 저장 응답 DTO
-     *
-     * 온도/습도/조도는 특정 식물 데이터가 아니라
-     * 재배 공간 단위의 환경 데이터다.
-     */
+    // 라즈베리파이 환경 데이터 저장 응답 DTO — 온도/습도/조도는 특정 식물 데이터가 아니라
     @Getter
     @Setter
     @Builder
@@ -64,6 +50,7 @@ public class IotDeviceDto {
 
         private LocalDateTime measuredAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static RaspberryEnvironmentResDto from(RaspberrySensorData data) {
             return RaspberryEnvironmentResDto.builder()
                     .sensorDataId(data.getId())
@@ -77,14 +64,7 @@ public class IotDeviceDto {
         }
     }
 
-    /**
-     * ESP 토양수분 데이터 전송 요청 DTO
-     *
-     * POST /api/iot/esp/soil-moisture
-     *
-     * Header:
-     * X-DEVICE-KEY: ESP-BASIL-001
-     */
+    // ESP 토양수분 데이터 전송 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -95,18 +75,11 @@ public class IotDeviceDto {
 
         private Double soilMoisturePercent;
 
-        /**
-         * ESP에서 측정한 시각.
-         * null이면 서버에서 현재 시각으로 저장한다.
-         */
+        // ESP에서 측정한 시각. — null이면 서버에서 현재 시각으로 저장한다.
         private LocalDateTime measuredAt;
     }
 
-    /**
-     * ESP 토양수분 데이터 저장 응답 DTO
-     *
-     * 토양수분은 식물별 데이터이므로 userPlantId가 포함된다.
-     */
+    // ESP 토양수분 데이터 저장 응답 DTO — 토양수분은 식물별 데이터이므로 userPlantId가 포함된다.
     @Getter
     @Setter
     @Builder
@@ -124,6 +97,7 @@ public class IotDeviceDto {
 
         private LocalDateTime measuredAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static EspSoilMoistureResDto from(EspSensorData data) {
             Long growSpaceId = data.getGrowSpace() == null
                     ? null
@@ -141,14 +115,7 @@ public class IotDeviceDto {
         }
     }
 
-    /**
-     * 라즈베리파이가 조회하는 대기 명령 응답 DTO
-     *
-     * GET /api/iot/commands/pending
-     *
-     * Header:
-     * X-DEVICE-KEY: RPI-CAPSTONE-001
-     */
+    // 라즈베리파이가 조회하는 대기 명령 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -167,6 +134,7 @@ public class IotDeviceDto {
 
         private LocalDateTime requestedAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static PendingCommandResDto from(DeviceCommand command) {
             return PendingCommandResDto.builder()
                     .commandId(command.getId())
@@ -179,12 +147,7 @@ public class IotDeviceDto {
         }
     }
 
-    /**
-     * 라즈베리파이 명령 처리용 펌프 채널 DTO
-     *
-     * 앱 사용자에게 보여주는 정보가 아니라,
-     * 실제 라즈베리파이 코드가 펌프를 제어하기 위해 사용하는 정보다.
-     */
+    // 라즈베리파이 명령 처리용 펌프 채널 DTO — 앱 사용자에게 보여주는 정보가 아니라,
     @Getter
     @Setter
     @Builder
@@ -197,6 +160,7 @@ public class IotDeviceDto {
 
         private Integer relayChannel;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static PumpChannelCommandDto from(PumpChannel pumpChannel) {
             if (pumpChannel == null) {
                 return null;
@@ -210,11 +174,7 @@ public class IotDeviceDto {
         }
     }
 
-    /**
-     * 명령 처리 시작 응답 DTO
-     *
-     * PATCH /api/iot/commands/{commandId}/processing
-     */
+    // 명령 처리 시작 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -227,6 +187,7 @@ public class IotDeviceDto {
 
         private LocalDateTime processedAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static CommandProcessingResDto from(DeviceCommand command) {
             return CommandProcessingResDto.builder()
                     .commandId(command.getId())
@@ -236,11 +197,7 @@ public class IotDeviceDto {
         }
     }
 
-    /**
-     * 명령 처리 완료 요청 DTO
-     *
-     * PATCH /api/iot/commands/{commandId}/complete
-     */
+    // 명령 처리 완료 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -253,12 +210,7 @@ public class IotDeviceDto {
         private String resultMessage;
     }
 
-    /**
-     * 명령 처리 완료 응답 DTO
-     *
-     * success == true  → commandStatus = SUCCESS
-     * success == false → commandStatus = FAILED
-     */
+    // 명령 처리 완료 응답 DTO — success == true → commandStatus = SUCCESS
     @Getter
     @Setter
     @Builder
@@ -273,6 +225,7 @@ public class IotDeviceDto {
 
         private LocalDateTime completedAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static CommandCompleteResDto from(DeviceCommand command) {
             return CommandCompleteResDto.builder()
                     .commandId(command.getId())
@@ -283,11 +236,7 @@ public class IotDeviceDto {
         }
     }
 
-    /**
-     * 라즈베리파이 식물 이미지 업로드 응답 DTO
-     *
-     * POST /api/iot/plant-images
-     */
+    // 라즈베리파이 식물 이미지 업로드 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -305,6 +254,7 @@ public class IotDeviceDto {
 
         private LocalDateTime capturedAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static PlantImageUploadResDto from(PlantImage plantImage) {
             Long userPlantId = plantImage.getUserPlant() == null
                     ? null

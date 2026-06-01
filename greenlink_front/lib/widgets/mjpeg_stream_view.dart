@@ -1,14 +1,11 @@
+// MJPEG 스트림 위젯 — http 바이트 스트림에서 JPEG 프레임 추출
+
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-// ============================================================
-// MjpegStreamView
-//   - http 패키지로 MJPEG 스트림을 직접 읽어 Image.memory로 렌더링
-//   - 외부 MJPEG 패키지 불필요
-//   - 새로고침: key를 교체하면 dispose 후 재생성됨
-// ============================================================
+// MJPEG 스트림 위젯 — JPEG 프레임 추출 후 표시
 class MjpegStreamView extends StatefulWidget {
   final String streamUrl;
   final double height;
@@ -21,10 +18,12 @@ class MjpegStreamView extends StatefulWidget {
     this.fit = BoxFit.cover,
   }) : super(key: key);
 
+  // State 객체 생성
   @override
   State<MjpegStreamView> createState() => _MjpegStreamViewState();
 }
 
+// _MjpegStreamViewState — 화면 상태와 이벤트 처리
 class _MjpegStreamViewState extends State<MjpegStreamView> {
   Uint8List? _frameBytes;   // 현재 렌더링할 JPEG 프레임
   bool _isConnecting = true;
@@ -42,18 +41,21 @@ class _MjpegStreamViewState extends State<MjpegStreamView> {
   static const int _eoiByte0 = 0xFF;
   static const int _eoiByte1 = 0xD9;
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _startStream();
   }
 
+  // 리소스 정리
   @override
   void dispose() {
     _stopStream();
     super.dispose();
   }
 
+  // MJPEG 스트림 정지 — 구독과 클라이언트 정리
   void _stopStream() {
     _subscription?.cancel();
     _client?.close();
@@ -61,6 +63,7 @@ class _MjpegStreamViewState extends State<MjpegStreamView> {
     _client = null;
   }
 
+  // MJPEG 스트림 시작 — HTTP bytes 구독 생성
   Future<void> _startStream() async {
     setState(() {
       _isConnecting = true;
@@ -101,17 +104,20 @@ class _MjpegStreamViewState extends State<MjpegStreamView> {
     }
   }
 
+  // 스트림 chunk 처리 — 버퍼에 추가 후 프레임 추출
   void _onData(List<int> chunk) {
     _buffer.addAll(chunk);
     _extractFrames();
   }
 
+  // 스트림 오류 처리 — 에러 상태 표시
   void _onError(Object e) {
     debugPrint('[MjpegStreamView] ❌ 스트림 오류: $e');
     if (!mounted) return;
     setState(() => _error = '실시간 카메라 연결이 끊겼습니다.');
   }
 
+  // 스트림 종료 처리 — 연결 상태 해제
   void _onDone() {
     debugPrint('[MjpegStreamView] 🔌 스트림 종료');
     if (!mounted) return;
@@ -120,7 +126,7 @@ class _MjpegStreamViewState extends State<MjpegStreamView> {
     }
   }
 
-  /// 버퍼에서 JPEG SOI~EOI 구간을 찾아 프레임 추출
+  // JPEG 프레임 추출 — SOI/EOI 구간을 찾아 이미지 갱신
   void _extractFrames() {
     while (_buffer.length >= 2) {
       // SOI 마커(FF D8) 탐색
@@ -152,7 +158,7 @@ class _MjpegStreamViewState extends State<MjpegStreamView> {
     }
   }
 
-  /// bytes 내에서 [b0, b1] 시퀀스의 첫 위치를 반환, 없으면 -1
+  // 바이트 시퀀스 검색 — 없으면 -1 반환
   int _findSequence(List<int> bytes, int b0, int b1, int from) {
     for (int i = from; i < bytes.length - 1; i++) {
       if (bytes[i] == b0 && bytes[i + 1] == b1) return i;
@@ -160,6 +166,7 @@ class _MjpegStreamViewState extends State<MjpegStreamView> {
     return -1;
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

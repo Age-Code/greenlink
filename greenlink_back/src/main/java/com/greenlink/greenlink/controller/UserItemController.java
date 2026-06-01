@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// UserItemController — API 요청 처리
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user-items")
@@ -35,6 +36,7 @@ public class UserItemController {
         return ApiResponse.success("내 아이템 조회 성공", response);
     }
 
+    // 화분 장착 처리
     @PostMapping("/{userItemId}/equip-pot")
     public ApiResponse<UserItemDto.EquipPotResDto> equipPot(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -50,6 +52,7 @@ public class UserItemController {
         return ApiResponse.success("화분이 장착되었습니다.", response);
     }
 
+    // 화분 해제 처리
     @PostMapping("/{userItemId}/unequip-pot")
     public ApiResponse<UserItemDto.UnequipPotResDto> unequipPot(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -63,6 +66,7 @@ public class UserItemController {
         return ApiResponse.success("화분 장착이 해제되었습니다.", response);
     }
 
+    // 영양제 사용 처리
     @PostMapping("/{userItemId}/use-nutrient")
     public ApiResponse<UserItemDto.UseNutrientResDto> useNutrient(
             @AuthenticationPrincipal CustomUserDetails userDetails,

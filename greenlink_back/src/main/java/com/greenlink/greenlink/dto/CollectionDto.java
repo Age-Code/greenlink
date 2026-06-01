@@ -7,13 +7,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// CollectionDto — API 요청/응답 DTO
 public class CollectionDto {
 
-    /**
-     * 도감 목록 응답 DTO
-     *
-     * GET /api/collections
-     */
+    // 도감 목록 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -29,6 +26,7 @@ public class CollectionDto {
         private long harvestCount;
         private LocalDateTime firstHarvestedAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static ListResDto of(
                 Plant plant,
                 boolean collected,
@@ -47,11 +45,7 @@ public class CollectionDto {
         }
     }
 
-    /**
-     * 도감 상세에 포함되는 수확 식물 DTO
-     *
-     * 사용자가 실제로 수확한 user_plant 목록입니다.
-     */
+    // 도감 상세에 포함되는 수확 식물 DTO — 사용자가 실제로 수확한 user_plant 목록입니다.
     @Getter
     @Setter
     @Builder
@@ -64,6 +58,7 @@ public class CollectionDto {
         private LocalDateTime plantedAt;
         private LocalDateTime harvestedAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static HarvestedPlantDto from(UserPlant userPlant) {
             return HarvestedPlantDto.builder()
                     .userPlantId(userPlant.getId())
@@ -75,11 +70,7 @@ public class CollectionDto {
         }
     }
 
-    /**
-     * 도감 상세 응답 DTO
-     *
-     * GET /api/collections/{plantId}
-     */
+    // 도감 상세 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -96,6 +87,7 @@ public class CollectionDto {
         private long harvestCount;
         private List<HarvestedPlantDto> harvestedPlants;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static DetailResDto of(
                 Plant plant,
                 List<UserPlant> harvestedPlants

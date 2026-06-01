@@ -1,8 +1,10 @@
+// 자동화 카드 위젯 — 학습 모델과 로그 표시
+
 import 'package:flutter/material.dart';
 import '../../models/automation_models.dart';
 import '../../theme/app_theme.dart';
 
-// ── Card 3: 학습 모델 ──────────────────────────────────────
+// AutomationModelCard — 카드 위젯
 class AutomationModelCard extends StatelessWidget {
   final AutomationModelModel? model;
   final bool isTraining;
@@ -19,14 +21,18 @@ class AutomationModelCard extends StatelessWidget {
     required this.onRefresh,
   }) : super(key: key);
 
+  // 표시용 문자열 포맷
   String _fmtDouble(double? v, {int digits = 1}) =>
       v == null ? '-' : v.toStringAsFixed(digits);
 
+  // 표시용 문자열 포맷
   String _fmtInt(int? v) => v == null ? '-' : v.toString();
 
+  // 표시용 문자열 포맷
   String _fmtScore(double? v) =>
       v == null ? '-' : '${(v * 100).toStringAsFixed(0)}%';
 
+  // 표시용 문자열 포맷
   String _fmtStatus(String? s) {
     switch (s) {
       case 'READY': return '사용 가능';
@@ -36,6 +42,7 @@ class AutomationModelCard extends StatelessWidget {
     }
   }
 
+  // 상태 표시값 변환
   Color _statusColor(String? s) {
     switch (s) {
       case 'READY': return AppColors.successText;
@@ -45,6 +52,7 @@ class AutomationModelCard extends StatelessWidget {
     }
   }
 
+  // 상태 표시값 변환
   Color _statusBg(String? s) {
     switch (s) {
       case 'READY': return AppColors.successBg;
@@ -54,6 +62,7 @@ class AutomationModelCard extends StatelessWidget {
     }
   }
 
+  // 표시용 문자열 포맷
   String _fmtDateTime(String? iso) {
     if (iso == null) return '-';
     try {
@@ -62,8 +71,10 @@ class AutomationModelCard extends StatelessWidget {
     } catch (_) { return iso; }
   }
 
+  // 숫자 두 자리 문자열 변환
   String _p(int n) => n.toString().padLeft(2, '0');
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -178,11 +189,13 @@ class AutomationModelCard extends StatelessWidget {
   }
 }
 
+// _ModelRow — 내부 위젯
 class _ModelRow extends StatelessWidget {
   final String label;
   final String value;
   const _ModelRow({required this.label, required this.value});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -198,13 +211,14 @@ class _ModelRow extends StatelessWidget {
   }
 }
 
-// ── Card 4: 자동화 로그 ────────────────────────────────────
+// AutomationLogCard — 카드 위젯
 class AutomationLogCard extends StatelessWidget {
   final List<AutomationLogModel> logs;
   final bool isLoading;
 
   const AutomationLogCard({Key? key, required this.logs, required this.isLoading}) : super(key: key);
 
+  // 로그 타입 표시값 변환
   String _typeLabel(String t) {
     switch (t) {
       case 'AUTO_WATER': return '자동 급수 실행';
@@ -216,18 +230,21 @@ class AutomationLogCard extends StatelessWidget {
     }
   }
 
+  // 로그 타입 표시값 변환
   Color _typeColor(String t) {
     if (t.startsWith('AUTO_')) return AppColors.successText;
     if (t.startsWith('SKIP_')) return AppColors.warningText;
     return AppColors.bodyMuted;
   }
 
+  // 로그 타입 표시값 변환
   Color _typeBg(String t) {
     if (t.startsWith('AUTO_')) return AppColors.successBg;
     if (t.startsWith('SKIP_')) return AppColors.warningBg;
     return AppColors.canvasGreenTint;
   }
 
+  // 로그 타입 표시값 변환
   IconData _typeIcon(String t) {
     switch (t) {
       case 'AUTO_WATER': return Icons.water_drop_rounded;
@@ -239,6 +256,7 @@ class AutomationLogCard extends StatelessWidget {
     }
   }
 
+  // 표시용 문자열 포맷
   String _fmtDateTime(String iso) {
     try {
       final dt = DateTime.parse(iso);
@@ -246,8 +264,10 @@ class AutomationLogCard extends StatelessWidget {
     } catch (_) { return iso; }
   }
 
+  // 숫자 두 자리 문자열 변환
   String _p(int n) => n.toString().padLeft(2, '0');
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Container(

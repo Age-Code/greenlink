@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+// UserItemService — 비즈니스 로직 처리
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -45,6 +46,7 @@ public class UserItemService {
                 .toList();
     }
 
+    // 화분 장착 처리
     @Transactional
     public UserItemDto.EquipPotResDto equipPot(
             Long userId,
@@ -68,6 +70,7 @@ public class UserItemService {
         return UserItemDto.EquipPotResDto.from(potUserItem);
     }
 
+    // 화분 해제 처리
     @Transactional
     public UserItemDto.UnequipPotResDto unequipPot(
             Long userId,
@@ -85,6 +88,7 @@ public class UserItemService {
         return UserItemDto.UnequipPotResDto.from(potUserItem);
     }
 
+    // 영양제 사용 처리
     @Transactional
     public UserItemDto.UseNutrientResDto useNutrient(
             Long userId,
@@ -106,6 +110,7 @@ public class UserItemService {
         return UserItemDto.UseNutrientResDto.from(nutrientUserItem);
     }
 
+    // find User Items 조회 — 없으면 예외 또는 Optional 반환
     private List<UserItem> findUserItems(
             User user,
             ItemType itemType,
@@ -136,6 +141,7 @@ public class UserItemService {
         );
     }
 
+    // group By Item Id 처리
     private Map<Long, List<UserItem>> groupByItemId(List<UserItem> userItems) {
         return userItems.stream()
                 .collect(
@@ -148,6 +154,7 @@ public class UserItemService {
                 );
     }
 
+    // to User Item List Response 처리
     private UserItemDto.ListResDto toUserItemListResponse(
             User user,
             List<UserItem> groupedItems
@@ -181,6 +188,7 @@ public class UserItemService {
         );
     }
 
+    // unequip Existing Pot 처리
     private void unequipExistingPot(
             User user,
             UserPlant userPlant
@@ -195,6 +203,7 @@ public class UserItemService {
                 .forEach(UserItem::unequipPot);
     }
 
+    // validate Pot Can Be Equipped 검증
     private void validatePotCanBeEquipped(UserItem userItem) {
         if (userItem.getItem().getItemType() != ItemType.POT) {
             throw new IllegalStateException("화분 아이템만 장착할 수 있습니다.");
@@ -205,6 +214,7 @@ public class UserItemService {
         }
     }
 
+    // validate Pot Can Be Unequipped 검증
     private void validatePotCanBeUnequipped(UserItem userItem) {
         if (userItem.getItem().getItemType() != ItemType.POT) {
             throw new IllegalStateException("화분 아이템만 장착 해제할 수 있습니다.");
@@ -215,6 +225,7 @@ public class UserItemService {
         }
     }
 
+    // validate Nutrient Can Be Used 검증
     private void validateNutrientCanBeUsed(UserItem userItem) {
         if (userItem.getItem().getItemType() != ItemType.NUTRIENT) {
             throw new IllegalStateException("영양제 아이템만 사용할 수 있습니다.");
@@ -225,6 +236,7 @@ public class UserItemService {
         }
     }
 
+    // find Active User 조회 — 없으면 예외 또는 Optional 반환
     private User findActiveUser(Long userId) {
         return userRepository.findById(userId)
                 .filter(user -> !user.isDeleted())

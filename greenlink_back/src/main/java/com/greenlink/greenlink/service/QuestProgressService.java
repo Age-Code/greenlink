@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
+// 퀘스트 진행 서비스 — TargetType별 진행도 증가
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -27,6 +28,7 @@ public class QuestProgressService {
     private final QuestRepository questRepository;
     private final UserQuestRepository userQuestRepository;
 
+    // 퀘스트 진행 증가 — TargetType 활성 퀘스트 progress 반영
     @Transactional
     public void increaseProgress(User user, TargetType targetType, int amount) {
         List<Quest> quests = questRepository.findAllByTargetTypeAndActiveTrueAndDeletedFalse(targetType);
@@ -76,6 +78,7 @@ public class QuestProgressService {
         };
     }
 
+    // 기간 만료 퀘스트 처리
     private void expireIfNeeded(UserQuest userQuest) {
         if (userQuest.getStatus() != UserQuestStatus.IN_PROGRESS) {
             return;

@@ -1,3 +1,5 @@
+# 이미지 업로드 — 백엔드 multipart POST 후 AI trigger
+
 from pathlib import Path
 from datetime import datetime
 import requests
@@ -6,16 +8,11 @@ from config import DEVICE_KEY, SERVER_IMAGE_URL
 from ai_trigger import trigger_ai_worker
 
 
+# 이미지 업로드 — Backend multipart POST 후 AI Worker 호출
 def upload_image(
     image_path: Path,
     user_plant_id: int,
 ):
-    """
-    라즈베리파이에서 촬영한 식물 이미지를 백엔드에 업로드한다.
-
-    백엔드 응답에서 plantImageId, userPlantId, imageUrl을 받은 뒤,
-    그 값으로 AI Worker를 자동 호출한다.
-    """
 
     image_path = Path(image_path)
 
@@ -110,16 +107,11 @@ def upload_image(
     return result
 
 
+# 이미지 업로드 후 삭제 — Backend 업로드 성공 시 로컬 파일 제거
 def upload_image_and_delete_if_success(
     image_path: Path,
     user_plant_id: int,
 ):
-    """
-    이미지 업로드가 성공하면 로컬 이미지 파일을 삭제한다.
-
-    AI Worker 호출 실패 여부와 관계없이,
-    백엔드 이미지 업로드가 성공했으면 로컬 원본은 삭제한다.
-    """
 
     image_path = Path(image_path)
 

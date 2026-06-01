@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+// UserController — API 요청 처리
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
@@ -25,6 +26,7 @@ public class UserController {
         return ApiResponse.success("내 정보 조회 성공", response);
     }
 
+    // update Nickname 수정
     @PatchMapping("/me")
     public ApiResponse<UserDto.UpdateNicknameResDto> updateNickname(
             @AuthenticationPrincipal CustomUserDetails userDetails,

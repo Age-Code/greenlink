@@ -1,3 +1,5 @@
+// 사용자 식물 목록 화면 — 상태 필터와 식물 카드
+
 import 'package:flutter/material.dart';
 import '../../models/user_plant_models.dart';
 import '../../services/user_plant_service.dart';
@@ -6,11 +8,14 @@ import '../../theme/app_theme.dart';
 import 'user_plant_detail_page.dart';
 import 'seed_planting_page.dart';
 
+// UserPlantListPage — 화면 위젯
 class UserPlantListPage extends StatefulWidget {
+  // State 객체 생성
   @override
   _UserPlantListPageState createState() => _UserPlantListPageState();
 }
 
+// _UserPlantListPageState — 화면 상태와 이벤트 처리
 class _UserPlantListPageState extends State<UserPlantListPage> {
   final UserPlantService _plantService = UserPlantService();
 
@@ -25,12 +30,14 @@ class _UserPlantListPageState extends State<UserPlantListPage> {
     'HARVESTED': '수확 완료',
   };
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadPlants();
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadPlants() async {
     setState(() => _isLoading = true);
     final statusParam = _selectedStatus == 'ALL' ? null : _selectedStatus;
@@ -44,11 +51,13 @@ class _UserPlantListPageState extends State<UserPlantListPage> {
     }
   }
 
+  // 식물 상태 필터 변경 — 선택 상태로 목록 재조회
   void _onStatusChanged(String status) {
     setState(() => _selectedStatus = status);
     _loadPlants();
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,6 +106,7 @@ class _UserPlantListPageState extends State<UserPlantListPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildFilters() {
     return SizedBox(
       height: 40,
@@ -128,6 +138,7 @@ class _UserPlantListPageState extends State<UserPlantListPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildPlantCard(UserPlantSummary plant) {
     String statusText;
     Color statusBg;
@@ -242,6 +253,7 @@ class _UserPlantListPageState extends State<UserPlantListPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildEmptyState() {
     return Center(
       child: Padding(

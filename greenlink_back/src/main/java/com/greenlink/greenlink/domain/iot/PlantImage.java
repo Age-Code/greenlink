@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+// PlantImage — 도메인 모델
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -16,24 +17,17 @@ public class PlantImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 사진이 촬영된 재배 공간
-     */
+    // 사진이 촬영된 재배 공간
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "grow_space_id", nullable = false)
     private GrowSpace growSpace;
 
-    /**
-     * 특정 식물 사진이면 userPlant가 들어간다.
-     * 공간 전체 사진이면 null 가능.
-     */
+    // 특정 식물 사진이면 userPlant가 들어간다. — 공간 전체 사진이면 null 가능.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_plant_id")
     private UserPlant userPlant;
 
-    /**
-     * 사진을 촬영한 라즈베리파이
-     */
+    // 사진을 촬영한 라즈베리파이
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "iot_device_id", nullable = false)
     private IotDevice iotDevice;
@@ -56,6 +50,7 @@ public class PlantImage {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
+    // PlantImage 생성
     @Builder
     private PlantImage(
             GrowSpace growSpace,
@@ -78,6 +73,7 @@ public class PlantImage {
         this.deleted = false;
     }
 
+    // create 생성
     public static PlantImage create(
             GrowSpace growSpace,
             UserPlant userPlant,
@@ -100,6 +96,7 @@ public class PlantImage {
         return this.userPlant != null;
     }
 
+    // 생성 시각 초기화
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
@@ -107,6 +104,7 @@ public class PlantImage {
         this.modifiedAt = now;
     }
 
+    // 수정 시각 갱신
     @PreUpdate
     public void preUpdate() {
         this.modifiedAt = LocalDateTime.now();

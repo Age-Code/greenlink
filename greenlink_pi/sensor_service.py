@@ -1,3 +1,5 @@
+# 센서 서비스 — DHT22 온습도, BH1750 조도 측정
+
 import time
 import smbus
 import board
@@ -14,6 +16,7 @@ BH1750_CONTINUOUS_HIGH_RES_MODE = 0x10
 _bus = smbus.SMBus(BH1750_I2C_BUS)
 
 
+# DHT GPIO 매핑 — BCM 번호를 board 핀으로 변환
 def _get_dht_board_pin():
     if DHT_GPIO == 4:
         return board.D4
@@ -32,6 +35,7 @@ def _get_dht_board_pin():
 _dht = adafruit_dht.DHT22(_get_dht_board_pin(), use_pulseio=False)
 
 
+# BH1750 조도 측정 — lux 값을 소수 둘째 자리로 반환
 def read_bh1750_lux() -> float:
     _bus.write_byte(BH1750_ADDR, BH1750_POWER_ON)
     _bus.write_byte(BH1750_ADDR, BH1750_RESET)
@@ -50,6 +54,7 @@ def read_bh1750_lux() -> float:
     return round(lux, 2)
 
 
+# DHT22 값 검증 — 온도/습도 범위 확인
 def _is_valid_temp_hum(temp, hum) -> bool:
     if temp is None or hum is None:
         return False
@@ -63,6 +68,7 @@ def _is_valid_temp_hum(temp, hum) -> bool:
     return True
 
 
+# DHT22 온습도 측정 — 재시도 후 온도/습도 반환
 def read_dht22(max_retry: int = 5):
     for attempt in range(max_retry):
         try:
@@ -82,6 +88,7 @@ def read_dht22(max_retry: int = 5):
     return None, None
 
 
+# 전체 센서 측정 — 조도/온도/습도 dict 반환
 def read_all_sensors():
     lux = None
     temp = None
@@ -104,6 +111,7 @@ def read_all_sensors():
     }
 
 
+# 센서 리소스 정리 — DHT/I2C close
 def cleanup_sensors():
     try:
         _dht.exit()

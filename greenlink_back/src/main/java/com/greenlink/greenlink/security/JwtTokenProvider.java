@@ -11,6 +11,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+// JWT 발급 및 검증
 @Component
 public class JwtTokenProvider {
 
@@ -22,11 +23,13 @@ public class JwtTokenProvider {
 
     private SecretKey secretKey;
 
+    // init 초기화
     @PostConstruct
     protected void init() {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    // create Access Token 생성
     public String createAccessToken(Long userId, String email, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessTokenValidityMs);
@@ -41,6 +44,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    // JWT 검증 — 서명과 만료 확인
     public boolean validateToken(String token) {
         try {
             parseClaims(token);
@@ -59,6 +63,7 @@ public class JwtTokenProvider {
         return claims.get("userId", Long.class);
     }
 
+    // JWT claims 파싱
     private Claims parseClaims(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)

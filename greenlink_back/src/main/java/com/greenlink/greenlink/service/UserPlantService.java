@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// 사용자 식물 서비스 — 식재, 조회, 수확, GROW_PLANT 퀘스트 연결
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -31,6 +32,7 @@ public class UserPlantService {
     private final UserPlantRepository userPlantRepository;
     private final QuestProgressService questProgressService;
 
+    // create User Plant 생성
     @Transactional
     public UserPlantDto.CreateResDto createUserPlant(
             Long userId,
@@ -107,6 +109,7 @@ public class UserPlantService {
         return UserPlantDto.DetailResDto.of(userPlant, today, equippedPot);
     }
 
+    // update Nickname 수정
     @Transactional
     public UserPlantDto.UpdateNicknameResDto updateNickname(
             Long userId,
@@ -123,6 +126,7 @@ public class UserPlantService {
         return UserPlantDto.UpdateNicknameResDto.from(userPlant);
     }
 
+    // 수확 처리 — HARVEST/GROW_PLANT 퀘스트 진행 증가
     @Transactional
     public UserPlantDto.HarvestResDto harvestUserPlant(Long userId, Long userPlantId) {
         User user = findActiveUser(userId);
@@ -149,6 +153,7 @@ public class UserPlantService {
         return UserPlantDto.HarvestResDto.from(userPlant);
     }
 
+    // find Equipped Pot 조회 — 없으면 예외 또는 Optional 반환
     private UserItem findEquippedPot(User user, UserPlant userPlant) {
         return userItemRepository
                 .findFirstByUserAndItem_ItemTypeAndUserPlantAndStatusAndDeletedFalse(
@@ -160,6 +165,7 @@ public class UserPlantService {
                 .orElse(null);
     }
 
+    // validate Seed User Item 검증
     private void validateSeedUserItem(UserItem userItem) {
         if (userItem.getStatus() != UserItemStatus.OWNED) {
             throw new IllegalStateException("보유 중인 씨앗만 사용할 수 있습니다.");
@@ -174,6 +180,7 @@ public class UserPlantService {
         }
     }
 
+    // find Active User 조회 — 없으면 예외 또는 Optional 반환
     private User findActiveUser(Long userId) {
         return userRepository.findById(userId)
                 .filter(user -> !user.isDeleted())

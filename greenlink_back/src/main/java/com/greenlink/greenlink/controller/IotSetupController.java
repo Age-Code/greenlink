@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// IotSetupController — API 요청 처리
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/iot")
@@ -18,11 +19,7 @@ public class IotSetupController {
 
     private final IotSetupService iotSetupService;
 
-    /**
-     * 재배 공간 생성
-     *
-     * POST /api/iot/grow-spaces
-     */
+    // 재배 공간 생성
     @PostMapping("/grow-spaces")
     public ApiResponse<IotSetupDto.GrowSpaceResDto> createGrowSpace(
             @Valid @RequestBody IotSetupDto.GrowSpaceCreateReqDto request
@@ -33,11 +30,7 @@ public class IotSetupController {
         return ApiResponse.success("재배 공간이 생성되었습니다.", response);
     }
 
-    /**
-     * 재배 공간 목록 조회
-     *
-     * GET /api/iot/grow-spaces
-     */
+    // 재배 공간 목록 조회
     @GetMapping("/grow-spaces")
     public ApiResponse<List<IotSetupDto.GrowSpaceResDto>> getGrowSpaces() {
         List<IotSetupDto.GrowSpaceResDto> response =
@@ -46,11 +39,7 @@ public class IotSetupController {
         return ApiResponse.success("재배 공간 목록 조회 성공", response);
     }
 
-    /**
-     * 재배 공간에 식물 연결
-     *
-     * POST /api/iot/grow-spaces/{growSpaceId}/plants
-     */
+    // 재배 공간에 식물 연결
     @PostMapping("/grow-spaces/{growSpaceId}/plants")
     public ApiResponse<IotSetupDto.GrowSpacePlantResDto> connectPlantToGrowSpace(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -67,11 +56,7 @@ public class IotSetupController {
         return ApiResponse.success("재배 공간에 식물이 연결되었습니다.", response);
     }
 
-    /**
-     * 재배 공간에 연결된 식물 목록 조회
-     *
-     * GET /api/iot/grow-spaces/{growSpaceId}/plants
-     */
+    // 재배 공간에 연결된 식물 목록 조회
     @GetMapping("/grow-spaces/{growSpaceId}/plants")
     public ApiResponse<List<IotSetupDto.GrowSpacePlantResDto>> getGrowSpacePlants(
             @PathVariable Long growSpaceId
@@ -82,11 +67,7 @@ public class IotSetupController {
         return ApiResponse.success("재배 공간 식물 목록 조회 성공", response);
     }
 
-    /**
-     * IoT 기기 등록
-     *
-     * POST /api/iot/devices
-     */
+    // IoT 기기 등록
     @PostMapping("/devices")
     public ApiResponse<IotSetupDto.DeviceResDto> createDevice(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -101,11 +82,7 @@ public class IotSetupController {
         return ApiResponse.success("IoT 기기가 등록되었습니다.", response);
     }
 
-    /**
-     * IoT 기기 목록 조회
-     *
-     * GET /api/iot/devices
-     */
+    // IoT 기기 목록 조회
     @GetMapping("/devices")
     public ApiResponse<List<IotSetupDto.DeviceResDto>> getDevices() {
         List<IotSetupDto.DeviceResDto> response =
@@ -114,11 +91,7 @@ public class IotSetupController {
         return ApiResponse.success("IoT 기기 목록 조회 성공", response);
     }
 
-    /**
-     * 펌프 채널 등록
-     *
-     * POST /api/iot/pump-channels
-     */
+    // 펌프 채널 등록
     @PostMapping("/pump-channels")
     public ApiResponse<IotSetupDto.PumpChannelResDto> createPumpChannel(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -133,11 +106,7 @@ public class IotSetupController {
         return ApiResponse.success("펌프 채널이 등록되었습니다.", response);
     }
 
-    /**
-     * 펌프 채널 목록 조회
-     *
-     * GET /api/iot/pump-channels
-     */
+    // 펌프 채널 목록 조회
     @GetMapping("/pump-channels")
     public ApiResponse<List<IotSetupDto.PumpChannelResDto>> getPumpChannels() {
         List<IotSetupDto.PumpChannelResDto> response =

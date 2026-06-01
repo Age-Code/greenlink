@@ -1,4 +1,8 @@
+// Enum 라벨 매핑 유틸리티
+
+// EnumLabelMapper — Enum 라벨 매핑 유틸리티
 class EnumLabelMapper {
+  // 아이템 타입 라벨 반환
   static String itemType(String? type) {
     switch (type) {
       case 'SEED': return '씨앗';
@@ -8,6 +12,7 @@ class EnumLabelMapper {
     }
   }
 
+  // 사용자 아이템 상태 라벨 반환
   static String userItemStatus(String? status) {
     switch (status) {
       case 'OWNED': return '보유 중';
@@ -17,6 +22,7 @@ class EnumLabelMapper {
     }
   }
 
+  // 사용자 식물 상태 라벨 반환
   static String userPlantStatus(String? status) {
     switch (status) {
       case 'GROWING': return '자라는 중';
@@ -26,6 +32,7 @@ class EnumLabelMapper {
     }
   }
 
+  // 퀘스트 타입 라벨 반환
   static String questType(String? type) {
     switch (type) {
       case 'DAILY': return '오늘의 약속';
@@ -36,6 +43,7 @@ class EnumLabelMapper {
     }
   }
 
+  // 사용자 퀘스트 상태 라벨 반환
   static String userQuestStatus(String? status) {
     switch (status) {
       case 'IN_PROGRESS': return '진행 중';
@@ -46,6 +54,7 @@ class EnumLabelMapper {
     }
   }
 
+  // 퀘스트 목표 타입 라벨 반환
   static String targetType(String? type) {
     switch (type) {
       case 'ATTEND': return '출석';

@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+// Security 설정 — 공개/JWT/장치/AI/관리자 경로 정책, formLogin 비활성
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -22,15 +23,13 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    // 비밀번호 인코더 Bean 생성
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Spring Security AuthenticationManager Bean 등록.
-     * 현재 로그인은 AuthService에서 직접 PasswordEncoder로 검증한다.
-     */
+    // Spring Security AuthenticationManager Bean 등록. — 현재 로그인은 AuthService에서 직접 PasswordEncoder로 검증한다.
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration authenticationConfiguration
@@ -38,6 +37,7 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    // SecurityFilterChain 구성 — 공개/JWT/관리자 경로 정책 적용
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -91,7 +91,7 @@ public class SecurityConfig {
                         // IoT 기기용 API
                         .requestMatchers("/api/iot/raspberry/**", "/api/iot/esp/**", "/api/iot/commands/**", "/api/iot/plant-images").permitAll()
                         .requestMatchers("/api/auth/oauth/kakao", "/api/auth/oauth/google").permitAll()
-                        
+
                         .requestMatchers("/error").permitAll()
 
                         .requestMatchers("/api/ai/**").permitAll()

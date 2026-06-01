@@ -1,34 +1,16 @@
+// 사용자 아이템 서비스 — 인벤토리, 화분 장착, 영양제 사용 API 호출
+
 import 'package:flutter/foundation.dart';
 import '../core/network/api_client.dart';
 import '../core/network/api_response.dart';
 import '../core/constants/api_paths.dart';
 import '../models/user_item_models.dart';
 
-// ============================================================
-// UserItemService
-// TEST 5: 인벤토리 조회
-//   [x] GET /api/user-items — Authorization 헤더 포함
-//   [x] 씨앗/화분/영양제 필터 동작
-//   [x] ownedCount, usableCount, usedCount 표시
-//   [x] itemType별 버튼 표시
-//
-// TEST 6: 씨앗 목록 조회
-//   [x] GET /api/user-items?itemType=SEED&status=OWNED
-//   [x] 보유 씨앗 목록 표시
-//
-// TEST 7: 화분 장착
-//   [x] POST /api/user-items/{userItemId}/equip-pot
-//   [x] body: { userPlantId }
-//   [x] 성공 메시지 표시, 인벤토리 재조회
-//
-// TEST 8: 영양제 사용
-//   [x] POST /api/user-items/{userItemId}/use-nutrient
-//   [x] body: { userPlantId }
-//   [x] 성공 후 영양제 status USED 확인
-// ============================================================
+// UserItemService — Backend API 호출
 class UserItemService {
   final ApiClient _client = ApiClient();
 
+  // 사용자 아이템 목록 조회 API 호출
   Future<ApiResponse<List<UserItemGroup>>> getUserItems({String? itemType, String? status}) async {
     debugPrint('[UserItemService] 🎒 인벤토리 조회 (itemType=$itemType, status=$status)');
     try {
@@ -52,6 +34,7 @@ class UserItemService {
     }
   }
 
+  // 화분 장착 API 호출
   Future<ApiResponse<Map<String, dynamic>>> equipPot(int userItemId, int userPlantId) async {
     debugPrint('[UserItemService] 🪴 화분 장착 (itemId=$userItemId, plantId=$userPlantId)');
     try {
@@ -70,6 +53,7 @@ class UserItemService {
     }
   }
 
+  // 영양제 사용 API 호출
   Future<ApiResponse<Map<String, dynamic>>> useNutrient(int userItemId, int userPlantId) async {
     debugPrint('[UserItemService] 💧 영양제 사용 (itemId=$userItemId, plantId=$userPlantId)');
     try {

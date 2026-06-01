@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+// IotSetupService — 비즈니스 로직 처리
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -33,9 +34,7 @@ public class IotSetupService {
     private final IotDeviceRepository iotDeviceRepository;
     private final PumpChannelRepository pumpChannelRepository;
 
-    /**
-     * 재배 공간 생성
-     */
+    // 재배 공간 생성
     @Transactional
     public IotSetupDto.GrowSpaceResDto createGrowSpace(
             IotSetupDto.GrowSpaceCreateReqDto request
@@ -54,9 +53,7 @@ public class IotSetupService {
         return IotSetupDto.GrowSpaceResDto.from(savedGrowSpace);
     }
 
-    /**
-     * 재배 공간 목록 조회
-     */
+    // 재배 공간 목록 조회
     public List<IotSetupDto.GrowSpaceResDto> getGrowSpaces() {
         return growSpaceRepository.findAllByDeletedFalse()
                 .stream()
@@ -64,12 +61,7 @@ public class IotSetupService {
                 .toList();
     }
 
-    /**
-     * 재배 공간에 식물 연결
-     *
-     * grow_space에는 user_id가 없으므로,
-     * userPlant가 로그인 사용자의 식물인지 먼저 검증한다.
-     */
+    // 재배 공간에 식물 연결 — grow_space에는 user_id가 없으므로,
     @Transactional
     public IotSetupDto.GrowSpacePlantResDto connectPlantToGrowSpace(
             Long userId,
@@ -98,9 +90,7 @@ public class IotSetupService {
         return IotSetupDto.GrowSpacePlantResDto.from(savedGrowSpacePlant);
     }
 
-    /**
-     * 특정 재배 공간에 연결된 식물 목록 조회
-     */
+    // 특정 재배 공간에 연결된 식물 목록 조회
     public List<IotSetupDto.GrowSpacePlantResDto> getGrowSpacePlants(
             Long growSpaceId
     ) {
@@ -113,17 +103,7 @@ public class IotSetupService {
                 .toList();
     }
 
-    /**
-     * IoT 기기 등록
-     *
-     * RASPBERRY_PI:
-     * - growSpaceId 필수
-     * - userPlantId 없어야 함
-     *
-     * ESP32:
-     * - userPlantId 필수
-     * - growSpaceId는 가능하면 함께 사용
-     */
+    // IoT 기기 등록 — Pi/ESP 유형별 Entity 생성
     @Transactional
     public IotSetupDto.DeviceResDto createDevice(
             Long userId,
@@ -150,13 +130,7 @@ public class IotSetupService {
         return IotSetupDto.DeviceResDto.from(savedDevice);
     }
 
-    /**
-     * IoT 기기 목록 조회
-     *
-     * 현재는 전체 기기 조회.
-     * grow_space에 user_id가 없기 때문에 사용자별 필터링은 별도 조인이 필요하다.
-     * 캡스톤 개발 단계에서는 전체 조회로 충분하다.
-     */
+    // IoT 기기 목록 조회 — 현재는 전체 기기 조회.
     public List<IotSetupDto.DeviceResDto> getDevices() {
         return iotDeviceRepository.findAllByDeletedFalse()
                 .stream()
@@ -164,11 +138,7 @@ public class IotSetupService {
                 .toList();
     }
 
-    /**
-     * 펌프 채널 등록
-     *
-     * 한 식물당 펌프 채널 1개만 연결한다.
-     */
+    // 펌프 채널 등록 — 한 식물당 펌프 채널 1개만 연결한다.
     @Transactional
     public IotSetupDto.PumpChannelResDto createPumpChannel(
             Long userId,
@@ -214,9 +184,7 @@ public class IotSetupService {
         return IotSetupDto.PumpChannelResDto.from(savedPumpChannel);
     }
 
-    /**
-     * 펌프 채널 목록 조회
-     */
+    // 펌프 채널 목록 조회
     public List<IotSetupDto.PumpChannelResDto> getPumpChannels() {
         return pumpChannelRepository.findAllByDeletedFalse()
                 .stream()
@@ -224,6 +192,7 @@ public class IotSetupService {
                 .toList();
     }
 
+    // create Raspberry Device 생성
     private IotDevice createRaspberryDevice(
             IotSetupDto.DeviceCreateReqDto request
     ) {
@@ -247,6 +216,7 @@ public class IotSetupService {
         );
     }
 
+    // create Esp Device 생성
     private IotDevice createEspDevice(
             User user,
             IotSetupDto.DeviceCreateReqDto request
@@ -280,6 +250,7 @@ public class IotSetupService {
         );
     }
 
+    // validate User Plant Connected To Grow Space 검증
     private void validateUserPlantConnectedToGrowSpace(
             GrowSpace growSpace,
             UserPlant userPlant
@@ -294,6 +265,7 @@ public class IotSetupService {
         }
     }
 
+    // validate Raspberry Device In Grow Space 검증
     private void validateRaspberryDeviceInGrowSpace(
             IotDevice raspberryDevice,
             GrowSpace growSpace
@@ -308,6 +280,7 @@ public class IotSetupService {
         }
     }
 
+    // find Active User 조회 — 없으면 예외 또는 Optional 반환
     private User findActiveUser(Long userId) {
         return userRepository.findById(userId)
                 .filter(user -> !user.isDeleted())

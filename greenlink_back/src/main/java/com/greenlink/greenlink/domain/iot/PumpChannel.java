@@ -18,29 +18,24 @@ import java.time.LocalDateTime;
                 )
         }
 )
+// PumpChannel — 도메인 모델
 public class PumpChannel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 펌프가 속한 재배 공간
-     */
+    // 펌프가 속한 재배 공간
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "grow_space_id", nullable = false)
     private GrowSpace growSpace;
 
-    /**
-     * 이 펌프가 물을 주는 대상 식물
-     */
+    // 이 펌프가 물을 주는 대상 식물
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_plant_id", nullable = false)
     private UserPlant userPlant;
 
-    /**
-     * 펌프를 실제로 제어하는 라즈베리파이
-     */
+    // 펌프를 실제로 제어하는 라즈베리파이
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "raspberry_device_id", nullable = false)
     private IotDevice raspberryDevice;
@@ -48,14 +43,10 @@ public class PumpChannel {
     @Column(nullable = false, length = 100)
     private String channelName;
 
-    /**
-     * 라즈베리파이 GPIO 번호
-     */
+    // 라즈베리파이 GPIO 번호
     private Integer gpioPin;
 
-    /**
-     * 릴레이 모듈 기준 채널 번호
-     */
+    // 릴레이 모듈 기준 채널 번호
     private Integer relayChannel;
 
     @Column(nullable = false)
@@ -70,6 +61,7 @@ public class PumpChannel {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
+    // PumpChannel 생성
     @Builder
     private PumpChannel(
             GrowSpace growSpace,
@@ -93,6 +85,7 @@ public class PumpChannel {
         this.deleted = false;
     }
 
+    // create 생성
     public static PumpChannel create(
             GrowSpace growSpace,
             UserPlant userPlant,
@@ -111,6 +104,7 @@ public class PumpChannel {
                 .build();
     }
 
+    // update Channel Info 수정
     public void updateChannelInfo(
             String channelName,
             Integer gpioPin,
@@ -121,19 +115,23 @@ public class PumpChannel {
         this.relayChannel = relayChannel;
     }
 
+    // 비활성화 처리
     public void deactivate() {
         this.active = false;
     }
 
+    // 활성화 처리
     public void activate() {
         this.active = true;
     }
 
+    // delete 삭제
     public void delete() {
         this.deleted = true;
         this.active = false;
     }
 
+    // 생성 시각 초기화
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
@@ -145,6 +143,7 @@ public class PumpChannel {
         }
     }
 
+    // 수정 시각 갱신
     @PreUpdate
     public void preUpdate() {
         this.modifiedAt = LocalDateTime.now();

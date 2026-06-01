@@ -1,3 +1,5 @@
+// 씨앗 심기 화면 — 보유 씨앗 선택 후 식재
+
 import 'package:flutter/material.dart';
 import '../../models/user_item_models.dart';
 import '../../services/user_item_service.dart';
@@ -5,11 +7,14 @@ import '../../services/user_plant_service.dart';
 import '../../core/widgets/greenlink_card.dart';
 import '../../theme/app_theme.dart';
 
+// SeedPlantingPage — 화면 위젯
 class SeedPlantingPage extends StatefulWidget {
+  // State 객체 생성
   @override
   _SeedPlantingPageState createState() => _SeedPlantingPageState();
 }
 
+// _SeedPlantingPageState — 화면 상태와 이벤트 처리
 class _SeedPlantingPageState extends State<SeedPlantingPage> {
   final UserItemService _itemService = UserItemService();
   final UserPlantService _plantService = UserPlantService();
@@ -21,18 +26,21 @@ class _SeedPlantingPageState extends State<SeedPlantingPage> {
   int? _selectedUserItemId;
   final TextEditingController _nicknameController = TextEditingController();
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadSeeds();
   }
 
+  // 리소스 정리
   @override
   void dispose() {
     _nicknameController.dispose();
     super.dispose();
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadSeeds() async {
     setState(() => _isLoading = true);
     final res = await _itemService.getUserItems(itemType: 'SEED', status: 'OWNED');
@@ -48,6 +56,7 @@ class _SeedPlantingPageState extends State<SeedPlantingPage> {
     }
   }
 
+  // 식재 처리 — 선택 씨앗으로 식물 생성
   Future<void> _plantSeed() async {
     if (_selectedUserItemId == null) return;
     setState(() => _isPlanting = true);
@@ -63,6 +72,7 @@ class _SeedPlantingPageState extends State<SeedPlantingPage> {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,6 +140,7 @@ class _SeedPlantingPageState extends State<SeedPlantingPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildSeedCard(UserItemGroup seed) {
     final ownedItems = seed.items.where((i) => i.status == 'OWNED').toList();
     if (ownedItems.isEmpty) return const SizedBox();
@@ -205,6 +216,7 @@ class _SeedPlantingPageState extends State<SeedPlantingPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildEmptyState() {
     return Center(
       child: Padding(

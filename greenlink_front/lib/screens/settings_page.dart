@@ -1,12 +1,15 @@
+// 설정 화면 — 로그아웃
+
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import 'auth/login_page.dart';
 
-/// 계정 설정 및 로그아웃 페이지
+// 설정 화면 — 로그아웃 제공
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
 
+  // 로그아웃 처리 — 토큰 삭제 후 로그인 화면 이동
   Future<void> _logout(BuildContext context) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -82,6 +85,7 @@ class SettingsPage extends StatelessWidget {
 
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,9 +1,12 @@
+# 센서 업로드 — 백엔드 환경 센서 API POST
+
 from datetime import datetime
 import requests
 
 from config import SERVER_ENVIRONMENT_URL, DEVICE_KEY
 
 
+# 센서 데이터 업로드 — Backend 환경 센서 API POST
 def upload_sensor_data(sensor_data: dict):
     payload = {
         "temperature": sensor_data.get("temperatureC"),
@@ -27,6 +30,7 @@ def upload_sensor_data(sensor_data: dict):
     return response
 
 
+# 센서 데이터 안전 업로드 — 예외를 success flag로 변환
 def upload_sensor_data_safe(sensor_data: dict):
     try:
         response = upload_sensor_data(sensor_data)

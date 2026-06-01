@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+// AttendController — API 요청 처리
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/attends")
@@ -15,6 +16,7 @@ public class AttendController {
 
     private final AttendService attendService;
 
+    // 오늘 출석 처리
     @PostMapping("/today")
     public ApiResponse<AttendDto.AttendTodayResDto> attendToday(
             @AuthenticationPrincipal CustomUserDetails userDetails

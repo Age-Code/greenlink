@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// Item — 도메인 모델
 @Getter
 @Entity
 @Table(name = "item")
@@ -39,6 +40,7 @@ public class Item extends BaseEntity {
     @JoinColumn(name = "linked_plant_id")
     private Plant linkedPlant;
 
+    // Item 생성
     private Item(String name, ItemType itemType, String description, String imageUrl, Plant linkedPlant) {
         this.name = name;
         this.itemType = itemType;
@@ -47,6 +49,7 @@ public class Item extends BaseEntity {
         this.linkedPlant = linkedPlant;
     }
 
+    // create Seed 생성
     public static Item createSeed(String name, String description, String imageUrl, Plant linkedPlant) {
         if (linkedPlant == null) {
             throw new IllegalArgumentException("씨앗 아이템은 연결된 식물이 필요합니다.");
@@ -55,14 +58,17 @@ public class Item extends BaseEntity {
         return new Item(name, ItemType.SEED, description, imageUrl, linkedPlant);
     }
 
+    // create Pot 생성
     public static Item createPot(String name, String description, String imageUrl) {
         return new Item(name, ItemType.POT, description, imageUrl, null);
     }
 
+    // create Nutrient 생성
     public static Item createNutrient(String name, String description, String imageUrl) {
         return new Item(name, ItemType.NUTRIENT, description, imageUrl, null);
     }
 
+    // update 수정
     public void update(String name, String description, String imageUrl) {
         this.name = name;
         this.description = description;

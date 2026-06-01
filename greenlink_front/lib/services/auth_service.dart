@@ -1,3 +1,5 @@
+// 인증 서비스 — 로그인/회원가입/OAuth/토큰 처리
+
 import 'package:flutter/foundation.dart';
 import '../core/network/api_client.dart';
 import '../core/network/api_response.dart';
@@ -7,19 +9,12 @@ import '../models/auth_models.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import 'package:google_sign_in/google_sign_in.dart';
 
-// ============================================================
-// AuthService
-// TEST 1: 로그인
-//   - POST /api/auth/login
-//   - success == true 확인
-//   - data.accessToken 존재 확인
-//   - TokenStorage에 저장 확인
-//   - 로그인 성공 후 MainPage로 이동 확인
-// ============================================================
+// AuthService — Backend API 호출
 class AuthService {
   final ApiClient _client = ApiClient();
   final TokenStorage _tokenStorage = TokenStorage();
 
+  // 이메일 로그인 API 호출
   Future<ApiResponse<LoginResponse>> login(String email, String password) async {
     debugPrint('[AuthService] 🔐 로그인 시도 — email: $email');
     try {
@@ -51,6 +46,7 @@ class AuthService {
     }
   }
 
+  // 회원가입 API 호출
   Future<ApiResponse<Map<String, dynamic>>> signup(
       String email, String password, String nickname) async {
     debugPrint('[AuthService] 📝 회원가입 시도 — email: $email, nickname: $nickname');
@@ -70,6 +66,7 @@ class AuthService {
     }
   }
 
+  // Kakao 로그인 API 호출
   Future<ApiResponse<LoginResponse>> loginWithKakao() async {
     debugPrint('[AuthService] 🟨 카카오 로그인 시도 (인가 코드 방식)');
     try {
@@ -94,6 +91,7 @@ class AuthService {
     }
   }
 
+  // Google 로그인 API 호출
   Future<ApiResponse<LoginResponse>> loginWithGoogle() async {
     debugPrint('[AuthService] 🟦 구글 로그인 시도 (Server Auth Code 방식)');
     try {
@@ -103,7 +101,7 @@ class AuthService {
         clientId: '1042440953157-7ts5sfinq6slmt1p3arkdcuknt65g8lk.apps.googleusercontent.com',
         serverClientId: '1042440953157-r2iqcnd7hk7s94u16es2l5b2rno0em8q.apps.googleusercontent.com',
       );
-      
+
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) return ApiResponse<LoginResponse>(success: false, message: '구글 로그인이 취소되었습니다.');
 
@@ -111,7 +109,7 @@ class AuthService {
       if (code == null) {
         return ApiResponse<LoginResponse>(success: false, message: '구글 인가 코드를 가져오지 못했습니다.');
       }
-      
+
       // 2. 백엔드로 code 전달
       final response = await _client.post(
         ApiPaths.googleLogin,
@@ -128,6 +126,7 @@ class AuthService {
     }
   }
 
+  // 로그인 응답 처리 — 토큰 저장 후 공통 응답 반환
   Future<ApiResponse<LoginResponse>> _handleLoginResponse(dynamic response, String provider) async {
     if (response['success'] == true && response['data'] != null) {
       final loginData = LoginResponse.fromJson(response['data']);
@@ -147,11 +146,13 @@ class AuthService {
     }
   }
 
+  // 로그아웃 처리 — 저장된 토큰 삭제
   Future<void> logout() async {
     debugPrint('[AuthService] 🚪 로그아웃 — token 삭제');
     await _tokenStorage.clearAccessToken();
   }
 
+  // 로그인 상태 확인 — 저장 토큰 존재 여부 반환
   Future<bool> isLoggedIn() async {
     final token = await _tokenStorage.getAccessToken();
     final loggedIn = token != null && token.isNotEmpty;

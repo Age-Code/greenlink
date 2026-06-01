@@ -1,9 +1,12 @@
+// 퀘스트 상세 바텀시트 — 상세 조회와 보상 수령
+
 import 'package:flutter/material.dart';
 import '../models/quest_models.dart';
 import '../services/quest_service.dart';
 import '../screens/main_page.dart';
 import '../theme/app_theme.dart';
 
+// QuestDetailBottomSheet — 퀘스트 상세 바텀시트 — 상세 조회와 보상 수령
 class QuestDetailBottomSheet extends StatefulWidget {
   final int userQuestId;
   final VoidCallback onRewardReceived;
@@ -14,22 +17,26 @@ class QuestDetailBottomSheet extends StatefulWidget {
     required this.onRewardReceived,
   }) : super(key: key);
 
+  // State 객체 생성
   @override
   _QuestDetailBottomSheetState createState() => _QuestDetailBottomSheetState();
 }
 
+// _QuestDetailBottomSheetState — 화면 상태와 이벤트 처리
 class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
   final QuestService _questService = QuestService();
   UserQuestDetail? _detail;
   bool _isLoading = true;
   bool _isReceiving = false;
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadDetail();
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadDetail() async {
     final res = await _questService.getUserQuestDetail(widget.userQuestId);
     if (!mounted) return;
@@ -41,6 +48,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
     }
   }
 
+  // 보상 수령 처리
   Future<void> _receiveReward() async {
     if (_isReceiving || _detail == null) return;
     setState(() => _isReceiving = true);
@@ -56,6 +64,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
     }
   }
 
+  // 사용자 안내 UI 표시
   void _showRewardSuccessDialog(QuestRewardResponse rewardData) {
     showDialog(
       context: context,
@@ -124,6 +133,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
     );
   }
 
+  // 날짜 문자열 포맷 — 파싱 실패 시 원문 반환
   String _formatDate(String? isoString) {
     if (isoString == null) return '';
     try {
@@ -132,6 +142,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
     } catch (_) { return isoString; }
   }
 
+  // 퀘스트 타입 라벨 반환
   String _getTypeName(String type) {
     switch (type) {
       case 'DAILY': return '오늘의 약속';
@@ -142,6 +153,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
     }
   }
 
+  // 퀘스트 목표 타입 라벨 반환
   String _getTargetTypeName(String type) {
     switch (type) {
       case 'ATTEND': return '출석';
@@ -152,6 +164,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -297,6 +310,7 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildActionButton(bool isAchievable, bool isCompleted, bool isExpired) {
     if (isAchievable) {
       return SizedBox(
@@ -325,13 +339,14 @@ class _QuestDetailBottomSheetState extends State<QuestDetailBottomSheet> {
   }
 }
 
-// ── Shared badges ────────────────────────────────────────────
 
+// _TypeBadge — 내부 위젯
 class _TypeBadge extends StatelessWidget {
   final String type;
   final String label;
   const _TypeBadge({required this.type, required this.label});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -342,10 +357,12 @@ class _TypeBadge extends StatelessWidget {
   }
 }
 
+// _StatusBadge — 내부 위젯
 class _StatusBadge extends StatelessWidget {
   final String status;
   const _StatusBadge({required this.status});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     Color bg;

@@ -1,3 +1,5 @@
+# AI 이미지 처리 파이프라인 — 다운로드→전처리→변환→S3→callback
+
 from pathlib import Path
 from urllib.parse import urlparse
 import argparse
@@ -21,6 +23,7 @@ BACKEND_BASE_URL = "http://54.180.203.50:8080"
 AI_WORKER_SECRET = os.environ.get("AI_WORKER_SECRET", "gl-ai-worker-secret-change-me")
 
 
+# 원본 이미지 다운로드 — URL bytes를 로컬 파일로 저장
 def download_image(url: str, output_path: Path) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -31,16 +34,8 @@ def download_image(url: str, output_path: Path) -> Path:
     return output_path
 
 
+# 원본 S3 파일명 추출 — 확장자 없는 stem 반환
 def extract_original_stem_from_url(image_url: str) -> str:
-    """
-    원본 S3 이미지 URL에서 확장자를 제외한 파일명을 추출한다.
-
-    예:
-    https://likelion-gwang.s3.ap-northeast-2.amazonaws.com/greenlink/userplant/user-plant-5-20260518-162945-33233d89.jpg
-
-    반환:
-    user-plant-5-20260518-162945-33233d89
-    """
 
     parsed = urlparse(image_url)
     filename = Path(parsed.path).name
@@ -51,22 +46,15 @@ def extract_original_stem_from_url(image_url: str) -> str:
     return Path(filename).stem
 
 
+# 최종 AI S3 key 생성 — 원본 stem 기반 PNG 경로
 def build_final_ai_s3_key_from_image_url(image_url: str) -> str:
-    """
-    최종 AI 이미지 S3 저장 key를 만든다.
-
-    원본:
-    greenlink/userplant/user-plant-5-20260518-162945-33233d89.jpg
-
-    AI:
-    greenlink/ai/userplant/user-plant-5-20260518-162945-33233d89.png
-    """
 
     original_stem = extract_original_stem_from_url(image_url)
 
     return f"greenlink/ai/userplant/{original_stem}.png"
 
 
+# 최종 AI 결과 업로드 — S3 URL과 key 반환
 def upload_final_result_to_s3(
     image_url: str,
     ai_result_path: Path,
@@ -90,6 +78,7 @@ def upload_final_result_to_s3(
     }
 
 
+# AI 결과 callback — X-AI-Worker-Secret 헤더로 Backend 저장
 def save_ai_result_to_backend(
     plant_image_id: int,
     final_ai_url: str,
@@ -120,12 +109,8 @@ def save_ai_result_to_backend(
     return response.json()
 
 
+# 로컬 파일 cleanup — 처리 산출물 삭제 실패는 경고만 출력
 def cleanup_local_files(paths: list):
-    """
-    처리 완료 후 로컬 중간 파일을 삭제한다.
-    S3에 업로드된 최종 이미지는 이미 S3에 있으므로 로컬에서 제거해도 안전하다.
-    삭제 실패는 경고 로그만 출력하고 예외를 전파하지 않는다.
-    """
     for path in paths:
         try:
             if path is not None and Path(path).exists():
@@ -135,22 +120,13 @@ def cleanup_local_files(paths: list):
             print(f"[AI] 로컬 파일 삭제 실패 (무시): {path} — {e}")
 
 
+# AI 이미지 처리 파이프라인 — 다운로드→전처리→변환→S3→callback
 def process_one(
     image_url: str,
     name: str,
     plant_image_id: int | None = None,
     backend_base_url: str = BACKEND_BASE_URL,
 ) -> dict:
-    """
-    GreenLink AI 이미지 처리 흐름.
-
-    1. 원본 이미지 다운로드
-    2. rembg 세션 로딩
-    3. 원본 배경/화분 제거
-    4. OpenAI 스타일 변환
-    5. AI 결과 S3 업로드
-    6. 백엔드 DB 저장
-    """
 
     INPUT_DIR.mkdir(parents=True, exist_ok=True)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -252,6 +228,7 @@ def process_one(
     }
 
 
+# 실행 진입점
 def main():
     parser = argparse.ArgumentParser()
 

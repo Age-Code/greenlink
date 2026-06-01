@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
+// IotDeviceDataService — 비즈니스 로직 처리
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -34,6 +35,7 @@ public class IotDeviceDataService {
     private final S3UploadService s3UploadService;
     private final AutomationService automationService;
 
+    // save Raspberry Environment 저장
     @Transactional
     public IotDeviceDto.RaspberryEnvironmentResDto saveRaspberryEnvironment(
             String deviceKey,
@@ -68,6 +70,7 @@ public class IotDeviceDataService {
         return IotDeviceDto.RaspberryEnvironmentResDto.from(savedSensorData);
     }
 
+    // save Esp Soil Moisture 저장
     @Transactional
     public IotDeviceDto.EspSoilMoistureResDto saveEspSoilMoisture(
             String deviceKey,
@@ -102,6 +105,7 @@ public class IotDeviceDataService {
         return IotDeviceDto.EspSoilMoistureResDto.from(savedSensorData);
     }
 
+    // save Plant Image 저장
     @Transactional
     public IotDeviceDto.PlantImageUploadResDto savePlantImage(
             String deviceKey,
@@ -154,6 +158,7 @@ public class IotDeviceDataService {
         return IotDeviceDto.PlantImageUploadResDto.from(savedPlantImage);
     }
 
+    // find Active Device By Key 조회 — 없으면 예외 또는 Optional 반환
     private IotDevice findActiveDeviceByKey(String deviceKey) {
         if (deviceKey == null || deviceKey.isBlank()) {
             throw new IllegalArgumentException("X-DEVICE-KEY가 필요합니다.");
@@ -163,12 +168,14 @@ public class IotDeviceDataService {
                 .orElseThrow(() -> new IllegalArgumentException("등록되지 않았거나 비활성화된 기기입니다."));
     }
 
+    // validate Raspberry Device 검증
     private void validateRaspberryDevice(IotDevice device) {
         if (!device.isRaspberryPi()) {
             throw new IllegalStateException("라즈베리파이 기기만 환경 데이터 또는 이미지를 전송할 수 있습니다.");
         }
     }
 
+    // validate Esp Device 검증
     private void validateEspDevice(IotDevice device) {
         if (!device.isEsp32()) {
             throw new IllegalStateException("ESP32 기기만 토양수분 데이터를 전송할 수 있습니다.");

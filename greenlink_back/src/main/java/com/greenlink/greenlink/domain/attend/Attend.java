@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
                 )
         }
 )
+// Attend — 도메인 모델
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Attend {
 
@@ -44,16 +45,19 @@ public class Attend {
     @Column(name = "streak_count", nullable = false)
     private Integer streakCount;
 
+    // Attend 생성
     private Attend(User user, LocalDate attendDate, Integer streakCount) {
         this.user = user;
         this.attendDate = attendDate;
         this.streakCount = streakCount;
     }
 
+    // create 생성
     public static Attend create(User user, LocalDate attendDate, Integer streakCount) {
         return new Attend(user, attendDate, streakCount);
     }
 
+    // 생성 시각 초기화
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

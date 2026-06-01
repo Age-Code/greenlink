@@ -1,3 +1,6 @@
+// 퀘스트 API 모델
+
+// UserQuestSummary — 퀘스트 API 모델
 class UserQuestSummary {
   final int userQuestId;
   final String questType;
@@ -11,6 +14,7 @@ class UserQuestSummary {
     required this.status, required this.targetValue, required this.progressValue,
   });
 
+  // JSON 응답을 모델로 변환
   factory UserQuestSummary.fromJson(Map<String, dynamic> json) => UserQuestSummary(
     userQuestId: json['userQuestId'] ?? 0,
     questType: json['questType'] ?? '',
@@ -21,6 +25,7 @@ class UserQuestSummary {
   );
 }
 
+// UserQuestDetail — 퀘스트 API 모델
 class UserQuestDetail {
   final int userQuestId;
   final String title;
@@ -41,6 +46,7 @@ class UserQuestDetail {
     this.expiredAt, this.rewardItem,
   });
 
+  // JSON 응답을 모델로 변환
   factory UserQuestDetail.fromJson(Map<String, dynamic> json) => UserQuestDetail(
     userQuestId: json['userQuestId'] ?? 0,
     title: json['title'] ?? '',
@@ -56,6 +62,7 @@ class UserQuestDetail {
   );
 }
 
+// RewardItem — 퀘스트 API 모델
 class RewardItem {
   final int itemId;
   final String name;
@@ -68,6 +75,7 @@ class RewardItem {
     required this.quantity, this.imageUrl,
   });
 
+  // JSON 응답을 모델로 변환
   factory RewardItem.fromJson(Map<String, dynamic> json) => RewardItem(
     itemId: json['itemId'] ?? 0,
     name: json['name'] ?? '',
@@ -77,18 +85,21 @@ class RewardItem {
   );
 }
 
+// QuestRewardResponse — API 응답 모델
 class QuestRewardResponse {
   final RewardResult reward;
   final List<CreatedUserItem> createdItems;
 
   QuestRewardResponse({required this.reward, required this.createdItems});
 
+  // JSON 응답을 모델로 변환
   factory QuestRewardResponse.fromJson(Map<String, dynamic> json) => QuestRewardResponse(
     reward: RewardResult.fromJson(json['reward']),
     createdItems: (json['createdItems'] as List?)?.map((i) => CreatedUserItem.fromJson(i)).toList() ?? [],
   );
 }
 
+// RewardResult — 퀘스트 API 모델
 class RewardResult {
   final String itemName;
   final String itemType;
@@ -96,6 +107,7 @@ class RewardResult {
 
   RewardResult({required this.itemName, required this.itemType, required this.quantity});
 
+  // JSON 응답을 모델로 변환
   factory RewardResult.fromJson(Map<String, dynamic> json) => RewardResult(
     itemName: json['itemName'] ?? '',
     itemType: json['itemType'] ?? '',
@@ -103,9 +115,11 @@ class RewardResult {
   );
 }
 
+// CreatedUserItem — 퀘스트 API 모델
 class CreatedUserItem {
   final int userItemId;
   CreatedUserItem({required this.userItemId});
+  // JSON 응답을 모델로 변환
   factory CreatedUserItem.fromJson(Map<String, dynamic> json) => CreatedUserItem(
     userItemId: json['userItemId'] ?? 0,
   );

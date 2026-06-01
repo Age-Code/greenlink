@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 
+// AttendService — 비즈니스 로직 처리
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -23,6 +24,7 @@ public class AttendService {
     private final AttendRepository attendRepository;
     private final QuestProgressService questProgressService;
 
+    // 오늘 출석 처리
     @Transactional
     public AttendDto.AttendTodayResDto attendToday(Long userId) {
         User user = findActiveUser(userId);
@@ -70,6 +72,7 @@ public class AttendService {
         );
     }
 
+    // resolve Year Month 처리
     private YearMonth resolveYearMonth(Integer year, Integer month) {
         if (year == null && month == null) {
             return YearMonth.now();
@@ -86,6 +89,7 @@ public class AttendService {
         return YearMonth.of(year, month);
     }
 
+    // find Active User 조회 — 없으면 예외 또는 Optional 반환
     private User findActiveUser(Long userId) {
         return userRepository.findById(userId)
                 .filter(user -> !user.isDeleted())

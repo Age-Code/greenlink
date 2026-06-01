@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// UserQuestController — API 요청 처리
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user-quests")
@@ -47,6 +48,7 @@ public class UserQuestController {
         return ApiResponse.success("내 퀘스트 상세 조회 성공", response);
     }
 
+    // 퀘스트 보상 수령 처리
     @PostMapping("/{userQuestId}/reward")
     public ApiResponse<QuestDto.UserQuestRewardResDto> receiveReward(
             @AuthenticationPrincipal CustomUserDetails userDetails,

@@ -9,11 +9,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// QuestDto — API 요청/응답 DTO
 public class QuestDto {
 
-    /**
-     * 퀘스트 보상 아이템 응답 DTO
-     */
+    // 퀘스트 보상 아이템 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -25,6 +24,7 @@ public class QuestDto {
         private String itemType;
         private String imageUrl;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static RewardItemDto from(Item item) {
             if (item == null) {
                 return null;
@@ -39,11 +39,7 @@ public class QuestDto {
         }
     }
 
-    /**
-     * 퀘스트 목록 응답 DTO
-     *
-     * GET /api/quests
-     */
+    // 퀘스트 목록 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -58,6 +54,7 @@ public class QuestDto {
         private String resetCycle;
         private Boolean active;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static ListResDto from(Quest quest) {
             return ListResDto.builder()
                     .questId(quest.getId())
@@ -71,11 +68,7 @@ public class QuestDto {
         }
     }
 
-    /**
-     * 퀘스트 상세 응답 DTO
-     *
-     * GET /api/quests/{questId}
-     */
+    // 퀘스트 상세 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -93,6 +86,7 @@ public class QuestDto {
         private String resetCycle;
         private Boolean active;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static DetailResDto from(Quest quest) {
             return DetailResDto.builder()
                     .questId(quest.getId())
@@ -109,11 +103,7 @@ public class QuestDto {
         }
     }
 
-    /**
-     * 내 퀘스트 목록 응답 DTO
-     *
-     * GET /api/user-quests
-     */
+    // 내 퀘스트 목록 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -131,6 +121,7 @@ public class QuestDto {
         private LocalDateTime startedAt;
         private LocalDateTime expiredAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static UserQuestListResDto from(UserQuest userQuest) {
             return UserQuestListResDto.builder()
                     .userQuestId(userQuest.getId())
@@ -147,11 +138,7 @@ public class QuestDto {
         }
     }
 
-    /**
-     * 내 퀘스트 상세 응답 DTO
-     *
-     * GET /api/user-quests/{userQuestId}
-     */
+    // 내 퀘스트 상세 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -174,6 +161,7 @@ public class QuestDto {
         private RewardItemDto rewardItem;
         private Integer rewardQuantity;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static UserQuestDetailResDto from(UserQuest userQuest) {
             Quest quest = userQuest.getQuest();
 
@@ -197,11 +185,7 @@ public class QuestDto {
         }
     }
 
-    /**
-     * 퀘스트 보상 수령 응답 DTO
-     *
-     * POST /api/user-quests/{userQuestId}/reward
-     */
+    // 퀘스트 보상 수령 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -213,6 +197,7 @@ public class QuestDto {
         private RewardResDto reward;
         private List<CreatedUserItemDto> createdUserItems;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static UserQuestRewardResDto of(
                 UserQuest userQuest,
                 Item rewardItem,
@@ -232,9 +217,7 @@ public class QuestDto {
         }
     }
 
-    /**
-     * 보상 정보 DTO
-     */
+    // 보상 정보 DTO
     @Getter
     @Setter
     @Builder
@@ -246,6 +229,7 @@ public class QuestDto {
         private String itemType;
         private Integer quantity;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static RewardResDto of(Item item, Integer quantity) {
             if (item == null) {
                 return null;
@@ -260,9 +244,7 @@ public class QuestDto {
         }
     }
 
-    /**
-     * 보상 수령으로 생성된 user_item DTO
-     */
+    // 보상 수령으로 생성된 user_item DTO
     @Getter
     @Setter
     @Builder
@@ -273,6 +255,7 @@ public class QuestDto {
         private Long itemId;
         private String status;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static CreatedUserItemDto from(UserItem userItem) {
             return CreatedUserItemDto.builder()
                     .userItemId(userItem.getId())

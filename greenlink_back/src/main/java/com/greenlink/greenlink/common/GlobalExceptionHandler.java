@@ -15,10 +15,12 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 
+// 전역 예외 핸들러 — HTTP 상태코드 매핑
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // handle Entity Not Found Exception 처리 — HTTP 응답 변환
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleEntityNotFoundException(
             EntityNotFoundException e
@@ -28,14 +30,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(e.getMessage()));
     }
 
-    /**
-     * 잘못된 요청 값 처리
-     *
-     * 예:
-     * - 존재하지 않는 사용자
-     * - 존재하지 않는 아이템
-     * - 존재하지 않는 식물
-     */
+    // 잘못된 요청 값 처리
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(
             IllegalArgumentException e
@@ -45,15 +40,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(e.getMessage()));
     }
 
-    /**
-     * 현재 상태상 수행할 수 없는 요청 처리
-     *
-     * 예:
-     * - 이미 출석함
-     * - 이미 사용한 씨앗 재사용
-     * - 장착 중이 아닌 화분 해제
-     * - 보상 수령 불가능한 퀘스트
-     */
+    // 현재 상태상 수행할 수 없는 요청 처리
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalStateException(
             IllegalStateException e
@@ -63,14 +50,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(e.getMessage()));
     }
 
-    /**
-     * @Valid 검증 실패 처리
-     *
-     * 예:
-     * - email 형식 오류
-     * - nickname 빈 값
-     * - growthDays 1 미만
-     */
+    // 요청 값 검증 실패 처리
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationException(
             MethodArgumentNotValidException e
@@ -89,12 +69,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(message));
     }
 
-    /**
-     * 필수 Header 누락 처리
-     *
-     * 예:
-     * - X-USER-ID 누락
-     */
+    // 필수 Header 누락 처리
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<ApiResponse<Void>> handleMissingRequestHeaderException(
             MissingRequestHeaderException e
@@ -106,9 +81,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(message));
     }
 
-    /**
-     * 필수 Query Parameter 누락 처리
-     */
+    // 필수 Query Parameter 누락 처리
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestParameterException(
             MissingServletRequestParameterException e
@@ -120,13 +93,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(message));
     }
 
-    /**
-     * Enum 변환 실패, 타입 불일치 처리
-     *
-     * 예:
-     * - itemType=seed 처럼 소문자 전달
-     * - status=ABC 전달
-     */
+    // Enum 변환 실패, 타입 불일치 처리
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Void>> handleTypeMismatchException(
             MethodArgumentTypeMismatchException e
@@ -138,12 +105,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(message));
     }
 
-    /**
-     * 지원하지 않는 HTTP Method 처리
-     *
-     * 예:
-     * - GET만 가능한 API에 POST 요청
-     */
+    // 지원하지 않는 HTTP Method 처리
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodNotSupportedException(
             HttpRequestMethodNotSupportedException e
@@ -153,9 +115,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("지원하지 않는 HTTP 메서드입니다."));
     }
 
-    /**
-     * 그 외 예상하지 못한 서버 오류 처리
-     */
+    // 그 외 예상하지 못한 서버 오류 처리
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
         return ResponseEntity
@@ -163,6 +123,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("서버 내부 오류가 발생했습니다."));
     }
 
+    // handle Authentication Exception 처리 — HTTP 응답 변환
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(
             AuthenticationException e
@@ -172,6 +133,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("인증이 필요합니다."));
     }
 
+    // handle Access Denied Exception 처리 — HTTP 응답 변환
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(
             AccessDeniedException e

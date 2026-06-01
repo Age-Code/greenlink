@@ -9,28 +9,35 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
+// PlantImageRepository — JPA 데이터 접근
 public interface PlantImageRepository extends JpaRepository<PlantImage, Long> {
 
+    // find All By Grow Space And Deleted False Order By Captured At Desc 조회 — JPA query method
     List<PlantImage> findAllByGrowSpaceAndDeletedFalseOrderByCapturedAtDesc(
             GrowSpace growSpace
     );
 
+    // find First By Grow Space And Deleted False Order By Captured At Desc 조회 — JPA query method
     Optional<PlantImage> findFirstByGrowSpaceAndDeletedFalseOrderByCapturedAtDesc(
             GrowSpace growSpace
     );
 
+    // find All By User Plant And Deleted False Order By Captured At Desc 조회 — JPA query method
     List<PlantImage> findAllByUserPlantAndDeletedFalseOrderByCapturedAtDesc(
             UserPlant userPlant
     );
 
+    // find First By User Plant And Deleted False Order By Captured At Desc 조회 — JPA query method
     Optional<PlantImage> findFirstByUserPlantAndDeletedFalseOrderByCapturedAtDesc(
             UserPlant userPlant
     );
 
+    // find All By Iot Device And Deleted False Order By Captured At Desc 조회 — JPA query method
     List<PlantImage> findAllByIotDeviceAndDeletedFalseOrderByCapturedAtDesc(
             IotDevice iotDevice
     );
 
+    // find First By Iot Device And Deleted False Order By Captured At Desc 조회 — JPA query method
     Optional<PlantImage> findFirstByIotDeviceAndDeletedFalseOrderByCapturedAtDesc(
             IotDevice iotDevice
     );

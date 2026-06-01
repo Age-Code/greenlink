@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+// IoT 명령 서비스 — Pi polling용 명령 조회, 상태 전환, WATERING 퀘스트 연결
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -23,17 +24,7 @@ public class IotCommandService {
     private final DeviceCommandRepository deviceCommandRepository;
     private final QuestProgressService questProgressService;
 
-    /**
-     * 라즈베리파이 대기 명령 조회
-     *
-     * Header:
-     * X-DEVICE-KEY: RPI-CAPSTONE-001
-     *
-     * 조회 대상:
-     * - 해당 라즈베리파이 기기
-     * - commandStatus = PENDING
-     * - deleted = false
-     */
+    // 라즈베리파이 대기 명령 조회 — X-DEVICE-KEY로 Pi 검증
     public List<IotDeviceDto.PendingCommandResDto> getPendingCommands(
             String deviceKey
     ) {
@@ -51,11 +42,7 @@ public class IotCommandService {
                 .toList();
     }
 
-    /**
-     * 명령 처리 시작
-     *
-     * PENDING → PROCESSING
-     */
+    // 명령 처리 시작 — PENDING → PROCESSING
     @Transactional
     public IotDeviceDto.CommandProcessingResDto markCommandProcessing(
             String deviceKey,
@@ -72,12 +59,7 @@ public class IotCommandService {
         return IotDeviceDto.CommandProcessingResDto.from(command);
     }
 
-    /**
-     * 명령 처리 완료
-     *
-     * success == true  → SUCCESS
-     * success == false → FAILED
-     */
+    // 명령 처리 완료 — success == true → SUCCESS
     @Transactional
     public IotDeviceDto.CommandCompleteResDto completeCommand(
             String deviceKey,
@@ -110,6 +92,7 @@ public class IotCommandService {
         return IotDeviceDto.CommandCompleteResDto.from(command);
     }
 
+    // increase Watering Quest Progress If Needed 처리
     private void increaseWateringQuestProgressIfNeeded(DeviceCommand command) {
         if (command.getCommandType() != CommandType.WATER) {
             return;
@@ -122,6 +105,7 @@ public class IotCommandService {
         );
     }
 
+    // find Command For Device 조회 — 없으면 예외 또는 Optional 반환
     private DeviceCommand findCommandForDevice(
             Long commandId,
             IotDevice raspberryDevice
@@ -136,6 +120,7 @@ public class IotCommandService {
         return command;
     }
 
+    // find Active Device By Key 조회 — 없으면 예외 또는 Optional 반환
     private IotDevice findActiveDeviceByKey(String deviceKey) {
         if (deviceKey == null || deviceKey.isBlank()) {
             throw new IllegalArgumentException("X-DEVICE-KEY가 필요합니다.");
@@ -145,6 +130,7 @@ public class IotCommandService {
                 .orElseThrow(() -> new IllegalArgumentException("등록되지 않았거나 비활성화된 기기입니다."));
     }
 
+    // validate Raspberry Device 검증
     private void validateRaspberryDevice(IotDevice device) {
         if (!device.isRaspberryPi()) {
             throw new IllegalStateException("라즈베리파이 기기만 명령을 처리할 수 있습니다.");

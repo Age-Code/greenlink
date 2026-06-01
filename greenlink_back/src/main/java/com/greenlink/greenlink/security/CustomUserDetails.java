@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+// Spring Security 사용자 인증 정보 래퍼
 @Getter
 public class CustomUserDetails implements UserDetails {
 
@@ -16,6 +17,7 @@ public class CustomUserDetails implements UserDetails {
     private final String password;
     private final String role;
 
+    // CustomUserDetails 생성
     public CustomUserDetails(User user) {
         this.userId = user.getId();
         this.email = user.getEmail();
@@ -23,6 +25,7 @@ public class CustomUserDetails implements UserDetails {
         this.role = user.getRole().name();
     }
 
+    // 권한 목록 반환 — Spring Security Role 매핑
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(() -> "ROLE_" + role);

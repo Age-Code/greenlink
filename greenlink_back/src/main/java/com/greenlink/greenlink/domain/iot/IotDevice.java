@@ -18,24 +18,19 @@ import java.time.LocalDateTime;
                 )
         }
 )
+// IotDevice — 도메인 모델
 public class IotDevice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 라즈베리파이는 growSpace 기준으로 연결된다.
-     * ESP도 같은 공간 소속을 표시하기 위해 growSpace를 가질 수 있다.
-     */
+    // 라즈베리파이는 growSpace 기준으로 연결된다. — ESP도 같은 공간 소속을 표시하기 위해 growSpace를 가질 수 있다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "grow_space_id")
     private GrowSpace growSpace;
 
-    /**
-     * ESP32는 특정 userPlant에 연결된다.
-     * RASPBERRY_PI는 userPlant가 null이다.
-     */
+    // ESP32는 특정 userPlant에 연결된다. — RASPBERRY_PI는 userPlant가 null이다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_plant_id")
     private UserPlant userPlant;
@@ -64,6 +59,7 @@ public class IotDevice {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
+    // IotDevice 생성
     @Builder
     private IotDevice(
             GrowSpace growSpace,
@@ -82,6 +78,7 @@ public class IotDevice {
         validateDeviceConnection();
     }
 
+    // create Raspberry Pi 생성
     public static IotDevice createRaspberryPi(
             GrowSpace growSpace,
             String deviceName,
@@ -96,6 +93,7 @@ public class IotDevice {
                 .build();
     }
 
+    // create Esp32 생성
     public static IotDevice createEsp32(
             GrowSpace growSpace,
             UserPlant userPlant,
@@ -111,6 +109,7 @@ public class IotDevice {
                 .build();
     }
 
+    // validate Device Connection 검증
     private void validateDeviceConnection() {
         if (this.deviceType == DeviceType.RASPBERRY_PI) {
             if (this.growSpace == null) {
@@ -129,18 +128,22 @@ public class IotDevice {
         }
     }
 
+    // update Last Connected At 수정
     public void updateLastConnectedAt() {
         this.lastConnectedAt = LocalDateTime.now();
     }
 
+    // 비활성화 처리
     public void deactivate() {
         this.active = false;
     }
 
+    // 활성화 처리
     public void activate() {
         this.active = true;
     }
 
+    // delete 삭제
     public void delete() {
         this.deleted = true;
         this.active = false;
@@ -154,6 +157,7 @@ public class IotDevice {
         return this.deviceType == DeviceType.ESP32;
     }
 
+    // 생성 시각 초기화
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
@@ -165,6 +169,7 @@ public class IotDevice {
         }
     }
 
+    // 수정 시각 갱신
     @PreUpdate
     public void preUpdate() {
         this.modifiedAt = LocalDateTime.now();

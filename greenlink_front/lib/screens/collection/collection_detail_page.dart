@@ -1,28 +1,35 @@
+// 도감 상세 화면 — 수확 기록과 상태 조회
+
 import 'package:flutter/material.dart';
 import '../../models/collection_models.dart';
 import '../../services/collection_service.dart';
 import '../../core/widgets/greenlink_card.dart';
 
+// CollectionDetailPage — 화면 위젯
 class CollectionDetailPage extends StatefulWidget {
   final int plantId;
 
   const CollectionDetailPage({Key? key, required this.plantId}) : super(key: key);
 
+  // State 객체 생성
   @override
   _CollectionDetailPageState createState() => _CollectionDetailPageState();
 }
 
+// _CollectionDetailPageState — 화면 상태와 이벤트 처리
 class _CollectionDetailPageState extends State<CollectionDetailPage> {
   final CollectionService _collectionService = CollectionService();
   CollectionDetail? _detail;
   bool _isLoading = true;
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadDetail();
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadDetail() async {
     setState(() => _isLoading = true);
     final res = await _collectionService.getCollectionDetail(widget.plantId);
@@ -39,6 +46,7 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
     }
   }
 
+  // 날짜 문자열 포맷 — 파싱 실패 시 원문 반환
   String _formatDate(String? isoString) {
     if (isoString == null) return '';
     try {
@@ -49,6 +57,7 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -65,6 +74,7 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildContent(ThemeData theme) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
@@ -87,6 +97,7 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildHeaderCard(ThemeData theme) {
     return GreenlinkCard(
       padding: const EdgeInsets.all(24),
@@ -136,6 +147,7 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildStatusCard(ThemeData theme) {
     if (_detail!.collected) {
       return Container(
@@ -188,6 +200,7 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
     }
   }
 
+  // 화면 섹션 렌더링
   Widget _buildRecordsSection(ThemeData theme) {
     if (!_detail!.collected || _detail!.harvestedPlants.isEmpty) {
       return Container(
@@ -255,6 +268,7 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildErrorState(ThemeData theme) {
     return Center(
       child: Text(

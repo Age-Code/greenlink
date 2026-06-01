@@ -1,8 +1,12 @@
+// 공통 버튼 위젯
+
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 
+// ButtonType — 공통 버튼 위젯
 enum ButtonType { primary, secondary, ghost, danger, disabled }
 
+// GreenlinkButton — 공통 버튼 위젯
 class GreenlinkButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -21,6 +25,7 @@ class GreenlinkButton extends StatelessWidget {
     this.width,
   }) : super(key: key);
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     final isDisabled = onPressed == null && !isLoading;

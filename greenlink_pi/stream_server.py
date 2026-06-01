@@ -1,3 +1,5 @@
+# MJPEG 스트림 서버 — Flask로 전체/식물별 스트림 제공
+
 import io
 import time
 import threading
@@ -8,17 +10,13 @@ from picamera2 import Picamera2
 from PIL import Image, ImageDraw
 
 
-# ==============================
 # 기본 서버 설정
-# ==============================
 
 HOST = "0.0.0.0"
 PORT = 8000
 
 
-# ==============================
 # 카메라 해상도 설정
-# ==============================
 # 카메라 원본 프레임 해상도입니다.
 # 해바라기/바질을 한 화면에 담은 뒤 crop하기 위해 1920x1080으로 설정합니다.
 
@@ -26,9 +24,7 @@ FRAME_WIDTH = 1640
 FRAME_HEIGHT = 1232
 
 
-# ==============================
 # 개별 crop 스트림 출력 해상도
-# ==============================
 # 좌우 crop을 하면 원래는 960x1080처럼 세로로 좁은 화면이 됩니다.
 # 그래서 crop 결과를 다시 1920x1080으로 확대해서 각 식물 화면에서 크게 보이도록 합니다.
 
@@ -36,9 +32,7 @@ CROP_OUTPUT_WIDTH = 800
 CROP_OUTPUT_HEIGHT = 1232
 
 
-# ==============================
 # 스트리밍 품질 설정
-# ==============================
 
 JPEG_QUALITY = 80
 
@@ -52,45 +46,34 @@ CAPTURE_INTERVAL_SECONDS = 0.08
 STREAM_INTERVAL_SECONDS = 0.03
 
 
-# ==============================
 # 카메라 방향 보정
-# ==============================
 # 카메라가 뒤집혀 달려 있으므로 180도 회전 적용.
 # 정상 방향이면 False로 바꾸면 됩니다.
 
 ROTATE_180 = True
 
 
-# ==============================
 # Crop 설정
-# ==============================
 # 비율 기준 crop 영역입니다.
 # 형식: (x1, y1, x2, y2)
-#
 # 기존에 해바라기/바질이 반대로 나왔기 때문에 서로 교체한 상태입니다.
-#
 # 현재 기준:
 # 해바라기 = 오른쪽 절반
 # 바질     = 왼쪽 절반
-#
 # 만약 다시 반대로 나오면 아래 두 줄만 서로 바꾸면 됩니다.
 
 SUNFLOWER_CROP = (0.5, 0.0, 1.0, 1.0)
 BASIL_CROP = (0.0, 0.0, 0.5, 1.0)
 
 
-# ==============================
 # 라벨 표시 여부
-# ==============================
 # 화면에 식물 라벨을 표시할지 여부입니다.
 # 앱/공개 스트림에서 라벨이 거슬리면 False로 바꾸면 됩니다.
 
 SHOW_LABEL = True
 
 
-# ==============================
 # 전역 객체
-# ==============================
 
 app = Flask(__name__)
 
@@ -100,9 +83,7 @@ frame_lock = threading.Lock()
 camera_running = False
 
 
-# ==============================
 # 로컬 확인용 HTML 페이지
-# ==============================
 
 INDEX_HTML = """
 <!DOCTYPE html>
@@ -183,10 +164,7 @@ INDEX_HTML = """
 """
 
 
-# ==============================
-# 카메라 초기화
-# ==============================
-
+# 카메라 초기화 — Picamera2 스트림 설정 후 시작
 def init_camera():
     global picam2
 
@@ -213,10 +191,7 @@ def init_camera():
     print(f"[STREAM] BASIL_CROP: {BASIL_CROP}")
 
 
-# ==============================
-# 프레임 캡처 루프
-# ==============================
-
+# 카메라 캡처 루프 — 최신 프레임을 전역 버퍼에 갱신
 def camera_capture_loop():
     global latest_frame, camera_running
 
@@ -241,10 +216,7 @@ def camera_capture_loop():
             time.sleep(1)
 
 
-# ==============================
-# 이미지 처리 함수
-# ==============================
-
+# 최신 프레임 조회 — lock 보호 후 PIL 이미지 반환
 def get_latest_image() -> Image.Image | None:
     with frame_lock:
         if latest_frame is None:
@@ -255,24 +227,12 @@ def get_latest_image() -> Image.Image | None:
     return Image.fromarray(frame_copy).convert("RGB")
 
 
+# 스트림 프레임 crop — 비율 영역을 출력 크기로 변환
 def crop_by_ratio(
     image: Image.Image,
     crop_ratio: Tuple[float, float, float, float],
     resize_to_output: bool = True
 ) -> Image.Image:
-    """
-    원본 프레임에서 비율 기준으로 영역을 crop합니다.
-
-    crop_ratio:
-    (x1, y1, x2, y2)
-
-    예:
-    왼쪽 절반  = (0.0, 0.0, 0.5, 1.0)
-    오른쪽 절반 = (0.5, 0.0, 1.0, 1.0)
-
-    resize_to_output=True이면 crop 결과를
-    CROP_OUTPUT_WIDTH x CROP_OUTPUT_HEIGHT로 확대합니다.
-    """
 
     w, h = image.size
 
@@ -300,6 +260,7 @@ def crop_by_ratio(
     return cropped
 
 
+# 스트림 라벨 표시 — 설정이 켜진 경우 식물명 overlay
 def draw_label(image: Image.Image, label: str) -> Image.Image:
     if not SHOW_LABEL:
         return image
@@ -327,16 +288,14 @@ def draw_label(image: Image.Image, label: str) -> Image.Image:
     return result
 
 
+# JPEG 인코딩 — PIL 이미지를 MJPEG frame bytes로 변환
 def image_to_jpeg_bytes(image: Image.Image) -> bytes:
     buffer = io.BytesIO()
     image.save(buffer, format="JPEG", quality=JPEG_QUALITY)
     return buffer.getvalue()
 
 
-# ==============================
-# MJPEG Generator
-# ==============================
-
+# MJPEG 생성 — stream_type별 crop 후 frame yield
 def generate_mjpeg(stream_type: str):
     while True:
         image = get_latest_image()
@@ -389,15 +348,13 @@ def generate_mjpeg(stream_type: str):
             time.sleep(0.5)
 
 
-# ==============================
-# Routes
-# ==============================
-
+# 스트림 확인 페이지 렌더링
 @app.route("/")
 def index():
     return render_template_string(INDEX_HTML)
 
 
+# 스트림 서버 상태 응답
 @app.route("/health")
 def health():
     return {
@@ -430,6 +387,7 @@ def health():
     }
 
 
+# 전체 MJPEG 스트림 응답
 @app.route("/stream.mjpg")
 def stream_full():
     return Response(
@@ -438,6 +396,7 @@ def stream_full():
     )
 
 
+# 해바라기 MJPEG 스트림 응답
 @app.route("/stream/sunflower.mjpg")
 def stream_sunflower():
     return Response(
@@ -446,6 +405,7 @@ def stream_sunflower():
     )
 
 
+# 바질 MJPEG 스트림 응답
 @app.route("/stream/basil.mjpg")
 def stream_basil():
     return Response(
@@ -454,10 +414,7 @@ def stream_basil():
     )
 
 
-# ==============================
-# Main
-# ==============================
-
+# 실행 진입점
 def main():
     init_camera()
 

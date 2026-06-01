@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+// IoT 앱 서비스 — 수동 명령 생성, wateringSafetyEnabled 체크
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -55,16 +56,7 @@ public class IotAppService {
     private final IotDeviceRepository iotDeviceRepository;
     private final AutomationSettingRepository automationSettingRepository;
 
-    /**
-     * 내 식물 IoT 최신 상태 조회
-     *
-     * 조회 데이터:
-     * 1. 식물이 속한 재배 공간
-     * 2. 재배 공간의 최신 라즈베리파이 환경 데이터
-     * 3. 해당 식물의 최신 ESP 토양수분 데이터
-     * 4. 해당 식물의 최신 원본 이미지
-     * 5. 해당 원본 이미지에 연결된 최신 AI 이미지
-     */
+    // 내 식물 IoT 최신 상태 조회
     public IotAppDto.IotLatestResDto getLatestIotStatus(
             Long userId,
             Long userPlantId
@@ -112,13 +104,7 @@ public class IotAppService {
         );
     }
 
-    /**
-     * 내 식물 사진 기록 조회
-     *
-     * 기본 정책:
-     * - 특정 userPlant 사진이 있으면 그것만 조회
-     * - 각 원본 이미지에 연결된 AI 이미지가 있으면 aiImageUrl도 함께 내려준다.
-     */
+    // 내 식물 사진 기록 조회
     public List<IotAppDto.PlantImageDto> getPlantImages(
             Long userId,
             Long userPlantId
@@ -143,12 +129,7 @@ public class IotAppService {
                 .toList();
     }
 
-    /**
-     * 물 주기 요청
-     *
-     * Request Body 없음.
-     * 서버에서 DeviceCommand를 생성한다.
-     */
+    // 물 주기 요청
     @Transactional
     public IotAppDto.WaterCommandResDto requestWater(
             Long userId,
@@ -182,6 +163,7 @@ public class IotAppService {
         return IotAppDto.WaterCommandResDto.from(savedCommand);
     }
 
+    // 수동 조명 켜기 명령 생성
     @Transactional
     public IotAppDto.LightCommandResDto requestLightOn(
             Long userId,
@@ -194,6 +176,7 @@ public class IotAppService {
         );
     }
 
+    // 수동 조명 끄기 명령 생성
     @Transactional
     public IotAppDto.LightCommandResDto requestLightOff(
             Long userId,
@@ -206,6 +189,7 @@ public class IotAppService {
         );
     }
 
+    // 수동 센서 새로고침 명령 생성 — 소유/공간/Pi 검증, 진행 중이면 409
     @Transactional
     public IotAppDto.DeviceCommandResDto requestSensorRefresh(
             Long userPlantId,
@@ -241,6 +225,7 @@ public class IotAppService {
         return IotAppDto.DeviceCommandResDto.fromSensorRefresh(savedCommand);
     }
 
+    // request Light Command 요청 처리
     private IotAppDto.LightCommandResDto requestLightCommand(
             Long userId,
             Long userPlantId,
@@ -273,6 +258,7 @@ public class IotAppService {
         return IotAppDto.LightCommandResDto.from(savedCommand);
     }
 
+    // validate No Pending Light Command 검증
     private void validateNoPendingLightCommand(UserPlant userPlant) {
         boolean lightOnExists = deviceCommandRepository
                 .existsByUserPlantAndCommandTypeAndCommandStatusInAndDeletedFalse(
@@ -293,6 +279,7 @@ public class IotAppService {
         }
     }
 
+    // validate Pump Channel 검증
     private void validatePumpChannel(
             GrowSpace growSpace,
             UserPlant userPlant,
@@ -319,6 +306,7 @@ public class IotAppService {
         }
     }
 
+    // validate No Pending Water Command 검증
     private void validateNoPendingWaterCommand(UserPlant userPlant) {
         boolean exists = deviceCommandRepository
                 .existsByUserPlantAndCommandTypeAndCommandStatusInAndDeletedFalse(
@@ -332,6 +320,7 @@ public class IotAppService {
         }
     }
 
+    // 과습 안전 모드 체크 — enabled이고 수분 >= threshold+10%이면 400
     private void validateWateringSafety(UserPlant userPlant) {
         AutomationSetting setting = automationSettingRepository
                 .findByUserPlantAndDeletedFalse(userPlant)
@@ -360,6 +349,7 @@ public class IotAppService {
         }
     }
 
+    // validate No Pending Sensor Refresh Command 검증
     private void validateNoPendingSensorRefreshCommand(IotDevice raspberryDevice) {
         boolean exists = deviceCommandRepository
                 .existsByIotDeviceAndCommandTypeAndCommandStatusInAndDeletedFalse(
@@ -373,6 +363,7 @@ public class IotAppService {
         }
     }
 
+    // find Grow Space For Sensor Refresh 조회 — 없으면 예외 또는 Optional 반환
     private GrowSpace findGrowSpaceForSensorRefresh(UserPlant userPlant) {
         GrowSpacePlant growSpacePlant = growSpacePlantRepository
                 .findByUserPlantAndActiveTrueAndDeletedFalse(userPlant)
@@ -381,6 +372,7 @@ public class IotAppService {
         return growSpacePlant.getGrowSpace();
     }
 
+    // find Grow Space By User Plant 조회 — 없으면 예외 또는 Optional 반환
     private GrowSpace findGrowSpaceByUserPlant(UserPlant userPlant) {
         GrowSpacePlant growSpacePlant = growSpacePlantRepository
                 .findByUserPlantAndActiveTrueAndDeletedFalse(userPlant)
@@ -389,6 +381,7 @@ public class IotAppService {
         return growSpacePlant.getGrowSpace();
     }
 
+    // find My User Plant 조회 — 없으면 예외 또는 Optional 반환
     private UserPlant findMyUserPlant(
             Long userPlantId,
             User user
@@ -397,11 +390,13 @@ public class IotAppService {
                 .orElseThrow(() -> new IllegalArgumentException("식물을 찾을 수 없습니다."));
     }
 
+    // UserPlant 조회 — 없으면 404
     private UserPlant findUserPlantOrNotFound(Long userPlantId) {
         return userPlantRepository.findByIdAndDeletedFalse(userPlantId)
                 .orElseThrow(() -> new EntityNotFoundException("식물을 찾을 수 없습니다."));
     }
 
+    // find Active User 조회 — 없으면 예외 또는 Optional 반환
     private User findActiveUser(Long userId) {
         return userRepository.findById(userId)
                 .filter(user -> !user.isDeleted())

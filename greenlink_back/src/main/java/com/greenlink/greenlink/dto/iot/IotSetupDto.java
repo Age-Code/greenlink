@@ -11,13 +11,10 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+// IotSetupDto — API 요청/응답 DTO
 public class IotSetupDto {
 
-    /**
-     * 재배 공간 생성 요청 DTO
-     *
-     * POST /api/iot/grow-spaces
-     */
+    // 재배 공간 생성 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -30,12 +27,7 @@ public class IotSetupDto {
         private String description;
     }
 
-    /**
-     * 재배 공간 응답 DTO
-     *
-     * GET /api/iot/grow-spaces
-     * POST /api/iot/grow-spaces
-     */
+    // 재배 공간 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -48,6 +40,7 @@ public class IotSetupDto {
         private Boolean active;
         private LocalDateTime createdAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static GrowSpaceResDto from(GrowSpace growSpace) {
             return GrowSpaceResDto.builder()
                     .growSpaceId(growSpace.getId())
@@ -59,11 +52,7 @@ public class IotSetupDto {
         }
     }
 
-    /**
-     * 재배 공간에 식물 연결 요청 DTO
-     *
-     * POST /api/iot/grow-spaces/{growSpaceId}/plants
-     */
+    // 재배 공간에 식물 연결 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -74,11 +63,7 @@ public class IotSetupDto {
         private Long userPlantId;
     }
 
-    /**
-     * 재배 공간-식물 연결 응답 DTO
-     *
-     * grow_space_plant 응답
-     */
+    // 재배 공간-식물 연결 응답 DTO — grow_space_plant 응답
     @Getter
     @Setter
     @Builder
@@ -97,6 +82,7 @@ public class IotSetupDto {
         private Boolean active;
         private LocalDateTime createdAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static GrowSpacePlantResDto from(GrowSpacePlant growSpacePlant) {
             return GrowSpacePlantResDto.builder()
                     .growSpacePlantId(growSpacePlant.getId())
@@ -114,28 +100,7 @@ public class IotSetupDto {
         }
     }
 
-    /**
-     * IoT 기기 등록 요청 DTO
-     *
-     * POST /api/iot/devices
-     *
-     * RASPBERRY_PI 등록 예:
-     * {
-     *   "deviceName": "캡스톤 라즈베리파이",
-     *   "deviceType": "RASPBERRY_PI",
-     *   "deviceKey": "RPI-CAPSTONE-001",
-     *   "growSpaceId": 1
-     * }
-     *
-     * ESP32 등록 예:
-     * {
-     *   "deviceName": "바질 ESP",
-     *   "deviceType": "ESP32",
-     *   "deviceKey": "ESP-BASIL-001",
-     *   "growSpaceId": 1,
-     *   "userPlantId": 1
-     * }
-     */
+    // IoT 기기 등록 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -156,11 +121,7 @@ public class IotSetupDto {
         private Long userPlantId;
     }
 
-    /**
-     * IoT 기기 응답 DTO
-     *
-     * RASPBERRY_PI / ESP32 공통 응답
-     */
+    // IoT 기기 응답 DTO — RASPBERRY_PI / ESP32 공통 응답
     @Getter
     @Setter
     @Builder
@@ -183,6 +144,7 @@ public class IotSetupDto {
         private LocalDateTime lastConnectedAt;
         private LocalDateTime createdAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static DeviceResDto from(IotDevice device) {
             Long growSpaceId = device.getGrowSpace() == null
                     ? null
@@ -223,21 +185,7 @@ public class IotSetupDto {
         }
     }
 
-    /**
-     * 펌프 채널 등록 요청 DTO
-     *
-     * POST /api/iot/pump-channels
-     *
-     * 예:
-     * {
-     *   "growSpaceId": 1,
-     *   "userPlantId": 1,
-     *   "raspberryDeviceId": 1,
-     *   "channelName": "바질 펌프",
-     *   "gpioPin": 17,
-     *   "relayChannel": 1
-     * }
-     */
+    // 펌프 채널 등록 요청 DTO
     @Getter
     @Setter
     @NoArgsConstructor
@@ -261,9 +209,7 @@ public class IotSetupDto {
         private Integer relayChannel;
     }
 
-    /**
-     * 펌프 채널 응답 DTO
-     */
+    // 펌프 채널 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -289,6 +235,7 @@ public class IotSetupDto {
         private Boolean active;
         private LocalDateTime createdAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static PumpChannelResDto from(PumpChannel pumpChannel) {
             return PumpChannelResDto.builder()
                     .pumpChannelId(pumpChannel.getId())

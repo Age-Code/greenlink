@@ -1,3 +1,6 @@
+// 공통 API 응답 모델
+
+// 공통 API 응답 모델
 class ApiResponse<T> {
   final bool success;
   final String message;
@@ -9,6 +12,7 @@ class ApiResponse<T> {
     this.data,
   });
 
+  // JSON 응답을 모델로 변환
   factory ApiResponse.fromJson(Map<String, dynamic> json, T Function(dynamic json)? fromJsonT) {
     return ApiResponse<T>(
       success: json['success'] ?? false,

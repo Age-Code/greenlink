@@ -1,3 +1,5 @@
+# 명령 워커 — 3초 polling 후 WATER/LIGHT/SENSOR_REFRESH 분기 실행
+
 import time
 
 from api_client import (
@@ -11,10 +13,7 @@ from sensor_service import read_all_sensors
 from sensor_uploader import upload_sensor_data_safe
 
 
-# ==============================
-# WATER 명령 처리
-# ==============================
-
+# WATER 명령 처리 — 펌프 GPIO를 durationSeconds 동안 작동
 def handle_water_command(command: dict):
     command_id = command.get("commandId")
     duration_seconds = command.get("durationSeconds", 1)
@@ -79,10 +78,7 @@ def handle_water_command(command: dict):
         all_off()
 
 
-# ==============================
-# LIGHT 명령 처리
-# ==============================
-
+# LIGHT 명령 처리 — LIGHT_ON/LIGHT_OFF에 따라 LED 제어
 def handle_light_command(command: dict):
     command_id = command.get("commandId")
     command_type = command.get("commandType")
@@ -133,10 +129,7 @@ def handle_light_command(command: dict):
             print(f"[COMMAND] 실패 보고도 실패: {report_error}")
 
 
-# ==============================
-# SENSOR_REFRESH 명령 처리
-# ==============================
-
+# SENSOR_REFRESH 처리 — 온도/습도/조도 재측정 후 업로드
 def handle_sensor_refresh_command(command: dict):
     command_id = command.get("commandId")
 
@@ -188,10 +181,7 @@ def handle_sensor_refresh_command(command: dict):
             print(f"[SENSOR_REFRESH] 실패 보고도 실패: {report_error}")
 
 
-# ==============================
-# 명령 분기 처리
-# ==============================
-
+# 명령 타입 분기 — WATER/LIGHT/SENSOR_REFRESH 처리
 def handle_command(command: dict):
     command_type = command.get("commandType")
 
@@ -210,10 +200,7 @@ def handle_command(command: dict):
     print(f"[COMMAND] 지원하지 않는 명령 타입입니다: {command_type}")
 
 
-# ==============================
-# 1회 polling
-# ==============================
-
+# 명령 polling 1회 실행 — 대기 명령 순차 처리
 def run_once():
     commands = get_pending_commands()
 
@@ -227,10 +214,7 @@ def run_once():
         handle_command(command)
 
 
-# ==============================
-# 계속 polling
-# ==============================
-
+# 명령 polling 루프 — 3초 주기로 Backend 조회
 def run_forever():
     print("[COMMAND] 서버 명령 polling 시작")
     print("[COMMAND] 지원 명령: WATER, LIGHT_ON, LIGHT_OFF, SENSOR_REFRESH")

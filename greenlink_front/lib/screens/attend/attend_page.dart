@@ -1,18 +1,23 @@
+// 출석 화면 — 월간 출석 조회와 오늘 출석 처리
+
 import 'package:flutter/material.dart';
 import '../../models/attend_models.dart';
 import '../../services/attend_service.dart';
 import '../../core/widgets/greenlink_card.dart';
 import '../../theme/app_theme.dart';
 
+// AttendPage — 화면 위젯
 class AttendPage extends StatefulWidget {
   final VoidCallback? onAttended;
 
   const AttendPage({Key? key, this.onAttended}) : super(key: key);
 
+  // State 객체 생성
   @override
   _AttendPageState createState() => _AttendPageState();
 }
 
+// _AttendPageState — 화면 상태와 이벤트 처리
 class _AttendPageState extends State<AttendPage> {
   final AttendService _attendService = AttendService();
 
@@ -22,12 +27,14 @@ class _AttendPageState extends State<AttendPage> {
   int _currentYear = DateTime.now().year;
   int _currentMonth = DateTime.now().month;
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadAttends();
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadAttends() async {
     setState(() => _isLoading = true);
     final res = await _attendService.getAttends(year: _currentYear, month: _currentMonth);
@@ -40,6 +47,7 @@ class _AttendPageState extends State<AttendPage> {
     }
   }
 
+  // 선택값 변경 — 상태 갱신 후 목록 반영
   void _changeMonth(int delta) {
     int newMonth = _currentMonth + delta;
     int newYear = _currentYear;
@@ -49,6 +57,7 @@ class _AttendPageState extends State<AttendPage> {
     _loadAttends();
   }
 
+  // 오늘 출석 처리 — 성공 시 출석 목록 갱신
   Future<void> _doTodayAttend() async {
     final res = await _attendService.attendToday();
     if (!mounted) return;
@@ -61,6 +70,7 @@ class _AttendPageState extends State<AttendPage> {
     }
   }
 
+  // 사용자 안내 UI 표시
   void _showSuccessDialog(int streakCount) {
     showDialog(
       context: context,
@@ -98,6 +108,7 @@ class _AttendPageState extends State<AttendPage> {
     );
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -161,6 +172,7 @@ class _AttendPageState extends State<AttendPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildMonthSelector() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -183,6 +195,7 @@ class _AttendPageState extends State<AttendPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildSummaryCards() {
     final int total = _attendData?.totalAttendCount ?? 0;
     final int streak = _attendData?.currentStreakCount ?? 0;
@@ -228,6 +241,7 @@ class _AttendPageState extends State<AttendPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildCalendarCard() {
     return GreenlinkCard(
       child: Column(
@@ -251,6 +265,7 @@ class _AttendPageState extends State<AttendPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildCalendarGrid() {
     final firstDayOfMonth = DateTime(_currentYear, _currentMonth, 1);
     final daysInMonth = DateTime(_currentYear, _currentMonth + 1, 0).day;
@@ -297,10 +312,12 @@ class _AttendPageState extends State<AttendPage> {
   }
 }
 
+// _WeekdayLabel — 내부 위젯
 class _WeekdayLabel extends StatelessWidget {
   final String text;
   const _WeekdayLabel({required this.text});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Text(
@@ -311,6 +328,7 @@ class _WeekdayLabel extends StatelessWidget {
   }
 }
 
+// _DayCell — 내부 위젯
 class _DayCell extends StatelessWidget {
   final int day;
   final bool isAttended;
@@ -319,6 +337,7 @@ class _DayCell extends StatelessWidget {
 
   const _DayCell({required this.day, required this.isAttended, required this.isToday, required this.isFuture});
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     Color textColor = AppColors.body;

@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+// AiPlantImage — 도메인 모델
 @Entity
 @Table(name = "ai_plant_image")
 @Getter
@@ -51,6 +52,7 @@ public class AiPlantImage {
     @Column(name = "modified_at", nullable = false)
     private LocalDateTime modifiedAt;
 
+    // 생성 시각 초기화
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
@@ -72,11 +74,13 @@ public class AiPlantImage {
         }
     }
 
+    // 수정 시각 갱신
     @PreUpdate
     public void preUpdate() {
         modifiedAt = LocalDateTime.now();
     }
 
+    // AI 처리 성공 표시
     public static AiPlantImage success(
             PlantImage plantImage,
             UserPlant userPlant,

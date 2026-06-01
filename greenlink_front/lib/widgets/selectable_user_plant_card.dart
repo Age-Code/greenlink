@@ -1,7 +1,9 @@
+// 선택 가능한 사용자 식물 카드 위젯
 
 import 'package:flutter/material.dart';
 import '../models/user_plant_models.dart';
 
+// SelectableUserPlantSummaryCard — 카드 위젯
 class SelectableUserPlantSummaryCard extends StatelessWidget {
   final UserPlantSummary plant;
   final bool isSelected;
@@ -14,10 +16,11 @@ class SelectableUserPlantSummaryCard extends StatelessWidget {
     required this.onTap,
   }) : super(key: key);
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     String statusText = "자라는 중";
     if (plant.status == 'HARVESTABLE') statusText = "수확 가능";
     if (plant.status == 'HARVESTED') statusText = "수확 완료";

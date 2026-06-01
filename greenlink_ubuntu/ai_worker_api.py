@@ -1,3 +1,5 @@
+# AI Worker FastAPI 서버 — /health, /process 엔드포인트
+
 from datetime import datetime
 
 from fastapi import FastAPI, BackgroundTasks
@@ -9,6 +11,7 @@ from process_one import process_one
 app = FastAPI(title="GreenLink AI Worker")
 
 
+# AI 처리 요청 모델 — plantImageId, imageUrl, 선택 이름 포함
 class ProcessRequest(BaseModel):
     plantImageId: int
     userPlantId: int | None = None
@@ -16,6 +19,7 @@ class ProcessRequest(BaseModel):
     name: str | None = None
 
 
+# AI Worker 상태 확인 응답
 @app.get("/health")
 def health_check():
     return {
@@ -24,6 +28,7 @@ def health_check():
     }
 
 
+# AI 작업명 생성 — 요청 이름 우선, 없으면 timestamp 사용
 def make_job_name(request: ProcessRequest) -> str:
     name = request.name
 
@@ -38,6 +43,7 @@ def make_job_name(request: ProcessRequest) -> str:
     return f"plant_image_{request.plantImageId}_{timestamp}"
 
 
+# AI background 작업 실행 — process_one 호출 후 결과 로깅
 def run_ai_job(
     image_url: str,
     name: str,
@@ -63,6 +69,7 @@ def run_ai_job(
         print(f"[AI_WORKER] error: {e}")
 
 
+# AI 처리 요청 접수 — background task 등록
 @app.post("/process")
 def process_image(
     request: ProcessRequest,

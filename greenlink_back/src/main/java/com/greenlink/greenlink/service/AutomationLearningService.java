@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+// 자동화 학습 서비스 — 최근 14일 통계로 임계치 산출
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -58,9 +59,7 @@ public class AutomationLearningService {
     private final DeviceCommandRepository deviceCommandRepository;
     private final GrowSpacePlantRepository growSpacePlantRepository;
 
-    /**
-     * 특정 식물의 최근 14일 데이터를 기반으로 자동화 모델 학습
-     */
+    // 특정 식물의 최근 14일 데이터를 기반으로 자동화 모델 학습
     @Transactional
     public AutomationDto.ModelResDto trainUserPlantModel(
             Long userId,
@@ -173,10 +172,8 @@ public class AutomationLearningService {
 
         AutomationModel savedModel = automationModelRepository.save(model);
 
-        /**
-         * autoOptimizeEnabled = true이고,
-         * confidenceScore가 충분하면 학습 결과를 실제 자동화 설정값에 반영한다.
-         */
+                // autoOptimizeEnabled = true이고, — confidenceScore가 충분하면 학습 결과를 실제 자동화 설정값에 반영한다.
+
         if (Boolean.TRUE.equals(setting.getAutoOptimizeEnabled())
                 && confidenceScore >= READY_CONFIDENCE_SCORE) {
             setting.applyLearningThresholds(
@@ -189,9 +186,7 @@ public class AutomationLearningService {
         return AutomationDto.ModelResDto.from(savedModel);
     }
 
-    /**
-     * 특정 식물의 최신 학습 모델 조회
-     */
+    // 특정 식물의 최신 학습 모델 조회
     public AutomationDto.ModelResDto getLatestModel(
             Long userId,
             Long userPlantId
@@ -207,14 +202,7 @@ public class AutomationLearningService {
         return AutomationDto.ModelResDto.from(model);
     }
 
-    /**
-     * 토양수분 감소 속도 계산
-     *
-     * 예:
-     * 2시간 동안 40% → 36%
-     * 감소량 4%
-     * 시간당 감소량 2%
-     */
+    // 토양수분 감소 속도 계산
     private Double calculateAverageDryRatePerHour(
             List<EspSensorData> soilDataList
     ) {
@@ -267,9 +255,7 @@ public class AutomationLearningService {
         return average(dryRates);
     }
 
-    /**
-     * 물 주기 전후 토양수분 회복량 계산
-     */
+    // 물 주기 전후 토양수분 회복량 계산
     private WaterLearningResult calculateWaterLearningResult(
             UserPlant userPlant,
             List<DeviceCommand> waterCommands,
@@ -347,16 +333,7 @@ public class AutomationLearningService {
         );
     }
 
-    /**
-     * 추천 급수 기준값 계산
-     *
-     * 기본 원리:
-     * 최근 물 주기 직전 평균 토양수분보다 약간 높은 값으로 기준 설정
-     *
-     * 예:
-     * 물 주기 직전 평균이 31.5%
-     * 추천 기준 = 33.5%
-     */
+    // 추천 급수 기준값 계산 — 급수 직전 평균 수분 기준
     private Double calculateRecommendedWaterThreshold(
             WaterLearningResult waterLearningResult,
             Double fallbackWaterThreshold
@@ -376,13 +353,7 @@ public class AutomationLearningService {
         );
     }
 
-    /**
-     * 조도 데이터 기반 LED 기준값 계산
-     *
-     * 단순 통계 방식:
-     * - 조도 하위 25% 지점을 LED ON 기준 후보로 사용
-     * - 조도 상위 75% 지점을 LED OFF 기준 후보로 사용
-     */
+    // 조도 데이터 기반 LED 기준값 계산 — 단순 통계 방식
     private LightLearningResult calculateLightLearningResult(
             List<RaspberrySensorData> lightDataList,
             Double fallbackLightOnThreshold,
@@ -436,11 +407,7 @@ public class AutomationLearningService {
         );
     }
 
-    /**
-     * 모델 신뢰도 계산
-     *
-     * 0.0 ~ 1.0 사이 값
-     */
+    // 모델 신뢰도 계산 — 0.0 ~ 1.0 사이 값
     private Double calculateConfidenceScore(
             int soilDataCount,
             int lightDataCount,
@@ -459,6 +426,7 @@ public class AutomationLearningService {
         );
     }
 
+    // find Grow Space By User Plant 조회 — 없으면 예외 또는 Optional 반환
     private GrowSpace findGrowSpaceByUserPlant(UserPlant userPlant) {
         GrowSpacePlant growSpacePlant =
                 growSpacePlantRepository
@@ -483,11 +451,13 @@ public class AutomationLearningService {
                 ));
     }
 
+    // find User 조회 — 없으면 예외 또는 Optional 반환
     private User findUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
     }
 
+    // find My User Plant 조회 — 없으면 예외 또는 Optional 반환
     private UserPlant findMyUserPlant(
             Long userPlantId,
             User user
@@ -497,6 +467,7 @@ public class AutomationLearningService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 식물을 찾을 수 없습니다."));
     }
 
+    // 평균값 계산
     private Double average(List<Double> values) {
         if (values == null || values.isEmpty()) {
             return null;
@@ -508,6 +479,7 @@ public class AutomationLearningService {
                 .orElse(0.0);
     }
 
+    // percentile 계산
     private double percentile(
             List<Double> sortedValues,
             double percentile
@@ -527,6 +499,7 @@ public class AutomationLearningService {
         return values.get(index);
     }
 
+    // 값 범위 제한
     private double clamp(
             double value,
             double min,
@@ -535,6 +508,7 @@ public class AutomationLearningService {
         return Math.max(min, Math.min(max, value));
     }
 
+    // WaterLearningResult DTO — API 요청/응답 데이터
     private static class WaterLearningResult {
 
         private final Double avgBeforeWaterPercent;
@@ -543,6 +517,7 @@ public class AutomationLearningService {
 
         private final int recoverySampleCount;
 
+        // WaterLearningResult 생성
         public WaterLearningResult(
                 Double avgBeforeWaterPercent,
                 Double avgWaterRecoveryPercent,
@@ -566,12 +541,14 @@ public class AutomationLearningService {
         }
     }
 
+    // LightLearningResult DTO — API 요청/응답 데이터
     private static class LightLearningResult {
 
         private final Double recommendedLightOnThresholdLux;
 
         private final Double recommendedLightOffThresholdLux;
 
+        // LightLearningResult 생성
         public LightLearningResult(
                 Double recommendedLightOnThresholdLux,
                 Double recommendedLightOffThresholdLux

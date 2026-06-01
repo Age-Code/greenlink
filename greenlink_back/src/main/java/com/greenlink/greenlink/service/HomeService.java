@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.EnumSet;
 
+// HomeService — 비즈니스 로직 처리
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -35,6 +36,7 @@ public class HomeService {
         return HomeDto.ResDto.of(user, mainUserPlant, today);
     }
 
+    // find Main User Plant 조회 — 없으면 예외 또는 Optional 반환
     private UserPlant findMainUserPlant(User user) {
         return userPlantRepository
                 .findFirstByUserAndStatusInAndDeletedFalseOrderByCreatedAtDesc(
@@ -51,6 +53,7 @@ public class HomeService {
                 );
     }
 
+    // find Active User 조회 — 없으면 예외 또는 Optional 반환
     private User findActiveUser(Long userId) {
         return userRepository.findById(userId)
                 .filter(user -> !user.isDeleted())

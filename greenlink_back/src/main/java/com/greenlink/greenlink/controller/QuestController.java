@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// QuestController — API 요청 처리
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/quests")

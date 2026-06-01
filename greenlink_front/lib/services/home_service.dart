@@ -1,20 +1,16 @@
+// 홈 서비스 — 홈 데이터 API 호출
+
 import 'package:flutter/foundation.dart';
 import '../core/network/api_client.dart';
 import '../core/network/api_response.dart';
 import '../core/constants/api_paths.dart';
 import '../models/home_models.dart';
 
-// ============================================================
-// HomeService
-// TEST 2: 홈 조회
-//   [x] GET /api/home — Authorization 헤더 포함 확인
-//   [x] user.nickname 정상 표시
-//   [x] mainUserPlant null → 빈 상태 표시
-//   [x] mainUserPlant 있음 → 식물 카드 표시
-// ============================================================
+// HomeService — Backend API 호출
 class HomeService {
   final ApiClient _client = ApiClient();
 
+  // 홈 데이터 조회 API 호출
   Future<ApiResponse<HomeResponse>> getHomeData() async {
     debugPrint('[HomeService] 🏠 홈 데이터 조회');
     try {

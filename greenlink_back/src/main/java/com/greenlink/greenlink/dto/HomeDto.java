@@ -7,13 +7,10 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+// HomeDto — API 요청/응답 DTO
 public class HomeDto {
 
-    /**
-     * 홈 화면 전체 응답 DTO
-     *
-     * GET /api/home
-     */
+    // 홈 화면 전체 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -23,6 +20,7 @@ public class HomeDto {
         private UserDto user;
         private UserPlantDto mainUserPlant;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static ResDto of(
                 User user,
                 UserPlant mainUserPlant,
@@ -35,9 +33,7 @@ public class HomeDto {
         }
     }
 
-    /**
-     * 홈 화면 사용자 정보 DTO
-     */
+    // 홈 화면 사용자 정보 DTO
     @Getter
     @Setter
     @Builder
@@ -48,6 +44,7 @@ public class HomeDto {
         private String nickname;
         private String profileImageUrl;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static UserDto from(User user) {
             return UserDto.builder()
                     .userId(user.getId())
@@ -57,9 +54,7 @@ public class HomeDto {
         }
     }
 
-    /**
-     * 홈 화면 대표 식물 DTO
-     */
+    // 홈 화면 대표 식물 DTO
     @Getter
     @Setter
     @Builder
@@ -75,6 +70,7 @@ public class HomeDto {
         private long daysAfterPlanting;
         private long remainingDays;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static UserPlantDto from(UserPlant userPlant, LocalDate today) {
             if (userPlant == null) {
                 return null;

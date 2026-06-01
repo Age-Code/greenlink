@@ -1,3 +1,5 @@
+// 인벤토리 액션 시트 — 화분 장착과 영양제 사용
+
 import 'package:flutter/material.dart';
 import '../../models/user_plant_models.dart';
 import '../../services/user_plant_service.dart';
@@ -7,19 +9,19 @@ import '../../widgets/selectable_user_plant_card.dart';
 import '../user_plant/seed_planting_page.dart';
 import '../../theme/app_theme.dart';
 
-// ============================================================
-// PotEquipBottomSheet — 화분 장착
-// ============================================================
+// PotEquipBottomSheet — 인벤토리 액션 시트 — 화분 장착과 영양제 사용
 class PotEquipBottomSheet extends StatefulWidget {
   final int userItemId;
   final VoidCallback onSuccess;
 
   const PotEquipBottomSheet({Key? key, required this.userItemId, required this.onSuccess}) : super(key: key);
 
+  // State 객체 생성
   @override
   _PotEquipBottomSheetState createState() => _PotEquipBottomSheetState();
 }
 
+// _PotEquipBottomSheetState — 화면 상태와 이벤트 처리
 class _PotEquipBottomSheetState extends State<PotEquipBottomSheet> {
   final UserPlantService _plantService = UserPlantService();
   final UserItemService _itemService = UserItemService();
@@ -29,18 +31,21 @@ class _PotEquipBottomSheetState extends State<PotEquipBottomSheet> {
   int? _selectedPlantId;
   bool _isEquipping = false;
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadPlants();
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   void _loadPlants() async {
     final res = await _plantService.getUserPlants();
     if (!mounted) return;
     setState(() { _plants = res.data ?? []; _isLoading = false; });
   }
 
+  // 화분 장착 처리
   void _equip() async {
     if (_selectedPlantId == null) return;
     setState(() => _isEquipping = true);
@@ -56,6 +61,7 @@ class _PotEquipBottomSheetState extends State<PotEquipBottomSheet> {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -124,6 +130,7 @@ class _PotEquipBottomSheetState extends State<PotEquipBottomSheet> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
@@ -156,19 +163,19 @@ class _PotEquipBottomSheetState extends State<PotEquipBottomSheet> {
   }
 }
 
-// ============================================================
-// NutrientUseBottomSheet — 영양제 사용
-// ============================================================
+// NutrientUseBottomSheet — 인벤토리 액션 시트 — 화분 장착과 영양제 사용
 class NutrientUseBottomSheet extends StatefulWidget {
   final int userItemId;
   final VoidCallback onSuccess;
 
   const NutrientUseBottomSheet({Key? key, required this.userItemId, required this.onSuccess}) : super(key: key);
 
+  // State 객체 생성
   @override
   _NutrientUseBottomSheetState createState() => _NutrientUseBottomSheetState();
 }
 
+// _NutrientUseBottomSheetState — 화면 상태와 이벤트 처리
 class _NutrientUseBottomSheetState extends State<NutrientUseBottomSheet> {
   final UserPlantService _plantService = UserPlantService();
   final UserItemService _itemService = UserItemService();
@@ -178,18 +185,21 @@ class _NutrientUseBottomSheetState extends State<NutrientUseBottomSheet> {
   int? _selectedPlantId;
   bool _isUsing = false;
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadPlants();
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   void _loadPlants() async {
     final res = await _plantService.getUserPlants();
     if (!mounted) return;
     setState(() { _plants = res.data ?? []; _isLoading = false; });
   }
 
+  // 아이템 사용 처리
   void _useNutrient() async {
     if (_selectedPlantId == null) return;
     setState(() => _isUsing = true);
@@ -205,6 +215,7 @@ class _NutrientUseBottomSheetState extends State<NutrientUseBottomSheet> {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -272,6 +283,7 @@ class _NutrientUseBottomSheetState extends State<NutrientUseBottomSheet> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildEmptyState() {
     return Center(
       child: Padding(

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// UserPlantController — API 요청 처리
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user-plants")
@@ -19,6 +20,7 @@ public class UserPlantController {
 
     private final UserPlantService userPlantService;
 
+    // create User Plant 생성
     @PostMapping
     public ApiResponse<UserPlantDto.CreateResDto> createUserPlant(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -58,6 +60,7 @@ public class UserPlantController {
         return ApiResponse.success("내 식물 상세 조회 성공", response);
     }
 
+    // update Nickname 수정
     @PatchMapping("/{userPlantId}")
     public ApiResponse<UserPlantDto.UpdateNicknameResDto> updateNickname(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -73,6 +76,7 @@ public class UserPlantController {
         return ApiResponse.success("식물 이름이 수정되었습니다.", response);
     }
 
+    // 수확 처리 — HARVEST/GROW_PLANT 퀘스트 진행 증가
     @PostMapping("/{userPlantId}/harvest")
     public ApiResponse<UserPlantDto.HarvestResDto> harvestUserPlant(
             @AuthenticationPrincipal CustomUserDetails userDetails,

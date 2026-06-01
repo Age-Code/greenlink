@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// User — 도메인 모델
 @Getter
 @Entity
 @Table(name = "users")
@@ -43,6 +44,7 @@ public class User extends BaseEntity {
     @Column
     private String profileImageUrl;
 
+    // User 생성
     private User(
             String email,
             String password,
@@ -60,6 +62,7 @@ public class User extends BaseEntity {
         this.profileImageUrl = profileImageUrl;
     }
 
+    // create User 생성
     public static User createUser(String email, String encodedPassword, String nickname) {
         return new User(
                 email,
@@ -71,6 +74,7 @@ public class User extends BaseEntity {
                 null);
     }
 
+    // create Admin 생성
     public static User createAdmin(String email, String encodedPassword, String nickname) {
         return new User(
                 email,
@@ -82,6 +86,7 @@ public class User extends BaseEntity {
                 null);
     }
 
+    // create OAuth User 생성
     public static User createOAuthUser(
             String email,
             String encodedPassword,
@@ -99,10 +104,12 @@ public class User extends BaseEntity {
                 profileImageUrl);
     }
 
+    // 관리자 권한 토글
     public void toggleRole() {
         this.role = (this.role == UserRole.USER) ? UserRole.ADMIN : UserRole.USER;
     }
 
+    // update Nickname 수정
     public void updateNickname(String nickname) {
         this.nickname = nickname;
     }

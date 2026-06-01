@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+// UserPlant — 도메인 모델
 @Getter
 @Entity
 @Table(name = "user_plant")
@@ -52,6 +53,7 @@ public class UserPlant extends BaseEntity {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    // UserPlant 생성
     private UserPlant(User user, Plant plant, String nickname, LocalDateTime plantedAt, String imageUrl) {
         this.user = user;
         this.plant = plant;
@@ -61,10 +63,12 @@ public class UserPlant extends BaseEntity {
         this.imageUrl = imageUrl;
     }
 
+    // create 생성
     public static UserPlant create(User user, Plant plant, String nickname) {
         return new UserPlant(user, plant, nickname, LocalDateTime.now(), plant.getImageUrl());
     }
 
+    // update Nickname 수정
     public void updateNickname(String nickname) {
         this.nickname = nickname;
     }
@@ -78,12 +82,14 @@ public class UserPlant extends BaseEntity {
         return !today.isBefore(harvestableDate);
     }
 
+    // 수확 가능 상태 갱신
     public void refreshHarvestableStatus(LocalDate today) {
         if (this.status == UserPlantStatus.GROWING && isHarvestable(today)) {
             this.status = UserPlantStatus.HARVESTABLE;
         }
     }
 
+    // 수확 처리
     public void harvest(LocalDateTime harvestedAt) {
         if (this.status == UserPlantStatus.HARVESTED) {
             throw new IllegalStateException("이미 수확 완료된 식물입니다.");

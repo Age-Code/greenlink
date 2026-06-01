@@ -37,6 +37,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+// 자동화 서비스 — 센서 저장 후 자동 급수/조명 판단 및 명령 생성
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -57,11 +58,7 @@ public class AutomationService {
     private final IotDeviceRepository iotDeviceRepository;
     private final GrowSpacePlantRepository growSpacePlantRepository;
 
-    /**
-     * 자동화 설정 조회
-     *
-     * 설정이 없으면 기본 설정을 생성해서 반환한다.
-     */
+    // 자동화 설정 조회 — 설정이 없으면 기본 설정을 생성해서 반환한다.
     @Transactional
     public AutomationDto.SettingResDto getSetting(
             Long userId,
@@ -75,9 +72,7 @@ public class AutomationService {
         return AutomationDto.SettingResDto.from(setting);
     }
 
-    /**
-     * 자동화 설정 수정
-     */
+    // 자동화 설정 수정
     @Transactional
     public AutomationDto.SettingResDto updateSetting(
             Long userId,
@@ -113,9 +108,7 @@ public class AutomationService {
         return AutomationDto.SettingResDto.from(setting);
     }
 
-    /**
-     * 자동화 로그 조회
-     */
+    // 자동화 로그 조회
     public List<AutomationDto.LogResDto> getLogs(
             Long userId,
             Long userPlantId
@@ -130,12 +123,7 @@ public class AutomationService {
                 .toList();
     }
 
-    /**
-     * ESP 토양수분 데이터 저장 직후 호출된다.
-     *
-     * 학습 모델 기준값이 사용 가능하면 학습 기준값을 사용하고,
-     * 사용 불가능하면 automation_setting의 기본 기준값을 사용한다.
-     */
+    // ESP 토양수분 데이터 저장 직후 호출된다. — 학습 모델 기준값이 사용 가능하면 학습 기준값을 사용하고,
     @Transactional
     public void evaluateAutoWater(EspSensorData sensorData) {
         if (sensorData == null) {
@@ -318,12 +306,7 @@ public class AutomationService {
         );
     }
 
-    /**
-     * Raspberry 환경 데이터 저장 직후 호출된다.
-     *
-     * 학습 모델 기준값이 사용 가능하면 학습 조도 기준값을 사용하고,
-     * 사용 불가능하면 automation_setting의 기본 조도 기준값을 사용한다.
-     */
+    // Raspberry 환경 데이터 저장 직후 호출된다. — 학습 모델 기준값이 사용 가능하면 학습 조도 기준값을 사용하고,
     @Transactional
     public void evaluateAutoLight(RaspberrySensorData sensorData) {
         if (sensorData == null) {
@@ -376,12 +359,7 @@ public class AutomationService {
         }
     }
 
-    /**
-     * 특정 식물 기준으로 자동 LED 판단
-     *
-     * LED는 growSpace 단위 장치이지만,
-     * 자동화 설정은 userPlant 단위로 관리한다.
-     */
+    // 특정 식물 기준으로 자동 LED 판단 — LED는 growSpace 단위 장치이지만,
     private void evaluateAutoLightForUserPlant(
             UserPlant userPlant,
             GrowSpace growSpace,
@@ -480,9 +458,7 @@ public class AutomationService {
         );
     }
 
-    /**
-     * LIGHT_ON / LIGHT_OFF 명령 생성 공통 로직
-     */
+    // LIGHT_ON / LIGHT_OFF 명령 생성 공통 로직
     private void createLightCommandIfPossible(
             UserPlant userPlant,
             GrowSpace growSpace,
@@ -552,16 +528,7 @@ public class AutomationService {
         );
     }
 
-    /**
-     * 자동 급수 기준값 결정
-     *
-     * RULE_BASED:
-     * - automation_setting.waterThresholdPercent 사용
-     *
-     * HYBRID / LEARNING_BASED:
-     * - 사용 가능한 학습 모델이 있으면 recommendedWaterThresholdPercent 사용
-     * - 없으면 안전하게 기본 설정값 사용
-     */
+    // 자동 급수 기준값 결정 — 학습 모델 우선, 없으면 설정값 사용
     private Double resolveWaterThreshold(
             UserPlant userPlant,
             AutomationSetting setting
@@ -589,6 +556,7 @@ public class AutomationService {
         return model.getRecommendedWaterThresholdPercent();
     }
 
+    // resolve Watering Safety Threshold 처리
     private double resolveWateringSafetyThreshold(AutomationSetting setting) {
         Double waterThresholdPercent = setting.getWaterThresholdPercent();
 
@@ -599,9 +567,7 @@ public class AutomationService {
         return waterThresholdPercent + WATERING_SAFETY_MARGIN_PERCENT;
     }
 
-    /**
-     * 자동 LED ON 기준값 결정
-     */
+    // 자동 LED ON 기준값 결정
     private Double resolveLightOnThreshold(
             UserPlant userPlant,
             AutomationSetting setting
@@ -629,9 +595,7 @@ public class AutomationService {
         return model.getRecommendedLightOnThresholdLux();
     }
 
-    /**
-     * 자동 LED OFF 기준값 결정
-     */
+    // 자동 LED OFF 기준값 결정
     private Double resolveLightOffThreshold(
             UserPlant userPlant,
             AutomationSetting setting
@@ -659,14 +623,7 @@ public class AutomationService {
         return model.getRecommendedLightOffThresholdLux();
     }
 
-    /**
-     * 자동화 판단에 사용할 수 있는 최신 학습 모델 조회
-     *
-     * 조건:
-     * 1. READY 상태
-     * 2. confidenceScore >= MODEL_CONFIDENCE_THRESHOLD
-     * 3. soilDataCount >= minLearningDataCount
-     */
+    // 자동화 판단용 최신 학습 모델 조회 — READY/신뢰도/데이터 수 조건 적용
     private AutomationModel findUsableLearningModel(
             UserPlant userPlant,
             AutomationSetting setting
@@ -709,9 +666,7 @@ public class AutomationService {
         return model;
     }
 
-    /**
-     * 자동화 설정이 없으면 기본값으로 생성
-     */
+    // 자동화 설정이 없으면 기본값으로 생성
     private AutomationSetting getOrCreateDefaultSetting(
             User user,
             UserPlant userPlant
@@ -723,9 +678,7 @@ public class AutomationService {
                 ));
     }
 
-    /**
-     * 이미 PENDING 또는 PROCESSING 명령이 있는지 확인
-     */
+    // 이미 PENDING 또는 PROCESSING 명령이 있는지 확인
     private boolean hasRunningCommand(
             UserPlant userPlant,
             CommandType commandType
@@ -738,9 +691,7 @@ public class AutomationService {
                 );
     }
 
-    /**
-     * 최근 N분 안에 해당 명령이 생성되었는지 확인
-     */
+    // 최근 N분 안에 해당 명령이 생성되었는지 확인
     private boolean isRecentlyCommandCreated(
             UserPlant userPlant,
             CommandType commandType,
@@ -770,15 +721,7 @@ public class AutomationService {
                 .orElse(false);
     }
 
-    /**
-     * 조명 작동 시간대 확인
-     *
-     * 일반 케이스:
-     * 08:00 ~ 18:00
-     *
-     * 자정을 넘기는 케이스:
-     * 20:00 ~ 06:00
-     */
+    // 조명 작동 시간대 확인 — 자정 넘김 범위 포함
     private boolean isTimeWithinRange(
             LocalTime now,
             LocalTime start,
@@ -799,6 +742,7 @@ public class AutomationService {
         return !now.isBefore(start) || !now.isAfter(end);
     }
 
+    // save Executed Log 저장
     private void saveExecutedLog(
             UserPlant userPlant,
             AutomationType automationType,
@@ -821,6 +765,7 @@ public class AutomationService {
         );
     }
 
+    // save Skip Log 저장
     private void saveSkipLog(
             UserPlant userPlant,
             AutomationType automationType,
@@ -841,11 +786,13 @@ public class AutomationService {
         );
     }
 
+    // find Active User 조회 — 없으면 예외 또는 Optional 반환
     private User findActiveUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
     }
 
+    // find My User Plant 조회 — 없으면 예외 또는 Optional 반환
     private UserPlant findMyUserPlant(
             Long userPlantId,
             User user
@@ -855,6 +802,7 @@ public class AutomationService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 식물을 찾을 수 없습니다."));
     }
 
+    // validate Setting Request 검증
     private void validateSettingRequest(
             AutomationDto.UpdateSettingReqDto request
     ) {

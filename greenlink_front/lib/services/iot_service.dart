@@ -1,21 +1,16 @@
+// IoT 서비스 — 최신 상태, 명령, 이미지 API 호출
+
 import 'package:flutter/foundation.dart';
 import '../core/network/api_client.dart';
 import '../core/network/api_response.dart';
 import '../core/constants/api_paths.dart';
 import '../models/iot_models.dart';
 
-// ============================================================
-// IotService
-//   - GET  /api/user-plants/{id}/iot/latest  → IotLatestStatus
-//   - POST /api/user-plants/{id}/iot/refresh → SensorRefreshResponse
-//   - POST /api/user-plants/{id}/iot/water   → IotCommandResponse
-//   - POST /api/user-plants/{id}/iot/light/on
-//   - POST /api/user-plants/{id}/iot/light/off
-// ============================================================
+// IotService — Backend API 호출
 class IotService {
   final ApiClient _client = ApiClient();
 
-  /// 최신 IoT 상태 조회
+  // 최신 IoT 상태 조회 API 호출
   Future<ApiResponse<IotLatestStatus>> getLatestStatus(int userPlantId) async {
     debugPrint('[IotService] 📡 최신 IoT 상태 조회 (plantId=$userPlantId)');
     try {
@@ -39,8 +34,7 @@ class IotService {
     }
   }
 
-  /// 라즈베리파이 환경 센서 새로고침 요청
-  /// 온도·습도·조도만 즉시 측정 대상이며 토양수분은 ESP32 주기 업로드를 따른다.
+  // 센서 새로고침 요청 API 호출
   Future<ApiResponse<SensorRefreshResponse>> requestSensorRefresh(
     int userPlantId,
   ) async {
@@ -64,7 +58,7 @@ class IotService {
     }
   }
 
-  /// 물 주기 요청
+  // 물주기 요청 API 호출
   Future<ApiResponse<IotCommandResponse>> requestWater(int userPlantId) async {
     debugPrint('[IotService] 💧 물 주기 요청 (plantId=$userPlantId)');
     try {
@@ -86,7 +80,7 @@ class IotService {
     }
   }
 
-  /// LED 켜기
+  // 조명 켜기 API 호출
   Future<ApiResponse<Map<String, dynamic>>> lightOn(int userPlantId) async {
     debugPrint('[IotService] 💡 LED 켜기 (plantId=$userPlantId)');
     try {
@@ -108,7 +102,7 @@ class IotService {
     }
   }
 
-  /// LED 끄기
+  // 조명 끄기 API 호출
   Future<ApiResponse<Map<String, dynamic>>> lightOff(int userPlantId) async {
     debugPrint('[IotService] 🌑 LED 끄기 (plantId=$userPlantId)');
     try {
@@ -130,8 +124,7 @@ class IotService {
     }
   }
 
-  /// 최신 이미지 정보(PlantImageData) 반환 — 홈/상세 화면 이미지 로드용
-  /// latestImage가 null이면 null 반환
+  // 최신 식물 이미지 정보 조회 — 없으면 null 반환
   Future<PlantImageData?> getLatestImageData(int userPlantId) async {
     try {
       final res = await getLatestStatus(userPlantId);

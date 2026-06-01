@@ -13,22 +13,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// IotAppDto — API 요청/응답 DTO
 public class IotAppDto {
 
-    /**
-     * 내 식물 IoT 최신 상태 응답 DTO
-     *
-     * GET /api/user-plants/{userPlantId}/iot/latest
-     *
-     * environment:
-     * - 라즈베리파이가 측정한 재배 공간 단위 환경 데이터
-     *
-     * soil:
-     * - ESP가 측정한 해당 식물 단위 토양수분 데이터
-     *
-     * latestImage:
-     * - 해당 식물의 최신 이미지
-     */
+    // 내 식물 IoT 최신 상태 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -41,6 +29,7 @@ public class IotAppDto {
         private SoilDto soil;
         private PlantImageDto latestImage;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static IotLatestResDto of(
                 Long userPlantId,
                 GrowSpace growSpace,
@@ -59,9 +48,7 @@ public class IotAppDto {
         }
     }
 
-    /**
-     * 앱 화면에 표시할 간단한 재배 공간 정보 DTO
-     */
+    // 앱 화면에 표시할 간단한 재배 공간 정보 DTO
     @Getter
     @Setter
     @Builder
@@ -71,6 +58,7 @@ public class IotAppDto {
         private Long growSpaceId;
         private String name;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static GrowSpaceSimpleDto from(GrowSpace growSpace) {
             if (growSpace == null) {
                 return null;
@@ -83,12 +71,7 @@ public class IotAppDto {
         }
     }
 
-    /**
-     * 라즈베리파이 환경 센서 데이터 DTO
-     *
-     * 온도, 습도, 조도는 특정 식물 하나의 값이 아니라
-     * 해당 식물이 속한 재배 공간의 공통 환경값이다.
-     */
+    // 라즈베리파이 환경 센서 데이터 DTO — 온도, 습도, 조도는 특정 식물 하나의 값이 아니라
     @Getter
     @Setter
     @Builder
@@ -101,6 +84,7 @@ public class IotAppDto {
         private Double light;
         private LocalDateTime measuredAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static EnvironmentDto from(RaspberrySensorData data) {
             if (data == null) {
                 return null;
@@ -116,11 +100,7 @@ public class IotAppDto {
         }
     }
 
-    /**
-     * ESP 토양수분 데이터 DTO
-     *
-     * 토양수분은 식물마다 다르므로 userPlant 기준 데이터다.
-     */
+    // ESP 토양수분 데이터 DTO — 토양수분은 식물마다 다르므로 userPlant 기준 데이터다.
     @Getter
     @Setter
     @Builder
@@ -132,6 +112,7 @@ public class IotAppDto {
         private Double soilMoisturePercent;
         private LocalDateTime measuredAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static SoilDto from(EspSensorData data) {
             if (data == null) {
                 return null;
@@ -146,6 +127,7 @@ public class IotAppDto {
         }
     }
 
+    // PlantImageDto DTO — API 요청/응답 데이터
     @Getter
     @Setter
     @Builder
@@ -154,23 +136,20 @@ public class IotAppDto {
     public static class PlantImageDto {
         private Long plantImageId;
 
-        /**
-         * 라즈베리파이 원본 이미지 URL
-         */
+        // 라즈베리파이 원본 이미지 URL
         private String imageUrl;
 
-        /**
-         * AI 변환 이미지 URL
-         * 값이 있으면 앱에서는 이 이미지를 우선 표시한다.
-         */
+        // AI 변환 이미지 URL — 값이 있으면 앱에서는 이 이미지를 우선 표시한다.
         private String aiImageUrl;
 
         private LocalDateTime capturedAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static PlantImageDto from(PlantImage plantImage) {
             return from(plantImage, null);
         }
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static PlantImageDto from(
                 PlantImage plantImage,
                 AiPlantImage aiPlantImage
@@ -192,14 +171,7 @@ public class IotAppDto {
         }
     }
 
-    /**
-     * 물 주기 명령 응답 DTO
-     *
-     * POST /api/user-plants/{userPlantId}/iot/water
-     *
-     * Request Body는 없다.
-     * 서버에서 고정 급수 시간 1초로 DeviceCommand를 생성한다.
-     */
+    // 물 주기 명령 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -216,6 +188,7 @@ public class IotAppDto {
         private Integer durationSeconds;
         private LocalDateTime requestedAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static WaterCommandResDto from(DeviceCommand command) {
             Long pumpChannelId = command.getPumpChannel() == null
                     ? null
@@ -235,12 +208,7 @@ public class IotAppDto {
         }
     }
 
-    /**
-     * 조명 명령 응답 DTO
-     *
-     * POST /api/user-plants/{userPlantId}/iot/light/on
-     * POST /api/user-plants/{userPlantId}/iot/light/off
-     */
+    // 조명 명령 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -255,6 +223,7 @@ public class IotAppDto {
         private CommandStatus commandStatus;
         private LocalDateTime requestedAt;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static LightCommandResDto from(DeviceCommand command) {
             return LightCommandResDto.builder()
                     .commandId(command.getId())
@@ -268,11 +237,7 @@ public class IotAppDto {
         }
     }
 
-    /**
-     * 공통 장치 명령 응답 DTO
-     *
-     * POST /api/user-plants/{userPlantId}/iot/refresh
-     */
+    // 공통 장치 명령 응답 DTO
     @Getter
     @Setter
     @Builder
@@ -294,6 +259,7 @@ public class IotAppDto {
         private List<String> refreshTargets;
         private List<String> excludedTargets;
 
+        // DTO 변환 — Entity 또는 원시 데이터를 응답 모델로 매핑
         public static DeviceCommandResDto fromSensorRefresh(DeviceCommand command) {
             Long pumpChannelId = command.getPumpChannel() == null
                     ? null

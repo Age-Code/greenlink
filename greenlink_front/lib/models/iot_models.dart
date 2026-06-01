@@ -1,8 +1,11 @@
+// IoT API 모델
+
 import '../core/constants/iot_thresholds.dart';
 
 // IoT 상태 모델
 // GET /api/user-plants/{userPlantId}/iot/latest 응답
 
+// IotLatestStatus — IoT API 모델
 class IotLatestStatus {
   final int userPlantId;
   final GrowSpaceInfo? growSpace;
@@ -18,6 +21,7 @@ class IotLatestStatus {
     this.latestImage,
   });
 
+  // JSON 응답을 모델로 변환
   factory IotLatestStatus.fromJson(Map<String, dynamic> json) =>
       IotLatestStatus(
         userPlantId: json['userPlantId'] ?? 0,
@@ -48,18 +52,21 @@ class IotLatestStatus {
   double? get soilMoisturePercent => soil?.soilMoisturePercent;
 }
 
+// GrowSpaceInfo — IoT API 모델
 class GrowSpaceInfo {
   final int growSpaceId;
   final String name;
 
   GrowSpaceInfo({required this.growSpaceId, required this.name});
 
+  // JSON 응답을 모델로 변환
   factory GrowSpaceInfo.fromJson(Map<String, dynamic> json) => GrowSpaceInfo(
     growSpaceId: json['growSpaceId'] ?? 0,
     name: json['name'] ?? '',
   );
 }
 
+// EnvironmentData — IoT API 모델
 class EnvironmentData {
   final int? sensorDataId;
   final double temperature;
@@ -75,6 +82,7 @@ class EnvironmentData {
     this.measuredAt,
   });
 
+  // JSON 응답을 모델로 변환
   factory EnvironmentData.fromJson(Map<String, dynamic> json) =>
       EnvironmentData(
         sensorDataId: json['sensorDataId'],
@@ -85,6 +93,7 @@ class EnvironmentData {
       );
 }
 
+// SoilData — IoT API 모델
 class SoilData {
   final int? sensorDataId;
   final int? soilMoistureRaw;
@@ -98,6 +107,7 @@ class SoilData {
     this.measuredAt,
   });
 
+  // JSON 응답을 모델로 변환
   factory SoilData.fromJson(Map<String, dynamic> json) => SoilData(
     sensorDataId: json['sensorDataId'],
     soilMoistureRaw: json['soilMoistureRaw'],
@@ -106,12 +116,14 @@ class SoilData {
   );
 }
 
+// nullable double 변환 — 파싱 실패 시 null 반환
 double? _toNullableDouble(dynamic value) {
   if (value == null) return null;
   if (value is num) return value.toDouble();
   return double.tryParse(value.toString());
 }
 
+// PlantImageData — IoT API 모델
 class PlantImageData {
   final int? plantImageId;
   final String imageUrl;
@@ -125,6 +137,7 @@ class PlantImageData {
     this.capturedAt,
   });
 
+  // JSON 응답을 모델로 변환
   factory PlantImageData.fromJson(Map<String, dynamic> json) => PlantImageData(
     plantImageId: json['plantImageId'],
     imageUrl: json['imageUrl'] ?? '',
@@ -133,7 +146,7 @@ class PlantImageData {
   );
 }
 
-/// POST /api/user-plants/{id}/iot/water 응답
+// IotCommandResponse — API 응답 모델
 class IotCommandResponse {
   final int? commandId;
   final String commandType;
@@ -145,6 +158,7 @@ class IotCommandResponse {
     required this.commandStatus,
   });
 
+  // JSON 응답을 모델로 변환
   factory IotCommandResponse.fromJson(Map<String, dynamic> json) =>
       IotCommandResponse(
         commandId: json['commandId'],
@@ -153,7 +167,7 @@ class IotCommandResponse {
       );
 }
 
-/// POST /api/user-plants/{id}/iot/refresh 응답
+// SensorRefreshResponse — API 응답 모델
 class SensorRefreshResponse {
   final int? userPlantId;
   final int? commandId;
@@ -177,6 +191,7 @@ class SensorRefreshResponse {
     this.excludedTargets = const [],
   });
 
+  // JSON 응답을 모델로 변환
   factory SensorRefreshResponse.fromJson(Map<String, dynamic> json) {
     return SensorRefreshResponse(
       userPlantId: _toNullableInt(json['userPlantId']),
@@ -194,6 +209,7 @@ class SensorRefreshResponse {
   }
 }
 
+// nullable int 변환 — 파싱 실패 시 null 반환
 int? _toNullableInt(dynamic value) {
   if (value == null) return null;
   if (value is int) return value;
@@ -201,6 +217,7 @@ int? _toNullableInt(dynamic value) {
   return int.tryParse(value.toString());
 }
 
+// 문자열 리스트 변환 — List가 아니면 빈 목록 반환
 List<String> _toStringList(dynamic value) {
   if (value is! List) return [];
   return value.map((e) => e.toString()).toList();

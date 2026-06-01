@@ -1,21 +1,16 @@
+// 출석 서비스 — 출석 조회와 오늘 출석 API 호출
+
 import 'package:flutter/foundation.dart';
 import '../core/network/api_client.dart';
 import '../core/network/api_response.dart';
 import '../core/constants/api_paths.dart';
 import '../models/attend_models.dart';
 
-// ============================================================
-// AttendService
-// GET /api/attends?year={year}&month={month}
-//   응답 data: { year, month, totalAttendCount, currentStreakCount,
-//               attends: [{ attendDate: "yyyy-MM-dd", streakCount }] }
-//
-// POST /api/attends/today
-//   성공 후 GET /api/attends 재조회 필요
-// ============================================================
+// AttendService — Backend API 호출
 class AttendService {
   final ApiClient _client = ApiClient();
 
+  // 월간 출석 조회 API 호출
   Future<ApiResponse<AttendMonth>> getAttends(
       {required int year, required int month}) async {
     debugPrint('[AttendService] 📅 출석 기록 조회 ($year년 $month월)');
@@ -44,6 +39,7 @@ class AttendService {
     }
   }
 
+  // 오늘 출석 API 호출
   Future<ApiResponse<AttendTodayResponse>> attendToday() async {
     debugPrint('[AttendService] ✋ 오늘 출석 체크');
     try {

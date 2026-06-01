@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
                 )
         }
 )
+// UserQuest — 도메인 모델
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserQuest extends BaseEntity {
 
@@ -58,6 +59,7 @@ public class UserQuest extends BaseEntity {
     @Column(name = "reward_received_at")
     private LocalDateTime rewardReceivedAt;
 
+    // UserQuest 생성
     private UserQuest(User user, Quest quest, LocalDateTime startedAt) {
         this.user = user;
         this.quest = quest;
@@ -66,6 +68,7 @@ public class UserQuest extends BaseEntity {
         this.startedAt = startedAt;
     }
 
+    // create 생성
     public static UserQuest create(User user, Quest quest, LocalDateTime startedAt) {
         return new UserQuest(user, quest, startedAt);
     }
@@ -86,6 +89,7 @@ public class UserQuest extends BaseEntity {
         return this.status == UserQuestStatus.EXPIRED;
     }
 
+    // 퀘스트 진행 증가 — TargetType 활성 퀘스트 progress 반영
     public void increaseProgress(int amount) {
         if (amount <= 0) {
             return;
@@ -104,6 +108,7 @@ public class UserQuest extends BaseEntity {
         }
     }
 
+    // complete Reward 완료 처리
     public void completeReward() {
         if (this.status != UserQuestStatus.ACHIEVABLE) {
             throw new IllegalStateException("보상을 수령할 수 있는 상태가 아닙니다.");
@@ -113,6 +118,7 @@ public class UserQuest extends BaseEntity {
         this.rewardReceivedAt = LocalDateTime.now();
     }
 
+    // expire 처리
     public void expire() {
         if (this.status == UserQuestStatus.COMPLETED) {
             return;

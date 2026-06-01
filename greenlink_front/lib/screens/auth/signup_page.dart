@@ -1,13 +1,17 @@
+// 회원가입 화면 — 이메일 회원가입
 
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../core/widgets/greenlink_button.dart';
 
+// SignupPage — 화면 위젯
 class SignupPage extends StatefulWidget {
+  // State 객체 생성
   @override
   _SignupPageState createState() => _SignupPageState();
 }
 
+// _SignupPageState — 화면 상태와 이벤트 처리
 class _SignupPageState extends State<SignupPage> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
@@ -15,11 +19,12 @@ class _SignupPageState extends State<SignupPage> {
   final _authService = AuthService();
   bool _isLoading = false;
 
+  // 회원가입 처리 — 성공 시 로그인 화면 복귀
   void _signup() async {
     setState(() => _isLoading = true);
     final res = await _authService.signup(_emailCtrl.text, _passwordCtrl.text, _nicknameCtrl.text);
     setState(() => _isLoading = false);
-    
+
     if (res.success) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message)));
       Navigator.pop(context);
@@ -28,6 +33,7 @@ class _SignupPageState extends State<SignupPage> {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Scaffold(

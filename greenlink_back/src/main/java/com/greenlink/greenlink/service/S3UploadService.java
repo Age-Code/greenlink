@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.UUID;
 
+// S3 업로드 서비스 — MIME/크기 검증 후 업로드
 @Service
 @RequiredArgsConstructor
 public class S3UploadService {
@@ -28,6 +29,7 @@ public class S3UploadService {
     @Value("${cloud.aws.region}")
     private String region;
 
+    // upload User Plant Image 처리
     public String uploadUserPlantImage(
             MultipartFile file,
             Long userPlantId
@@ -57,6 +59,7 @@ public class S3UploadService {
         }
     }
 
+    // 이미지 파일 검증 — MIME/크기 제한 확인
     private void validateImageFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("업로드할 이미지 파일이 필요합니다.");
@@ -89,6 +92,7 @@ public class S3UploadService {
         }
     }
 
+    // create Stored Filename 생성
     private String createStoredFilename(String originalFilename, Long userPlantId) {
         String extension = getExtension(originalFilename).toLowerCase();
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
@@ -111,6 +115,7 @@ public class S3UploadService {
         return filename.substring(dotIndex + 1);
     }
 
+    // create S3 Url 생성
     private String createS3Url(String key) {
         return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
     }

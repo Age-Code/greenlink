@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+// GrowSpace — 도메인 모델
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -15,10 +16,7 @@ public class GrowSpace {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 재배 공간 이름
-     * 예: 캡스톤 재배 공간, 연구실 재배 공간
-     */
+    // 재배 공간 이름
     @Column(nullable = false, length = 100)
     private String name;
 
@@ -37,6 +35,7 @@ public class GrowSpace {
     @Column(nullable = false)
     private LocalDateTime modifiedAt;
 
+    // GrowSpace 생성
     @Builder
     private GrowSpace(
             String name,
@@ -48,6 +47,7 @@ public class GrowSpace {
         this.deleted = false;
     }
 
+    // create 생성
     public static GrowSpace create(
             String name,
             String description
@@ -58,6 +58,7 @@ public class GrowSpace {
                 .build();
     }
 
+    // update Info 수정
     public void updateInfo(
             String name,
             String description
@@ -66,19 +67,23 @@ public class GrowSpace {
         this.description = description;
     }
 
+    // 비활성화 처리
     public void deactivate() {
         this.active = false;
     }
 
+    // 활성화 처리
     public void activate() {
         this.active = true;
     }
 
+    // delete 삭제
     public void delete() {
         this.deleted = true;
         this.active = false;
     }
 
+    // 생성 시각 초기화
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
@@ -90,6 +95,7 @@ public class GrowSpace {
         }
     }
 
+    // 수정 시각 갱신
     @PreUpdate
     public void preUpdate() {
         this.modifiedAt = LocalDateTime.now();

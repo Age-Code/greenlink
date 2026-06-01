@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// PlantController — API 요청 처리
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/plants")

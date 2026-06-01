@@ -1,3 +1,6 @@
+// 사용자 식물 API 모델
+
+// UserPlantSummary — 사용자 식물 API 모델
 class UserPlantSummary {
   final int userPlantId;
   final int plantId;
@@ -15,6 +18,7 @@ class UserPlantSummary {
     this.daysAfterPlanting, this.remainingDays, this.imageUrl,
   });
 
+  // JSON 응답을 모델로 변환
   factory UserPlantSummary.fromJson(Map<String, dynamic> json) => UserPlantSummary(
     userPlantId: json['userPlantId'] ?? 0,
     plantId: json['plantId'] ?? 0,
@@ -28,6 +32,7 @@ class UserPlantSummary {
   );
 }
 
+// UserPlantDetail — 사용자 식물 API 모델
 class UserPlantDetail {
   final int userPlantId;
   final int plantId;
@@ -48,6 +53,7 @@ class UserPlantDetail {
     this.remainingDays, this.equippedPot,
   });
 
+  // JSON 응답을 모델로 변환
   factory UserPlantDetail.fromJson(Map<String, dynamic> json) => UserPlantDetail(
     userPlantId: json['userPlantId'] ?? 0,
     plantId: json['plantId'] ?? 0,
@@ -63,6 +69,7 @@ class UserPlantDetail {
   );
 }
 
+// EquippedPot — 사용자 식물 API 모델
 class EquippedPot {
   final int userItemId;
   final int itemId;
@@ -71,6 +78,7 @@ class EquippedPot {
 
   EquippedPot({required this.userItemId, required this.itemId, required this.name, this.imageUrl});
 
+  // JSON 응답을 모델로 변환
   factory EquippedPot.fromJson(Map<String, dynamic> json) => EquippedPot(
     userItemId: json['userItemId'] ?? 0,
     itemId: json['itemId'] ?? 0,

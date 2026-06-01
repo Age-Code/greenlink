@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+// JWT 인증 필터 — Authorization 헤더 또는 jwt_token cookie에서 추출
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -22,6 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
 
+    // JWT 인증 필터 처리 — 헤더 또는 cookie 토큰 인증
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -53,6 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    // JWT 추출 — Authorization 헤더 우선, 없으면 jwt_token cookie 확인
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
 

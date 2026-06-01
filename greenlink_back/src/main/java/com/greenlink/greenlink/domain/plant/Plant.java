@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// Plant — 도메인 모델
 @Getter
 @Entity
 @Table(name = "plant")
@@ -36,6 +37,7 @@ public class Plant extends BaseEntity {
     @Column(name = "growth_days", nullable = false)
     private Integer growthDays;
 
+    // Plant 생성
     private Plant(String name, String category, String description, String imageUrl, Integer growthDays) {
         this.name = name;
         this.category = category;
@@ -44,10 +46,12 @@ public class Plant extends BaseEntity {
         this.growthDays = growthDays;
     }
 
+    // create 생성
     public static Plant create(String name, String category, String description, String imageUrl, Integer growthDays) {
         return new Plant(name, category, description, imageUrl, growthDays);
     }
 
+    // update 수정
     public void update(String name, String category, String description, String imageUrl, Integer growthDays) {
         this.name = name;
         this.category = category;

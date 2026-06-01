@@ -1,3 +1,5 @@
+# 스냅샷 서비스 — MJPEG에서 JPEG 한 장 추출 후 식물별 crop
+
 from pathlib import Path
 from datetime import datetime
 from typing import Tuple
@@ -12,20 +14,12 @@ from config import (
 )
 
 
+# MJPEG 스냅샷 추출 — JPEG 프레임 1장을 파일로 저장
 def capture_snapshot_from_mjpeg(
     stream_url: str,
     output_prefix: str,
     timeout_seconds: int = 15
 ) -> Path:
-    """
-    MJPEG 스트림에서 JPEG 프레임 1장을 추출해서 파일로 저장한다.
-
-    예:
-    stream_url = http://127.0.0.1:8000/stream.mjpg
-
-    반환:
-    저장된 원본 이미지 파일 Path
-    """
 
     IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -69,22 +63,12 @@ def capture_snapshot_from_mjpeg(
     raise RuntimeError("MJPEG 스트림에서 JPEG 프레임을 추출하지 못했습니다.")
 
 
+# 이미지 crop — 비율 영역을 앱 표시 크기로 저장
 def crop_image_by_ratio(
     source_image_path: Path,
     crop_ratio: Tuple[float, float, float, float],
     output_prefix: str
 ) -> Path:
-    """
-    원본 이미지 1장을 비율 기준으로 crop한 뒤,
-    SNAPSHOT_OUTPUT_WIDTH x SNAPSHOT_OUTPUT_HEIGHT 크기로 저장한다.
-
-    crop_ratio 형식:
-    (x1, y1, x2, y2)
-
-    예:
-    왼쪽 절반  = (0.0, 0.0, 0.5, 1.0)
-    오른쪽 절반 = (0.5, 0.0, 1.0, 1.0)
-    """
 
     if not source_image_path.exists():
         raise FileNotFoundError(f"원본 이미지가 없습니다: {source_image_path}")
@@ -124,18 +108,12 @@ def crop_image_by_ratio(
     return output_path
 
 
+# 식물별 스냅샷 생성 — 전체 프레임에서 해바라기/바질 crop
 def create_plant_snapshots_from_full_stream(
     full_stream_url: str,
     sunflower_crop: Tuple[float, float, float, float],
     basil_crop: Tuple[float, float, float, float]
 ):
-    """
-    전체 스트림에서 원본 프레임 1장을 가져온 뒤,
-    같은 이미지 기준으로 해바라기/바질 crop 이미지를 만든다.
-
-    반환:
-    (sunflower_image_path, basil_image_path, original_frame_path)
-    """
 
     original_frame_path = capture_snapshot_from_mjpeg(
         stream_url=full_stream_url,

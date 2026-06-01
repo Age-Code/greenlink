@@ -1,3 +1,5 @@
+# 카메라 진입점 — 스트림 프레임 추출, crop, 업로드
+
 import os
 
 from stream_snapshot_service import create_plant_snapshots_from_full_stream
@@ -11,21 +13,8 @@ from config import (
 )
 
 
+# 업로드 결과 정규화 — tuple/dict/bool 반환 형태 통일
 def normalize_upload_result(result):
-    """
-    uploader.py의 반환값 형태가 달라도 안전하게 처리한다.
-
-    가능한 반환 형태:
-    1. (success, body)
-    2. (success, body, ai_result)
-    3. body dict
-       {
-         "success": true,
-         "message": "...",
-         "data": {...}
-       }
-    4. bool
-    """
 
     if isinstance(result, tuple):
         success = result[0] if len(result) >= 1 else False
@@ -43,6 +32,7 @@ def normalize_upload_result(result):
     return False, result, None
 
 
+# 식물 스냅샷 업로드 — 업로드 결과와 AI trigger 결과 로깅
 def upload_snapshot(
     plant_name: str,
     image_path,
@@ -73,6 +63,7 @@ def upload_snapshot(
     return success, body, extra
 
 
+# 스냅샷 파일 삭제 — 실패해도 경고 로그만 출력
 def delete_file_if_exists(path):
     try:
         if path is not None and os.path.exists(path):
@@ -82,6 +73,7 @@ def delete_file_if_exists(path):
         print(f"[CAMERA_MAIN] 임시 파일 삭제 실패: {path} | {e}")
 
 
+# 실행 진입점
 def main():
     print("[CAMERA_MAIN] 아침 스냅샷 업로드 시작")
     print(f"[CAMERA_MAIN] fullStreamUrl = {FULL_STREAM_URL}")

@@ -1,3 +1,5 @@
+// 도감 화면 — 수집 식물 목록 조회
+
 import 'package:flutter/material.dart';
 import '../../models/collection_models.dart';
 import '../../services/collection_service.dart';
@@ -5,22 +7,27 @@ import '../../core/widgets/greenlink_card.dart';
 import '../../theme/app_theme.dart';
 import 'collection_detail_page.dart';
 
+// CollectionPage — 화면 위젯
 class CollectionPage extends StatefulWidget {
+  // State 객체 생성
   @override
   _CollectionPageState createState() => _CollectionPageState();
 }
 
+// _CollectionPageState — 화면 상태와 이벤트 처리
 class _CollectionPageState extends State<CollectionPage> {
   final CollectionService _collectionService = CollectionService();
   List<CollectionPlant>? _items;
   bool _isLoading = true;
 
+  // 초기 상태 설정
   @override
   void initState() {
     super.initState();
     _loadCollections();
   }
 
+  // 데이터 로드 — API 호출 후 상태 반영
   Future<void> _loadCollections() async {
     setState(() => _isLoading = true);
     final res = await _collectionService.getCollections();
@@ -34,6 +41,7 @@ class _CollectionPageState extends State<CollectionPage> {
     }
   }
 
+  // 위젯 렌더링
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,6 +55,7 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildContent() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -66,6 +75,7 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildSummaryCard() {
     int totalCount = _items?.length ?? 0;
     int collectedCount = _items?.where((i) => i.collected).length ?? 0;
@@ -98,6 +108,7 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildGridView() {
     return GridView.builder(
       shrinkWrap: true,
@@ -113,6 +124,7 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildPlantCard(CollectionPlant item) {
     final bool isCollected = item.collected;
 
@@ -186,6 +198,7 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
+  // 화면 섹션 렌더링
   Widget _buildEmptyState() {
     return Center(
       child: Padding(

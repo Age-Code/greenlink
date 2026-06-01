@@ -1,7 +1,4 @@
-# LEGACY: 직접 Picamera2 still 캡처 방식.
-# 현재 active 경로는 stream_snapshot_service.py (MJPEG 프레임 추출 방식)이다.
-# 이 파일은 현재 cron, systemd, camera_main.py에서 호출되지 않는다.
-# 참조: camera_main.py → stream_snapshot_service.py → stream_server.py
+# LEGACY: Picamera2 직접 still 캡처 — 현재 active 경로 아님
 
 from datetime import datetime
 from pathlib import Path
@@ -17,13 +14,8 @@ from config import (
 )
 
 
+# 이미지 방향 보정 — 회전/좌우반전 설정 적용
 def fix_image_orientation(image_path: Path):
-    """
-    촬영된 이미지의 방향을 보정한다.
-
-    IMAGE_ROTATE_DEGREES = 180이면 위아래 뒤집힌 사진을 정상 방향으로 돌린다.
-    IMAGE_FLIP_LEFT_RIGHT = True이면 좌우 반전한다.
-    """
 
     image = Image.open(image_path).convert("RGB")
 
@@ -36,12 +28,8 @@ def fix_image_orientation(image_path: Path):
     image.save(image_path, format="JPEG", quality=95)
 
 
+# LEGACY still 이미지 촬영 — Picamera2 직접 캡처 후 방향 보정
 def capture_image() -> Path:
-    """
-    Raspberry Pi Camera로 사진을 촬영하고 images 폴더에 저장한다.
-    저장 후 이미지 방향 보정을 수행한다.
-    반환값은 촬영된 이미지 파일 경로(Path)이다.
-    """
 
     IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 

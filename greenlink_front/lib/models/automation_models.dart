@@ -1,12 +1,6 @@
-// ============================================================
-// Automation Models
-// GET /api/user-plants/{id}/automation
-// PATCH /api/user-plants/{id}/automation
-// POST /api/user-plants/{id}/automation/train
-// GET /api/user-plants/{id}/automation/model
-// GET /api/user-plants/{id}/automation/logs
-// ============================================================
+// 자동화 API 모델
 
+// AutomationSettingModel — API 데이터 모델
 class AutomationSettingModel {
   final int? automationSettingId;
   final int userPlantId;
@@ -46,6 +40,7 @@ class AutomationSettingModel {
     this.modifiedAt,
   });
 
+  // JSON 응답을 모델로 변환
   factory AutomationSettingModel.fromJson(Map<String, dynamic> json) {
     return AutomationSettingModel(
       automationSettingId: json['automationSettingId'],
@@ -68,12 +63,14 @@ class AutomationSettingModel {
     );
   }
 
+  // 숫자 두 자리 문자열 변환
   static double _parseDouble(dynamic val, double def) {
     if (val == null) return def;
     if (val is num) return val.toDouble();
     return double.tryParse(val.toString()) ?? def;
   }
 
+  // 숫자 두 자리 문자열 변환
   static int _parseInt(dynamic val, int def) {
     if (val == null) return def;
     if (val is int) return val;
@@ -82,6 +79,7 @@ class AutomationSettingModel {
   }
 }
 
+// AutomationModelModel — API 데이터 모델
 class AutomationModelModel {
   final int? automationModelId;
   final int? userPlantId;
@@ -121,6 +119,7 @@ class AutomationModelModel {
     this.modifiedAt,
   });
 
+  // JSON 응답을 모델로 변환
   factory AutomationModelModel.fromJson(Map<String, dynamic> json) {
     return AutomationModelModel(
       automationModelId: json['automationModelId'],
@@ -149,6 +148,7 @@ class AutomationModelModel {
     );
   }
 
+  // 숫자 두 자리 문자열 변환
   static double? _parseDoubleOpt(dynamic val) {
     if (val == null) return null;
     if (val is num) return val.toDouble();
@@ -156,6 +156,7 @@ class AutomationModelModel {
   }
 }
 
+// AutomationLogModel — API 데이터 모델
 class AutomationLogModel {
   final int automationLogId;
   final int userPlantId;
@@ -179,6 +180,7 @@ class AutomationLogModel {
     required this.createdAt,
   });
 
+  // JSON 응답을 모델로 변환
   factory AutomationLogModel.fromJson(Map<String, dynamic> json) {
     return AutomationLogModel(
       automationLogId: json['automationLogId'] ?? 0,
