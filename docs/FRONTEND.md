@@ -243,12 +243,12 @@ sequenceDiagram
 | `IotService` | 최신 IoT, 사진, 물주기, 조명, 센서 refresh 요청 | `/api/user-plants/{id}/iot/**` |
 | `AutomationService` | 자동화 설정, 학습, 모델, 로그 | `/api/user-plants/{id}/automation/**` |
 
-### API 계약에서 확인된 불일치
+### API 계약 상태
 
 | 프론트엔드 동작 | 백엔드 확인 결과 | 영향 |
 | --- | --- | --- |
-| `IotService`가 `/api/user-plants/{id}/iot/refresh` POST 호출 | 대응하는 `IotAppController` endpoint 없음 | 사용자가 센서 갱신을 실행하면 실패할 가능성이 큼 |
-| 자동화 설정 모델/화면이 `wateringSafetyEnabled` 필드를 전송/표시 | 백엔드 자동화 DTO/Entity에 해당 필드 확인되지 않음 | 설정이 저장되지 않거나 역직렬화 정책에 따라 요청 실패 가능 |
+| `IotService`가 `/api/user-plants/{id}/iot/refresh` POST 호출 | 대응하는 `IotAppController` endpoint 구현 완료 | 연결 가능. 진행 중 명령은 409로 처리 |
+| 자동화 설정 모델/화면이 `wateringSafetyEnabled` 필드를 전송/표시 | 백엔드 `AutomationSetting`/DTO 반영 완료 | 일치. 수동/자동 급수 차단 정책에 반영 |
 
 ## 핵심 기능 설명
 
@@ -262,7 +262,7 @@ sequenceDiagram
 * 내부 처리 과정: JSON 요청, 응답 모델 파싱, SharedPreferences 저장, 401 callback 등록.
 * 예외 처리: API 실패 시 화면 메시지/상태 변경 경로가 있으며 401은 로그인으로 이동합니다.
 * 다른 기능과의 연결: 로그인 후 모든 사용자, 식물, IoT, 퀘스트 기능.
-* 주의할 점: 접근 토큰이 보안 전용 저장소가 아닌 `SharedPreferences`에 저장되고, 공통 클라이언트의 디버그 출력이 토큰 일부를 기록하는 코드가 확인됩니다.
+* 주의할 점: 접근 토큰은 보안 전용 저장소가 아닌 `SharedPreferences`에 저장됩니다. 공통 클라이언트의 token substring debug 로그는 제거되어 토큰 값은 출력하지 않습니다.
 
 ### 식물 홈 및 이미지 표시
 
@@ -280,7 +280,7 @@ sequenceDiagram
 
 * 목적: 센서 상태, 영상, 물주기와 조명 제어를 사용자에게 제공합니다.
 * 관련 파일: IoT screens, `iot_service.dart`, `iot_models.dart`, `mjpeg_stream_view.dart`, `iot_thresholds.dart`, `camera_config.dart`.
-* 실행 흐름: 식물별 최신 IoT API를 호출하고 센서값을 카드/배너로 표시합니다. 카메라 스트림은 앱이 Pi 제공 주소에 직접 접속해 표시합니다. 조작 버튼은 백엔드 명령 API를 호출합니다.
+* 실행 흐름: 식물별 최신 IoT API를 호출하고 센서값을 카드/배너로 표시합니다. 카메라 스트림은 앱이 Pi 제공 주소에 직접 접속해 표시합니다. 조작 버튼은 백엔드 명령 API를 호출합니다. 센서 새로고침 버튼은 `/iot/refresh` 요청 후 2.5초 뒤 latest를 재조회하며, 진행 중 409 응답은 스낵바로 안내합니다.
 * 입력값: 사용자 식물 ID, 버튼 이벤트, 스트림 URL.
 * 출력값: 센서 UI, 과습/물 부족 표시, 실시간 프레임, 명령 요청 결과.
 * 내부 처리 과정: 수분 퍼센트가 기준보다 낮거나 높을 때 배너 판정, byte stream에서 JPEG 시작/끝 바이트를 찾아 프레임 생성.
@@ -298,7 +298,7 @@ sequenceDiagram
 * 내부 처리 과정: 화면 입력을 모델 JSON으로 변환하여 PATCH/POST 요청합니다.
 * 예외 처리: 요청 실패 시 화면 단위 오류 처리가 수행됩니다.
 * 다른 기능과의 연결: 백엔드 자동화 판단, ESP/Pi 센서 및 Pi 명령.
-* 주의할 점: 프론트 모델에 존재하는 안전 관련 필드가 백엔드 데이터 구조와 일치하지 않습니다.
+* 주의할 점: `wateringSafetyEnabled`는 백엔드 자동화 설정에 저장되며 수동/자동 급수 판단에 반영됩니다.
 
 ### 육성 게임 흐름
 
@@ -363,7 +363,7 @@ sequenceDiagram
 * 관련 데이터: 접근 토큰, 공통 API 응답 JSON.
 * 의존하는 다른 함수/클래스: `http`, `TokenStorage`, 서비스 객체.
 * 에러 처리 방식: 네트워크/상태 코드 오류를 예외 또는 공통 실패로 전달합니다.
-* 개선 가능성: 토큰 일부도 로그에 남기지 않도록 디버그 출력을 제거하고, base URL을 환경별 설정으로 분리해야 합니다.
+* 개선 가능성: token substring debug 로그는 제거 완료되었습니다. base URL은 환경별 설정으로 분리할 필요가 있습니다.
 
 ### `MainPage`
 
@@ -376,7 +376,7 @@ sequenceDiagram
   1. 홈/인벤토리/컬렉션/퀘스트 화면을 `IndexedStack`에 구성합니다.
   2. 탭 선택 시 표시 인덱스를 변경합니다.
   3. 필요한 화면의 key를 이용해 데이터 reload를 유도합니다.
-  4. 개발용 디버그 이동 UI도 렌더링합니다.
+  4. `DebugPanel`은 삭제됨(개발용 디버그 패널) 상태이며 진입 UI를 렌더링하지 않습니다.
 * 관련 데이터: 현재 탭 인덱스와 하위 화면 상태.
 * 의존하는 다른 함수/클래스: 각 tab 화면.
 * 에러 처리 방식: 자식 화면별 오류 처리에 위임합니다.
@@ -393,11 +393,11 @@ sequenceDiagram
   1. `IotService`로 최신 상태를 로드합니다.
   2. 토양 퍼센트를 임계값과 비교해 부족/과습 안내를 표시합니다.
   3. 식물 매핑에 따른 MJPEG 스트림 위젯을 렌더링합니다.
-  4. 물주기/조명 조작 시 백엔드 요청을 전송하고 상태를 갱신합니다.
+  4. 물주기/조명/센서 새로고침 조작 시 백엔드 요청을 전송하고 상태를 갱신합니다.
 * 관련 데이터: 환경/토양/최신 이미지 모델, 스트림 URL, 제어 결과.
 * 의존하는 다른 함수/클래스: `IotService`, `MjpegStreamView`, 임계치 상수.
 * 에러 처리 방식: 로딩 실패/버튼 요청 실패/영상 오류의 UI 상태를 관리합니다.
-* 개선 가능성: 존재하지 않는 센서 refresh API 호출 계약을 수정하고 스트림 인증 정책을 보완해야 합니다.
+* 개선 가능성: 센서 refresh 버튼은 백엔드 `/iot/refresh`와 연결 완료되었습니다. 스트림 인증 정책은 별도 보완이 필요합니다.
 
 ### `MjpegStreamView`
 
@@ -447,19 +447,19 @@ sequenceDiagram
 | --- | --- | --- |
 | API 인증 만료 | HTTP 401 callback으로 로그인 이동 | 토큰 refresh 흐름은 확인되지 않음 |
 | 토큰 저장 | `SharedPreferences` 저장 | 민감 토큰은 안전 저장소 사용 검토 필요 |
-| 디버그 로그 | API 클라이언트가 토큰 일부를 출력하는 코드 존재 | 운영/개발 모두 토큰 출력 제거 필요 |
+| 디버그 로그 | API 클라이언트 token substring 로그 제거 완료 | Authorization 헤더 포함 여부만 출력 |
 | endpoint 구성 | 서버/스트림 주소가 상수에 직접 있음 | flavor 또는 빌드 환경별 설정 필요 |
 | 앱/플랫폼 키 | 앱 및 플랫폼 설정 파일에 식별/키 종류 존재 | 값을 저장소에 남길 범위와 회전 정책 검토 |
 | 스트림 접근 | 공개 URL을 직접 요청하며 JWT 헤더 사용 확인되지 않음 | 네트워크 노출 및 사용자별 접근 통제 확인 필요 |
-| API 계약 | refresh 및 자동화 필드 불일치 | 백엔드와 계약 테스트 추가 필요 |
+| API 계약 | `/iot/refresh` 및 `wateringSafetyEnabled` 백엔드 연결 완료 | 백엔드와 계약 테스트 추가 필요 |
 | 테스트 범위 | 수분 기준 테스트 1개 확인 | 인증, 서비스 JSON, navigation, 제어 실패 UI 테스트 필요 |
 
 ## 주의사항 및 개선 가능성
 
-* 백엔드에 없는 센서 refresh endpoint를 호출하는 화면 동작은 실제 기기 운영에서 즉시 오류로 드러날 수 있습니다.
-* 자동화 설정의 안전 관련 필드는 프론트엔드에만 존재하는 것으로 확인되어, 사용자가 바꾼 설정이 실제 제어에 반영된다고 보장할 수 없습니다.
+* 센서 refresh 버튼은 백엔드 `/iot/refresh`와 연결 완료되었고, 요청 후 2.5초 뒤 latest를 재조회하며 진행 중 409 응답은 스낵바로 안내합니다.
+* 자동화 설정의 `wateringSafetyEnabled`는 백엔드에 저장되고 수동/자동 급수 차단 정책에 반영됩니다.
 * API base URL, 영상 stream URL, SDK 설정을 앱 코드에서 환경별로 분리하지 않으면 테스트와 운영 전환 시 잘못된 서버에 연결될 위험이 있습니다.
-* 토큰 저장 방식과 토큰 디버그 출력은 인증 정보 노출 위험이 있으므로 우선순위가 높은 개선 항목입니다.
+* 토큰 저장 방식은 여전히 검토 대상입니다. token substring debug 로그는 제거 완료되었습니다.
 * 화면별 `setState` 중심 구조는 현재 기능에는 직접적이지만, IoT polling/자동화/인벤토리 간 데이터 동기화가 증가하면 공통 상태와 오류 정책이 필요합니다.
 * Firebase 관련 의존성과 플랫폼 설정은 있으나 앱 코드의 사용이 확인되지 않으므로, 미사용이면 정리하고 사용할 예정이면 초기화 및 권한 흐름을 문서화해야 합니다.
 
@@ -532,7 +532,6 @@ Flutter 앱의 `lib/` 전체, 테스트, 앱 설정 YAML 및 저장소 루트의
 * `lib/services/user_item_service.dart`
 * `lib/services/user_plant_service.dart`
 * `lib/theme/app_theme.dart`
-* `lib/widgets/debug_panel.dart`
 * `lib/widgets/mjpeg_stream_view.dart`
 * `lib/widgets/quest_detail_bottom_sheet.dart`
 * `lib/widgets/selectable_user_plant_card.dart`
@@ -844,7 +843,7 @@ class ApiClient {
     final headers = {'Content-Type': 'application/json'};
     if (token != null) {
       headers['Authorization'] = 'Bearer $token';
-      debugPrint('[ApiClient] 🔑 Authorization 헤더 포함됨 (token: ${token.substring(0, token.length.clamp(0, 20))}...)');
+      debugPrint('[ApiClient] 🔑 Authorization 헤더 포함됨');
     } else {
       debugPrint('[ApiClient] ⚠️ Authorization 헤더 없음 — 토큰 미저장 상태');
     }
@@ -4988,20 +4987,27 @@ class _IotStatusPageState extends State<IotStatusPage> {
       final res = await _iotService.requestSensorRefresh(widget.userPlantId);
       if (!mounted) return;
 
-      _showSnack(
-        res.message.isNotEmpty ? res.message : '센서 새로고침을 요청했습니다.',
-        success: res.success,
-      );
+      if (res.success) {
+        _showSnack(
+          res.message.isNotEmpty ? res.message : '센서 새로고침을 요청했습니다.',
+          success: true,
+        );
 
-      await Future.delayed(const Duration(seconds: 2));
-      if (!mounted) return;
+        await Future.delayed(const Duration(milliseconds: 2500));
+        if (!mounted) return;
 
-      _hasShownWaterShortageNotice = false;
-      await _loadLatest(showLoading: false);
+        _hasShownWaterShortageNotice = false;
+        await _loadLatest(showLoading: false);
+        return;
+      }
+
+      final message = res.message == '이미 센서 새로고침이 진행 중입니다.'
+          ? '이미 센서 새로고침이 진행 중입니다.'
+          : '센서 새로고침 요청에 실패했습니다.';
+      _showSnack(message, success: false);
     } catch (e) {
       if (!mounted) return;
-      _showSnack('센서 새로고침 중 오류가 발생했습니다.', success: false);
-      await _loadLatest(showLoading: false);
+      _showSnack('센서 새로고침 요청에 실패했습니다.', success: false);
     } finally {
       if (mounted) {
         setState(() => _isSensorRefreshing = false);
@@ -6034,7 +6040,6 @@ import 'home/home_page.dart';
 import 'inventory/inventory_page.dart';
 import 'collection/collection_page.dart';
 import 'quest/quest_page.dart';
-import '../widgets/debug_panel.dart';
 
 // ============================================================
 // MainPage — 하단 네비게이션 구조
@@ -6114,14 +6119,6 @@ class _MainPageState extends State<MainPage> {
       body: IndexedStack(
         index: _currentIndex,
         children: _pages,
-      ),
-      // 🔧 DEV: Debug 버튼 (출시 전 제거)
-      floatingActionButton: FloatingActionButton.small(
-        heroTag: 'debug_fab',
-        onPressed: () => showDebugPanel(context),
-        backgroundColor: AppColors.surfaceDark,
-        tooltip: 'Debug Panel',
-        child: const Icon(Icons.bug_report, color: AppColors.primaryOnDark, size: 18),
       ),
       bottomNavigationBar: _buildBottomNav(),
     );
@@ -10783,223 +10780,6 @@ class AppTheme {
 }
 ~~~~
 
-#### `lib/widgets/debug_panel.dart`
-
-~~~~dart
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../core/network/token_storage.dart';
-import '../services/auth_service.dart';
-import '../screens/auth/login_page.dart';
-
-// ============================================================
-// DebugPanel — 개발용 디버그 패널
-// 사용법: 화면 우하단 FAB 또는 AppBar action에서 열기
-// 확인 가능 항목:
-//   - 저장된 accessToken 앞 40자
-//   - 로그아웃 버튼
-//   - API Base URL 확인
-// ============================================================
-class DebugPanel extends StatefulWidget {
-  const DebugPanel({Key? key}) : super(key: key);
-
-  @override
-  _DebugPanelState createState() => _DebugPanelState();
-}
-
-class _DebugPanelState extends State<DebugPanel> {
-  final _tokenStorage = TokenStorage();
-  final _authService = AuthService();
-  String? _token;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadToken();
-  }
-
-  Future<void> _loadToken() async {
-    final token = await _tokenStorage.getAccessToken();
-    setState(() {
-      _token = token;
-      _isLoading = false;
-    });
-  }
-
-  Future<void> _logout(BuildContext ctx) async {
-    await _authService.logout();
-    if (!ctx.mounted) return;
-    Navigator.pushAndRemoveUntil(
-      ctx,
-      MaterialPageRoute(builder: (_) => LoginPage()),
-      (route) => false,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      padding: const EdgeInsets.all(24),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[600],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                const Icon(Icons.bug_report, color: Colors.greenAccent, size: 20),
-                const SizedBox(width: 8),
-                Text('🔧 Debug Panel',
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(color: Colors.greenAccent, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const Divider(color: Colors.grey, height: 24),
-
-            // Base URL
-            _DebugRow(label: 'Base URL', value: '<REDACTED_URL>'),
-            const SizedBox(height: 12),
-
-            // Token
-            Text('Access Token', style: TextStyle(color: Colors.grey[400], fontSize: 12)),
-            const SizedBox(height: 6),
-            if (_isLoading)
-              const CircularProgressIndicator(color: Colors.greenAccent)
-            else if (_token == null || _token!.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text('❌ 토큰 없음 — 로그인 필요',
-                    style: TextStyle(color: Colors.redAccent, fontSize: 13)),
-              )
-            else
-              GestureDetector(
-                onTap: () {
-                  Clipboard.setData(ClipboardData(text: _token!));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('토큰이 클립보드에 복사되었습니다')),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.3)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '✅ ${_token!.substring(0, _token!.length.clamp(0, 40))}...',
-                        style: const TextStyle(
-                            color: Colors.greenAccent, fontFamily: 'monospace', fontSize: 12),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text('(탭하면 전체 토큰 복사)',
-                          style: TextStyle(color: Colors.grey, fontSize: 10)),
-                    ],
-                  ),
-                ),
-              ),
-
-            const SizedBox(height: 24),
-
-            // Refresh + Logout
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _loadToken,
-                    icon: const Icon(Icons.refresh, size: 16, color: Colors.greenAccent),
-                    label: const Text('새로고침', style: TextStyle(color: Colors.greenAccent)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.greenAccent),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _logout(context),
-                    icon: const Icon(Icons.logout, size: 16),
-                    label: const Text('로그아웃'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red[800],
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DebugRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _DebugRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 80,
-          child: Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-                color: Colors.white, fontFamily: 'monospace', fontSize: 12),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// 어디서든 DebugPanel을 띄우는 헬퍼
-void showDebugPanel(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: Colors.transparent,
-    isScrollControlled: true,
-    builder: (_) => const DebugPanel(),
-  );
-}
-~~~~
-
 #### `lib/widgets/mjpeg_stream_view.dart`
 
 ~~~~dart
@@ -15534,12 +15314,12 @@ print("Syntax fixed")
 
 프론트엔드는 Flutter 앱으로서 백엔드 REST API와 Raspberry Pi의 MJPEG 스트림을 조합하여 육성 게임과 물리 식물 모니터링/제어 경험을 제공합니다. 화면 데이터는 서비스와 모델 계층을 거쳐 `StatefulWidget` 상태로 관리되며, AI 이미지가 있으면 식물 표시에 활용됩니다.
 
-구동 전 반드시 확인해야 할 부분은 백엔드와 맞지 않는 두 계약, 코드 내 endpoint/SDK 설정 관리, 토큰 저장 및 로그 보안입니다.
+구동 전 반드시 확인해야 할 부분은 코드 내 endpoint/SDK 설정 관리, 토큰 저장 방식, 스트림 접근 보안입니다.
 
 ## 추가로 확인하면 좋은 점
 
 * 운영용/개발용 API 및 stream endpoint를 나누는 빌드 설정 방식.
 * Kakao, Google, Firebase 설정의 배포별 주입과 저장소 관리 정책.
-* 센서 refresh 기능의 실제 요구사항과 대응 백엔드/Pi 명령 계약.
-* `wateringSafetyEnabled`가 제품 기능인지 여부 및 백엔드 저장 모델 반영 방식.
+* 센서 refresh 기능은 백엔드/Pi 명령 계약과 연결 완료되었습니다.
+* `wateringSafetyEnabled`는 백엔드 저장 모델과 수동/자동 급수 차단 로직에 반영되었습니다.
 * 스트림 접근 인증, 네트워크 장애 재연결, 실제 디바이스 UI 성능 테스트 결과.

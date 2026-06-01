@@ -31,11 +31,7 @@ greenlink_ubuntu/
 ├── openai_transform.py
 ├── remove_pot.py
 ├── s3_client.py
-├── ai_background_remove.py
-├── alpha_composite.py
-├── compose_pot.py
 ├── style_plant.png
-├── pot_base.png
 ├── inputs/
 │   └── ...  (다운로드된 원본 이미지 다수)
 └── outputs/
@@ -56,10 +52,8 @@ greenlink_ubuntu/
 | `style_plant.png` | 스타일 변환 참조 이미지 | 높음 | `openai_transform.py` |
 | `inputs/` | 다운로드한 원본 이미지 저장 위치 | 중간 | `process_one.py` |
 | `outputs/` | 전처리와 최종 변환 결과 저장 위치 | 중간 | `process_one.py` |
-| `ai_background_remove.py` | 별도 배경 제거 실험/보조 함수 | 낮음 | 활성 파이프라인 사용 확인되지 않음 |
-| `alpha_composite.py` | 알파 이미지 합성 보조 코드 | 낮음 | 활성 파이프라인 사용 확인되지 않음 |
-| `compose_pot.py` | 화분 합성 보조 코드 | 낮음 | 구문 오류가 있어 현 상태 실행 불가 |
-| `pot_base.png` | 합성용으로 보이는 화분 이미지 asset | 낮음 | 활성 파이프라인 사용 확인되지 않음 |
+
+삭제 완료된 legacy 파일은 `ai_background_remove.py`, `alpha_composite.py`, `compose_pot.py`, `pot_base.png`입니다.
 
 ## 환경 변수와 설정 파일
 
@@ -69,6 +63,7 @@ greenlink_ubuntu/
 | 클라우드 access/secret key | `s3_client.py` | 환경 변수에서 읽음. 값은 문서화하지 않음 |
 | 객체 저장소 bucket/region | `s3_client.py` | 환경 변수 및 기본 처리 코드 확인. 실제 값은 문서화하지 않음 |
 | Backend base URL | `process_one.py` | 코드 기본값으로 서버 주소 종류가 포함되어 있음. 실제 값은 노출하지 않음 |
+| `AI_WORKER_SECRET` | `process_one.py` | 없으면 `gl-ai-worker-secret-change-me` fallback 사용. Backend `greenlink.ai.worker-secret`과 일치해야 함 |
 | `.env` | `dotenv` 로딩 | 프로젝트 폴더에 실제 `.env` 파일은 확인되지 않음 |
 
 API 키와 클라우드 자격 증명은 환경 변수를 기대하지만, 실제 운영 서버에서 어떻게 주입하는지와 회전 방식은 코드상 확인되지 않습니다.
@@ -128,7 +123,7 @@ python process_one.py --url <image-url> --name <job-name> --plant-image-id <imag
 | GET | 원본 이미지 URL | 백엔드/S3에 저장된 원본 다운로드 | 이미지 URL | JPEG/이미지 bytes | `process_one.py` |
 | Image Edit 요청 | 외부 이미지 생성 API | 식물 전처리 이미지를 스타일 변환 | 전처리 PNG, 스타일 PNG, prompt | 생성 PNG 데이터 | `openai_transform.py` |
 | Upload | 객체 저장소 | 최종 PNG 저장 | 결과 파일, key, content type | 공개형 결과 URL 구성 | `s3_client.py` |
-| POST | Backend AI result endpoint | 원본 이미지와 최종 AI URL 연결 | `finalAiUrl` | 저장 결과 | `process_one.py` |
+| POST | Backend AI result endpoint | 원본 이미지와 최종 AI URL 연결 | `finalAiUrl`, `X-AI-Worker-Secret` header | 저장 결과 | `process_one.py` |
 
 ## 입력 및 출력 데이터 구조
 
@@ -148,7 +143,7 @@ python process_one.py --url <image-url> --name <job-name> --plant-image-id <imag
 | 다운로드 원본 | 이미지 파일 | `inputs/` | `download_image()` |
 | 배경/화분 제거 결과 | 투명 PNG | `outputs/` | `remove_background_and_pot()` |
 | AI 변환 최종 결과 | 투명 PNG | `outputs/` 및 객체 저장소 | `transform_to_greenlink_style()`, `upload_file()` |
-| 결과 callback payload | JSON (`finalAiUrl`) | Backend | `save_backend_result()` |
+| 결과 callback payload | JSON (`finalAiUrl`) + `X-AI-Worker-Secret` header | Backend | `save_ai_result_to_backend()` |
 
 ### 처리 응답과 비동기 의미
 
@@ -173,7 +168,7 @@ sequenceDiagram
     A->>O: 스타일 이미지와 함께 edit 요청
     O-->>A: 변환 PNG
     A->>S: 최종 이미지 업로드
-    A->>B: POST AI 결과 URL callback
+    A->>B: POST AI 결과 URL callback + X-AI-Worker-Secret
 ```
 
 ### 코드상 확인되는 실제 연결 관계
@@ -232,7 +227,7 @@ sequenceDiagram
 * 내부 처리 과정: boto3 client 구성, content type을 포함한 upload, `X-AI-Worker-Secret` header를 포함한 callback JSON 전송.
 * 예외 처리: 업로드 또는 callback 실패는 작업 예외가 되며 재시도/보상 트랜잭션은 확인되지 않습니다.
 * 다른 기능과의 연결: 백엔드 `AiPlantImage`, Flutter 표시.
-* 주의할 점: callback endpoint는 백엔드 shared secret header 검증을 통과해야 합니다.
+* 주의할 점: callback endpoint는 백엔드 `AiWorkerAuthInterceptor`의 shared secret header 검증을 통과해야 합니다.
 
 ## 핵심 Function / Class 상세 설명
 
@@ -260,13 +255,14 @@ sequenceDiagram
 * 호출되는 시점: API background task 또는 CLI 실행 시.
 * 매개변수: 원본 이미지 URL, 이름, 선택 plant image ID, 선택 backend URL.
 * 반환값: 최종 URL, 로컬 경로 및 callback 성공 여부를 담은 결과.
+* 설정값: `AI_WORKER_SECRET = os.environ.get("AI_WORKER_SECRET", "gl-ai-worker-secret-change-me")`로 callback shared secret을 읽습니다.
 * 내부 동작 순서:
   1. 입출력 디렉터리를 준비하고 스타일 asset 존재 여부를 검사합니다.
   2. 원본 이미지를 `inputs/`로 다운로드합니다.
   3. 배경 제거 session을 만들고 식물 전처리 PNG를 생성합니다.
   4. 스타일 참조 이미지를 사용해 외부 AI 변환 결과를 생성합니다.
   5. 최종 결과를 객체 저장소에 업로드합니다.
-  6. plant image ID가 있으면 백엔드에 최종 URL을 저장합니다.
+  6. plant image ID가 있으면 `X-AI-Worker-Secret` header를 포함해 백엔드에 최종 URL을 저장합니다.
   7. 결과 경로/URL 정보를 반환합니다.
 * 관련 데이터: 입력 URL, local input/output 파일, final URL, image ID.
 * 의존하는 다른 함수/클래스: `remove_pot`, `openai_transform`, `s3_client`, `requests`.
@@ -307,7 +303,7 @@ sequenceDiagram
 * 에러 처리 방식: 자격 증명 누락 또는 API/디코딩 실패가 호출자에게 전파됩니다.
 * 개선 가능성: prompt가 코드 상수로 고정되어 있으므로 운영 중 prompt 변경이 필요하면 설정 파일 또는 DB 관리로 분리할 수 있습니다. 요청 비용/지연 metric, 실패 유형별 재시도 및 입력 이미지 크기 제한도 정의할 수 있습니다.
 
-### `upload_file(...)` 및 `save_backend_result(...)`
+### `upload_file(...)` 및 `save_ai_result_to_backend(...)`
 
 * 위치: `s3_client.py`, `process_one.py`
 * 역할: 최종 이미지를 저장소에 올리고 백엔드 원본 사진과 결과를 연결합니다.
@@ -331,7 +327,7 @@ sequenceDiagram
 | 배경 제거 모델 | `rembg`에서 `u2netp` pretrained session을 사용하는 코드 확인 |
 | 이미지 생성 모델 | 외부 image edit API의 지정 모델 사용 확인 |
 | 서비스 스타일 asset | `style_plant.png` 사용 확인 |
-| 화분 asset | `pot_base.png` 존재하나 active 처리 경로 사용 확인되지 않음 |
+| 화분 asset | `pot_base.png` 삭제 완료 |
 | 자체 학습 dataset / train script | 확인되지 않음 |
 | 센서 분석/예측 model | 확인되지 않음 |
 | 추천/진단 model | 확인되지 않음 |
@@ -339,7 +335,7 @@ sequenceDiagram
 
 ### 보조 코드 상태
 
-`ai_background_remove.py`, `alpha_composite.py`, `compose_pot.py`는 현재 `process_one.py`가 호출하는 핵심 경로에는 연결되지 않은 보조 또는 실험 파일로 확인됩니다. 특히 `compose_pot.py` 시작 부분에는 Python 구문으로 유효하지 않은 문자가 포함되어 있어 그대로 실행하거나 import하면 구문 오류가 발생합니다.
+`ai_background_remove.py`, `alpha_composite.py`, `compose_pot.py`, `pot_base.png`는 legacy 보조/실험 파일로 정리되어 삭제 완료되었습니다. 현재 active 경로는 `process_one.py` → `remove_pot.py` → `openai_transform.py` → `s3_client.py` → Backend callback입니다.
 
 ## 서버 운영, 로그 및 저장 방식
 
@@ -350,7 +346,7 @@ sequenceDiagram
 | 원본/중간/최종 파일 | 로컬 `inputs/`, `outputs/` 저장 | 보존 기간/cleanup 정책 확인되지 않음 |
 | 최종 결과 저장 | 객체 저장소 업로드 | 공개 접근/수명/삭제 정책 확인되지 않음 |
 | 로그 | `print` 중심 처리 메시지 | 구조화 로그, rotation, monitoring 확인되지 않음 |
-| 인증 | Pi가 worker endpoint 호출 | AI worker endpoint 자체 인증 로직 확인되지 않음 |
+| 인증 | Pi가 worker endpoint 호출, worker가 Backend callback 호출 | Pi → worker `/process` 보안 상태는 기존 검토 항목으로 유지. Backend callback은 `X-AI-Worker-Secret` header를 포함하고 `AiWorkerAuthInterceptor`가 검증 |
 
 ## 예외 처리
 
@@ -375,7 +371,7 @@ sequenceDiagram
 | 산출물 누적 | `inputs/`, `outputs/` 결과 파일 다수 | cleanup, 보존, 개인정보/이미지 접근 정책 필요 |
 | 화분 제거 품질 | 하단 비율을 단순 투명화 | 식물 손상 여부 테스트와 더 정교한 segmentation 검토 |
 | 외부 AI 의존 | API 호출 기반 변환 | 비용/지연/실패/데이터 전달 정책 모니터링 |
-| 보조 파일 구문 오류 | `compose_pot.py` 실행 불가 문자 포함 | 정리하거나 테스트 가능한 상태로 수정 |
+| legacy 보조 파일 | `ai_background_remove.py`, `alpha_composite.py`, `compose_pot.py`, `pot_base.png` 삭제 완료 | active 경로에 재도입하지 않도록 문서와 배포 파일 목록 유지 |
 | 테스트 부재 | 테스트 파일 확인되지 않음 | 전처리 unit test, API contract, callback 통합 테스트 추가 |
 
 <!-- BEGIN GENERATED SOURCE APPENDIX -->
@@ -383,85 +379,19 @@ sequenceDiagram
 
 ### 포함 범위와 마스킹 원칙
 
-AI worker와 이미지 처리 보조 Python 소스를 포함한다. 스타일/화분 이미지 asset, `inputs/`, `outputs/`, 캐시와 IDE/Git 데이터는 제외한다.
+AI worker와 active 이미지 처리 Python 소스를 포함한다. 삭제 완료된 legacy 파일, 실행 산출물인 `inputs/`, `outputs/`, 캐시와 IDE/Git 데이터는 제외한다.
 
 아래 코드는 확인한 저장소 파일의 원문을 문서에 수록한 것이다. 다만 소스에 존재하는 비밀키, 토큰/장치 키, Wi-Fi 자격 정보, 실서버 주소 및 외부 저장소 URL은 `<REDACTED_SECRET>`, `<REDACTED_DEVICE_KEY>`, `<REDACTED_URL>` 또는 `<REDACTED_IP>`로 치환했으므로 그대로 빌드하기 위한 사본이 아니라 분석용 사본이다.
 
 ### 수록 파일 목록
 
-* `ai_background_remove.py`
 * `ai_worker_api.py`
-* `alpha_composite.py`
-* `compose_pot.py`
 * `openai_transform.py`
 * `process_one.py`
 * `remove_pot.py`
 * `s3_client.py`
 
 ### 원문 코드
-
-#### `ai_background_remove.py`
-
-~~~~python
-from pathlib import Path
-from PIL import Image
-from rembg import remove, new_session
-import io
-import numpy as np
-
-
-AI_BG_REMOVE_MODEL = "u2netp"
-
-
-def clean_transparent_pixels(rgba: Image.Image) -> Image.Image:
-    """
-    alpha가 0인 영역의 RGB 값을 0으로 정리한다.
-    앱에서 합성할 때 흰색/회색 테두리가 남는 것을 줄이기 위한 후처리.
-    """
-    rgba_np = np.array(rgba, dtype=np.uint8)
-
-    alpha = rgba_np[..., 3]
-    transparent_mask = alpha == 0
-
-    rgba_np[..., 0][transparent_mask] = 0
-    rgba_np[..., 1][transparent_mask] = 0
-    rgba_np[..., 2][transparent_mask] = 0
-
-    return Image.fromarray(rgba_np, mode="RGBA")
-
-
-def remove_ai_background(
-    ai_image_path: Path,
-    output_path: Path,
-    session=None,
-) -> Path:
-    """
-    OpenAI가 만든 AI raw 이미지 자체에 배경제거를 다시 적용한다.
-    원본 마스크를 사용하지 않는다.
-    """
-
-    if not ai_image_path.exists():
-        raise FileNotFoundError(f"AI 이미지가 없습니다: {ai_image_path}")
-
-    if session is None:
-        session = new_session(AI_BG_REMOVE_MODEL)
-
-    input_bytes = ai_image_path.read_bytes()
-
-    output_bytes = remove(
-        input_bytes,
-        session=session,
-        force_return_bytes=True,
-    )
-
-    rgba = Image.open(io.BytesIO(output_bytes)).convert("RGBA")
-    rgba = clean_transparent_pixels(rgba)
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    rgba.save(output_path, format="PNG")
-
-    return output_path
-~~~~
 
 #### `ai_worker_api.py`
 
@@ -556,194 +486,6 @@ def process_image(
             "status": "PROCESSING",
         },
     }
-~~~~
-
-#### `alpha_composite.py`
-
-~~~~python
-from pathlib import Path
-from PIL import Image
-
-
-def apply_alpha_mask_from_source(
-    source_transparent_path: Path,
-    ai_image_path: Path,
-    output_path: Path,
-):
-    """
-    source_transparent_path의 alpha 채널을 가져와서
-    ai_image_path에 덮어씌워 최종 투명 PNG를 만든다.
-    """
-
-    if not source_transparent_path.exists():
-        raise FileNotFoundError(f"소스 transparent 이미지가 없습니다: {source_transparent_path}")
-
-    if not ai_image_path.exists():
-        raise FileNotFoundError(f"AI 결과 이미지가 없습니다: {ai_image_path}")
-
-    src_rgba = Image.open(source_transparent_path).convert("RGBA")
-    ai_rgba = Image.open(ai_image_path).convert("RGBA")
-
-    # OpenAI 결과 크기가 다를 수 있으니 source 크기에 맞춤
-    if ai_rgba.size != src_rgba.size:
-        ai_rgba = ai_rgba.resize(src_rgba.size, Image.LANCZOS)
-
-    src_alpha = src_rgba.getchannel("A")
-
-    ai_rgba.putalpha(src_alpha)
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    ai_rgba.save(output_path, format="PNG")
-
-    return output_path
-~~~~
-
-#### `compose_pot.py`
-
-~~~~python
-≈from pathlib import Path
-from PIL import Image
-
-
-def make_near_white_transparent(
-    image: Image.Image,
-    threshold: int = 245,
-) -> Image.Image:
-    """
-    OpenAI 결과 이미지에 흰색 배경이 남아 있을 경우,
-    거의 흰색에 가까운 픽셀을 투명하게 바꾼다.
-    """
-    image = image.convert("RGBA")
-    pixels = image.load()
-
-    width, height = image.size
-
-    for y in range(height):
-        for x in range(width):
-            r, g, b, a = pixels[x, y]
-
-            if r >= threshold and g >= threshold and b >= threshold:
-                pixels[x, y] = (255, 255, 255, 0)
-
-    return image
-
-
-def trim_transparent_area(image: Image.Image) -> Image.Image:
-    """
-    투명 영역을 잘라내고 실제 식물/화분 영역만 남긴다.
-    """
-    image = image.convert("RGBA")
-    bbox = image.getbbox()
-
-    if bbox is None:
-        return image
-
-    return image.crop(bbox)
-
-
-def resize_by_height(image: Image.Image, target_height: int) -> Image.Image:
-    ratio = target_height / image.height
-    target_width = int(image.width * ratio)
-    return image.resize((target_width, target_height), Image.LANCZOS)
-
-
-def resize_by_width(image: Image.Image, target_width: int) -> Image.Image:
-    ratio = target_width / image.width
-    target_height = int(image.height * ratio)
-    return image.resize((target_width, target_height), Image.LANCZOS)
-
-
-def compose_plant_with_pot(
-    plant_path: str | Path,
-    pot_path: str | Path = "pot_base.png",
-    output_path: str | Path = "outputs/final_composed.png",
-) -> Path:
-    """
-    AI 식물 이미지와 화분 이미지를 자연스럽게 합성한다.
-
-    핵심:
-    - OpenAI 결과의 흰 배경을 투명화
-    - 식물 실제 영역만 crop
-    - 식물 아래쪽이 화분 입구 안쪽으로 들어가도록 위치 자동 배치
-    """
-
-    plant_path = Path(plant_path)
-    pot_path = Path(pot_path)
-    output_path = Path(output_path)
-
-    if not plant_path.exists():
-        raise FileNotFoundError(f"식물 이미지가 없습니다: {plant_path}")
-
-    if not pot_path.exists():
-        raise FileNotFoundError(f"화분 이미지가 없습니다: {pot_path}")
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    canvas_size = 1024
-    canvas = Image.new("RGBA", (canvas_size, canvas_size), (255, 255, 255, 0))
-
-    # ==============================
-    # 이미지 열기
-    # ==============================
-    plant = Image.open(plant_path).convert("RGBA")
-    pot = Image.open(pot_path).convert("RGBA")
-
-    # OpenAI 결과에 흰 배경이 있을 수 있으므로 제거
-    plant = make_near_white_transparent(plant, threshold=245)
-
-    # 실제 영역만 crop
-    plant = trim_transparent_area(plant)
-    pot = trim_transparent_area(pot)
-
-    # ==============================
-    # 화분 크기와 위치
-    # ==============================
-    pot_width = 500
-    pot = resize_by_width(pot, pot_width)
-
-    pot_x = (canvas_size - pot.width) // 2
-    pot_y = 630
-
-    # 화분 입구 기준점
-    # 식물 줄기 아래가 이 근처로 들어오게 배치
-    pot_mouth_y = pot_y + int(pot.height * 0.18)
-
-    # ==============================
-    # 식물 크기와 위치
-    # ==============================
-    plant_target_height = 520
-    plant = resize_by_height(plant, plant_target_height)
-
-    plant_x = (canvas_size - plant.width) // 2
-
-    # 식물 아래쪽을 화분 입구보다 조금 아래로 넣음
-    stem_insert_depth = 45
-    plant_bottom_y = pot_mouth_y + stem_insert_depth
-    plant_y = plant_bottom_y - plant.height
-
-    # 화면 밖으로 너무 올라가면 보정
-    if plant_y < 30:
-        plant_y = 30
-
-    # ==============================
-    # 합성
-    # ==============================
-    # 식물 먼저
-    canvas.alpha_composite(plant, (plant_x, plant_y))
-
-    # 화분 나중
-    # 이렇게 해야 줄기 아랫부분이 화분 뒤로 들어간 것처럼 보임
-    canvas.alpha_composite(pot, (pot_x, pot_y))
-
-    canvas.save(output_path, "PNG")
-
-    print(f"[COMPOSE] 식물 크기: {plant.size}")
-    print(f"[COMPOSE] 화분 크기: {pot.size}")
-    print(f"[COMPOSE] 식물 위치: x={plant_x}, y={plant_y}")
-    print(f"[COMPOSE] 화분 위치: x={pot_x}, y={pot_y}")
-    print(f"[COMPOSE] 화분 합성 완료: {output_path}")
-
-    return output_path
 ~~~~
 
 #### `openai_transform.py`
@@ -844,6 +586,7 @@ def transform_to_greenlink_style(
 from pathlib import Path
 from urllib.parse import urlparse
 import argparse
+import os
 import requests
 
 from rembg import new_session
@@ -860,6 +603,7 @@ OUTPUT_DIR = BASE_DIR / "outputs"
 STYLE_IMAGE_PATH = BASE_DIR / "style_plant.png"
 
 BACKEND_BASE_URL = "<REDACTED_URL>"
+AI_WORKER_SECRET = os.environ.get("AI_WORKER_SECRET", "gl-ai-worker-secret-change-me")
 
 
 def download_image(url: str, output_path: Path) -> Path:
@@ -949,6 +693,7 @@ def save_ai_result_to_backend(
     response = requests.post(
         api_url,
         json=payload,
+        headers={"X-AI-Worker-Secret": AI_WORKER_SECRET},
         timeout=30,
     )
 

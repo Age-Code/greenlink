@@ -77,13 +77,13 @@ flowchart TD
 | F-IOT-SETUP-01 | 공간/장치/펌프 연결 구성 | 로그인 사용자 | 구현됨, 권한 범위 주의 | `IotSetupService` |
 | F-SENSOR-01 | 토양 수분 수집 | ESP32 | 구현됨 | `main.cpp`, `IotDeviceDataService` |
 | F-SENSOR-02 | 환경 데이터 수집 | Pi | 구현됨 | `sensor_*.py`, `IotDeviceDataService` |
-| F-CAMERA-01 | 실시간 MJPEG 및 원본 사진 저장 | Pi/App | 구현됨, 일부 대안 경로 오류 | `stream_server.py`, `camera_main.py` |
+| F-CAMERA-01 | 실시간 MJPEG 및 원본 사진 저장 | Pi/App | 구현됨 | `stream_server.py`, `camera_main.py` |
 | F-CONTROL-01 | 수동 물주기/조명 | 사용자/Pi | 구현됨 | `IotAppService`, `command_worker.py` |
 | F-AUTO-01 | 자동 물주기/조명 | Backend/Pi | 구현됨 | `AutomationService` |
 | F-AUTO-02 | 데이터 기반 자동화 임계치 산출 | 사용자/Backend | 구현됨 | `AutomationLearningService` |
 | F-AI-01 | 사진 AI 스타일 변환 | Pi/AI Worker/App | 구현됨, 실패 복구 미확인 | AI Python 코드 |
 | F-ADMIN-01 | 마스터/사용자/장치 관리 | 관리자 | 부분 구현 | `AdminController`, `AdminWebController` |
-| F-GAP-01 | 센서 즉시 갱신 UI | 사용자/Pi | 연결 불완전 | Flutter/Pi 구현, Backend 미구현 |
+| F-GAP-01 | 센서 즉시 갱신 UI | 사용자/Pi | 구현됨 | Flutter 버튼, Backend refresh endpoint, `SENSOR_REFRESH` 명령, Pi 분기 |
 
 ## 6. 인증 및 사용자 기능
 
@@ -193,12 +193,12 @@ stateDiagram-v2
 
 ### 확인된 진행 Trigger
 
-| 목표 타입 | 실제 진행 증가 호출 | 구현 상태 |
+| TargetType | 트리거 | 상태 |
 | --- | --- | --- |
-| `ATTEND` | 오늘 출석 성공 시 `AttendService`에서 증가 | 구현됨 |
-| `HARVEST` | 식물 수확 성공 시 `UserPlantService`에서 증가 | 구현됨 |
-| `WATERING` | Pi가 WATER 명령 SUCCESS를 보고하면 `IotCommandService`에서 증가 | 구현됨 |
-| `GROW_PLANT` | 식물 수확 성공 시 `UserPlantService`에서 증가 | 구현됨 |
+| `ATTEND` | 오늘 출석 성공 시 `AttendService` | 구현됨 |
+| `HARVEST` | 식물 수확 성공 시 `UserPlantService` | 구현됨 |
+| `WATERING` | Pi가 WATER 명령 SUCCESS 보고 시 `IotCommandService` | 구현됨 |
+| `GROW_PLANT` | 식물 수확 성공 시 `UserPlantService` | 구현됨 |
 
 ### F-ATTEND-01 출석
 
@@ -318,6 +318,10 @@ sequenceDiagram
     Pi->>B: SUCCESS 또는 FAILED 보고
 ```
 
+### 센서 새로고침
+
+Flutter IoT 화면의 새로고침 버튼은 `POST /api/user-plants/{id}/iot/refresh`를 호출합니다. Backend는 소유 식물, 연결 공간, Pi 장치, 진행 중 중복 명령을 검증한 뒤 `CommandType.SENSOR_REFRESH`의 `PENDING` 명령을 생성합니다. Pi command worker는 기존 `SENSOR_REFRESH` 분기에서 센서를 읽고 업로드한 뒤 SUCCESS를 보고하며, Flutter는 요청 후 2.5초 뒤 latest API를 재조회합니다.
+
 ### 명령 상태 규칙
 
 | 현재 상태 | 동작 | 결과 상태 | 조건 |
@@ -379,7 +383,7 @@ sequenceDiagram
 
 ### 자동화 설정 화면 계약
 
-Flutter의 `wateringSafetyEnabled` 설정은 Backend 설정 DTO와 Entity에 저장되며, 과습 안전 모드가 켜진 경우 수동/자동 급수에서 토양수분 안전 기준을 검사합니다.
+Flutter의 `wateringSafetyEnabled` 설정은 Backend `AutomationSetting`에 저장되며 수동/자동 급수 판단에 반영됩니다. 과습 안전 모드가 켜져 있고 최신 토양수분이 `waterThresholdPercent + 10.0` 이상이면 자동 급수는 skip 로그를 남기고, 수동 급수는 400 응답으로 차단합니다.
 
 ## 13. 카메라 및 AI 이미지 기능
 
@@ -395,7 +399,7 @@ Flutter의 `wateringSafetyEnabled` 설정은 Backend 설정 DTO와 Entity에 저
 **확인된 문제**
 
 * 영상 stream endpoint 인증 로직은 확인되지 않습니다.
-* 별도 `camera_snapshot_main.py`는 stream server가 제공하지 않는 `/snapshot.jpg` route를 사용합니다.
+* 별도 `camera_snapshot_main.py` legacy 파일은 삭제 완료되었습니다.
 * 식물별 crop과 사용자 식물 매핑은 Pi 설정 코드에 고정되어 있습니다.
 
 ### F-AI-01 이미지 AI 변환
@@ -490,13 +494,13 @@ flowchart LR
 
 | ID | 내용 | 근거 | 사용자/운영 영향 |
 | --- | --- | --- | --- |
-| GAP-01 | 앱의 IoT sensor refresh API 없음 | Flutter `iot_service.dart`에는 호출, Backend Controller에는 없음 | 갱신 버튼 실패 |
-| GAP-02 | Pi의 `SENSOR_REFRESH` 분기는 있으나 서버 명령 enum/생성 경로 없음 | `command_worker.py` 대 `CommandType.java` | Pi 기능이 도달 불가능 |
-| GAP-03 | `wateringSafetyEnabled` Backend 반영 | 자동화 설정 저장, 수동/자동 급수 safety 체크 | 해소됨 |
-| GAP-04 | 급수 시간 기준 1초로 통일됨 | Backend 주석/DTO, `DeviceCommand`, Pi fallback | 해소됨 |
-| GAP-05 | `WATERING`, `GROW_PLANT` 퀘스트 목표 진행 연결 | WATER SUCCESS와 수확 시점에 `increaseProgress` 호출 | 해소됨 |
+| GAP-01 | 센서 refresh Backend endpoint와 명령 타입 연결 | `POST /api/user-plants/{id}/iot/refresh`, `CommandType.SENSOR_REFRESH`, Pi 기존 분기 | 해소됨 |
+| GAP-02 | Pi `SENSOR_REFRESH` 분기까지 서버 명령 생성 경로 연결 | GAP-01과 동일 작업으로 Backend 명령 생성 경로 연결 | 해소됨 |
+| GAP-03 | `wateringSafetyEnabled` Backend 반영 | `AutomationSetting` 필드와 DTO 반영, 자동 급수 skip, 수동 급수 400 차단 | 해소됨 |
+| GAP-04 | 급수 시간 기준 1초로 통일됨 | Controller 주석, DTO 주석, `DeviceCommand`, Pi fallback | 해소됨 |
+| GAP-05 | `WATERING`, `GROW_PLANT` 퀘스트 목표 진행 연결 | WATER SUCCESS 시 `IotCommandService`, 수확 시 `UserPlantService`에서 `increaseProgress` 호출 | 해소됨 |
 | GAP-06 | 관리자 웹 로그인 완료 흐름 확인 안 됨 | form login disabled, 대응 POST 없음 | 관리자 HTML 접근 곤란 |
-| GAP-07 | Pi snapshot 대안 경로가 존재하지 않는 route 사용 | Pi camera scripts | 해당 실행 진입점 실패 |
+| GAP-07 | Pi snapshot legacy 진입점 정리 | `camera_snapshot_main.py` 삭제 완료 | 해소됨 |
 
 ## 18. 보안 및 운영 요구사항
 
@@ -536,12 +540,12 @@ flowchart LR
 
 GreenLink는 계정과 육성 게임 기능에 물리 센서/제어 및 이미지 AI 처리를 결합한 시스템으로 구현되어 있습니다. 주요 정상 흐름은 회원가입과 식재, ESP/Pi 센서 저장, 앱 모니터링, 수동 또는 자동 명령 생성, Pi GPIO 실행, 사진 업로드와 AI 결과 표시입니다.
 
-현행 코드에서 제품 동작과 직접 충돌하는 부분은 센서 refresh, 자동화 안전 toggle, 관리자 로그인 및 Pi snapshot 경로입니다. 운영 전에는 장치 키 소스 노출과 AI/영상 접근 인증도 우선 수정 대상입니다.
+GAP-01~05와 GAP-07은 해소되었습니다. 잔여 GAP은 관리자 웹 로그인 완료 흐름과 보안 정책 정리가 필요한 GAP-06입니다. 운영 전에는 장치 키 소스 노출과 AI/영상 접근 인증도 계속 관리 대상입니다.
 
 ## 21. 추가로 확인하면 좋은 점
 
+* GAP-06 관리자 웹 로그인 완료 흐름과 JWT cookie 기반 보안 정책 정리.
 * `GROW_PLANT` 퀘스트를 현재처럼 수확 시점에 유지할지, 별도 식재 시점으로 분리할지.
-* sensor refresh를 Backend 명령으로 정식 추가할지 앱에서 제거할지.
 * 자동 물주기 안전 설정과 물리적 최대 작동 제한의 최종 요구사항.
 * 공간 공용 조명에 여러 식물 설정이 적용될 때의 우선순위 정책.
 * 장치 구성/관리 API를 관리자 전용으로 제한할지와 장치 provisioning 절차.
