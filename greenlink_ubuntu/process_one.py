@@ -120,6 +120,21 @@ def save_ai_result_to_backend(
     return response.json()
 
 
+def cleanup_local_files(paths: list):
+    """
+    처리 완료 후 로컬 중간 파일을 삭제한다.
+    S3에 업로드된 최종 이미지는 이미 S3에 있으므로 로컬에서 제거해도 안전하다.
+    삭제 실패는 경고 로그만 출력하고 예외를 전파하지 않는다.
+    """
+    for path in paths:
+        try:
+            if path is not None and Path(path).exists():
+                Path(path).unlink()
+                print(f"[AI] 로컬 파일 삭제 완료: {path}")
+        except Exception as e:
+            print(f"[AI] 로컬 파일 삭제 실패 (무시): {path} — {e}")
+
+
 def process_one(
     image_url: str,
     name: str,
@@ -209,6 +224,14 @@ def process_one(
         )
     else:
         print("[AI] [6/6] plantImageId가 없어 백엔드 저장은 건너뜀")
+
+    # S3 업로드 및 선택적 백엔드 callback 성공 후 로컬 중간 파일 삭제
+    cleanup_local_files([
+        original_path,
+        source_transparent_path,
+        source_debug_path,
+        ai_result_path,
+    ])
 
     print("[AI] 처리 완료")
     print(f"[AI] finalAiUrl: {urls['finalAiUrl']}")
