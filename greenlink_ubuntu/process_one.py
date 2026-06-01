@@ -143,7 +143,7 @@ def process_one(
     if not STYLE_IMAGE_PATH.exists():
         raise FileNotFoundError(f"스타일 이미지가 없습니다: {STYLE_IMAGE_PATH}")
 
-    print("[1/6] 원본 이미지 다운로드")
+    print("[AI] [1/6] 원본 이미지 다운로드")
 
     original_path = INPUT_DIR / f"{name}_original.jpg"
 
@@ -152,13 +152,13 @@ def process_one(
         output_path=original_path,
     )
 
-    print(f"다운로드 완료: {original_path}")
+    print(f"[AI] 원본 이미지 저장: {original_path}")
 
-    print("[2/6] 원본 배경/화분 제거용 rembg 세션 로딩")
+    print("[AI] [2/6] 원본 배경/화분 제거용 rembg 세션 로딩")
 
     session = new_session(MODEL_NAME)
 
-    print("[3/6] 원본 배경/화분 제거")
+    print("[AI] [3/6] 원본 배경/화분 제거")
 
     source_transparent_path = OUTPUT_DIR / f"{name}_source_transparent.png"
     source_debug_path = OUTPUT_DIR / f"{name}_source_debug_black.png"
@@ -171,10 +171,10 @@ def process_one(
         session,
     )
 
-    print(f"원본 투명 이미지 저장: {source_transparent_path}")
-    print(f"원본 디버그 이미지 저장: {source_debug_path}")
+    print(f"[AI] 원본 투명 이미지 저장: {source_transparent_path}")
+    print(f"[AI] 원본 디버그 이미지 저장: {source_debug_path}")
 
-    print("[4/6] OpenAI 스타일 변환 - 식물만 변환")
+    print("[AI] [4/6] OpenAI 스타일 변환 - 식물만 변환")
 
     # 중요:
     # AI 변환 결과가 잘 나오던 기존 파일명 구조를 유지한다.
@@ -188,9 +188,9 @@ def process_one(
         ai_result_path,
     )
 
-    print(f"AI 최종 이미지 저장: {ai_result_path}")
+    print(f"[AI] AI 최종 이미지 저장: {ai_result_path}")
 
-    print("[5/6] 최종 AI 결과 S3 업로드")
+    print("[AI] [5/6] 최종 AI 결과 S3 업로드")
 
     urls = upload_final_result_to_s3(
         image_url=image_url,
@@ -200,7 +200,7 @@ def process_one(
     backend_response = None
 
     if plant_image_id is not None:
-        print("[6/6] 백엔드 DB 저장")
+        print("[AI] [6/6] 백엔드 DB 저장")
 
         backend_response = save_ai_result_to_backend(
             plant_image_id=plant_image_id,
@@ -208,12 +208,12 @@ def process_one(
             backend_base_url=backend_base_url,
         )
     else:
-        print("[6/6] plantImageId가 없어 백엔드 저장은 건너뜀")
+        print("[AI] [6/6] plantImageId가 없어 백엔드 저장은 건너뜀")
 
-    print("===== 완료 =====")
-    print(f"finalAiUrl: {urls['finalAiUrl']}")
-    print(f"finalAiS3Key: {urls['finalAiS3Key']}")
-    print(f"backendSaved: {backend_response is not None}")
+    print("[AI] 처리 완료")
+    print(f"[AI] finalAiUrl: {urls['finalAiUrl']}")
+    print(f"[AI] finalAiS3Key: {urls['finalAiS3Key']}")
+    print(f"[AI] backendSaved: {backend_response is not None}")
 
     return {
         "finalAiUrl": urls["finalAiUrl"],

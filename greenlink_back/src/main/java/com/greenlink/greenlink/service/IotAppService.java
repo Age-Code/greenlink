@@ -1,6 +1,7 @@
 package com.greenlink.greenlink.service;
 
 import com.greenlink.greenlink.domain.ai.AiPlantImage;
+import com.greenlink.greenlink.domain.automation.AutomationSetting;
 import com.greenlink.greenlink.domain.iot.CommandStatus;
 import com.greenlink.greenlink.domain.iot.CommandType;
 import com.greenlink.greenlink.domain.iot.DeviceCommand;
@@ -16,6 +17,7 @@ import com.greenlink.greenlink.domain.plant.UserPlant;
 import com.greenlink.greenlink.domain.user.User;
 import com.greenlink.greenlink.dto.iot.IotAppDto;
 import com.greenlink.greenlink.repository.AiPlantImageRepository;
+import com.greenlink.greenlink.repository.AutomationSettingRepository;
 import com.greenlink.greenlink.repository.DeviceCommandRepository;
 import com.greenlink.greenlink.repository.EspSensorDataRepository;
 import com.greenlink.greenlink.repository.GrowSpacePlantRepository;
@@ -25,7 +27,9 @@ import com.greenlink.greenlink.repository.PumpChannelRepository;
 import com.greenlink.greenlink.repository.RaspberrySensorDataRepository;
 import com.greenlink.greenlink.repository.UserPlantRepository;
 import com.greenlink.greenlink.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +39,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class IotAppService {
+
+    private static final double WATERING_SAFETY_MARGIN_PERCENT = 10.0;
 
     private final UserRepository userRepository;
     private final UserPlantRepository userPlantRepository;
@@ -47,6 +53,7 @@ public class IotAppService {
     private final PumpChannelRepository pumpChannelRepository;
     private final DeviceCommandRepository deviceCommandRepository;
     private final IotDeviceRepository iotDeviceRepository;
+    private final AutomationSettingRepository automationSettingRepository;
 
     /**
      * 내 식물 IoT 최신 상태 조회
@@ -161,6 +168,8 @@ public class IotAppService {
 
         validateNoPendingWaterCommand(userPlant);
 
+        validateWateringSafety(userPlant);
+
         DeviceCommand command = DeviceCommand.createWaterCommand(
                 growSpace,
                 userPlant,
@@ -195,6 +204,41 @@ public class IotAppService {
                 userPlantId,
                 CommandType.LIGHT_OFF
         );
+    }
+
+    @Transactional
+    public IotAppDto.DeviceCommandResDto requestSensorRefresh(
+            Long userPlantId,
+            Long userId
+    ) {
+        UserPlant userPlant = findUserPlantOrNotFound(userPlantId);
+
+        User user = findActiveUser(userId);
+
+        if (!userPlant.isOwner(user)) {
+            throw new AccessDeniedException("해당 식물에 접근할 권한이 없습니다.");
+        }
+
+        GrowSpace growSpace = findGrowSpaceForSensorRefresh(userPlant);
+
+        IotDevice raspberryDevice = iotDeviceRepository
+                .findFirstByGrowSpaceAndDeviceTypeAndActiveTrueAndDeletedFalse(
+                        growSpace,
+                        DeviceType.RASPBERRY_PI
+                )
+                .orElseThrow(() -> new IllegalArgumentException("연결된 Pi 장치가 없습니다."));
+
+        validateNoPendingSensorRefreshCommand(raspberryDevice);
+
+        DeviceCommand command = DeviceCommand.createSensorRefreshCommand(
+                growSpace,
+                userPlant,
+                raspberryDevice
+        );
+
+        DeviceCommand savedCommand = deviceCommandRepository.save(command);
+
+        return IotAppDto.DeviceCommandResDto.fromSensorRefresh(savedCommand);
     }
 
     private IotAppDto.LightCommandResDto requestLightCommand(
@@ -288,6 +332,55 @@ public class IotAppService {
         }
     }
 
+    private void validateWateringSafety(UserPlant userPlant) {
+        AutomationSetting setting = automationSettingRepository
+                .findByUserPlantAndDeletedFalse(userPlant)
+                .orElse(null);
+
+        if (setting == null || !setting.isWateringSafetyEnabled()) {
+            return;
+        }
+
+        EspSensorData latestSoil = espSensorDataRepository
+                .findFirstByUserPlantAndDeletedFalseOrderByMeasuredAtDesc(userPlant)
+                .orElse(null);
+
+        if (latestSoil == null || latestSoil.getSoilMoisturePercent() == null) {
+            return;
+        }
+
+        double waterThreshold = setting.getWaterThresholdPercent() == null
+                ? 35.0
+                : setting.getWaterThresholdPercent();
+
+        double safetyThreshold = waterThreshold + WATERING_SAFETY_MARGIN_PERCENT;
+
+        if (latestSoil.getSoilMoisturePercent() >= safetyThreshold) {
+            throw new IllegalArgumentException("토양 수분이 충분하여 급수가 차단되었습니다.");
+        }
+    }
+
+    private void validateNoPendingSensorRefreshCommand(IotDevice raspberryDevice) {
+        boolean exists = deviceCommandRepository
+                .existsByIotDeviceAndCommandTypeAndCommandStatusInAndDeletedFalse(
+                        raspberryDevice,
+                        CommandType.SENSOR_REFRESH,
+                        List.of(CommandStatus.PENDING, CommandStatus.PROCESSING)
+                );
+
+        if (exists) {
+            throw new IllegalStateException("이미 센서 새로고침이 진행 중입니다.");
+        }
+    }
+
+    private GrowSpace findGrowSpaceForSensorRefresh(UserPlant userPlant) {
+        GrowSpacePlant growSpacePlant = growSpacePlantRepository
+                .findByUserPlantAndActiveTrueAndDeletedFalse(userPlant)
+                .orElseThrow(() -> new IllegalArgumentException("재배 공간이 연결되지 않았습니다"));
+
+        return growSpacePlant.getGrowSpace();
+    }
+
     private GrowSpace findGrowSpaceByUserPlant(UserPlant userPlant) {
         GrowSpacePlant growSpacePlant = growSpacePlantRepository
                 .findByUserPlantAndActiveTrueAndDeletedFalse(userPlant)
@@ -302,6 +395,11 @@ public class IotAppService {
     ) {
         return userPlantRepository.findByIdAndUserAndDeletedFalse(userPlantId, user)
                 .orElseThrow(() -> new IllegalArgumentException("식물을 찾을 수 없습니다."));
+    }
+
+    private UserPlant findUserPlantOrNotFound(Long userPlantId) {
+        return userPlantRepository.findByIdAndDeletedFalse(userPlantId)
+                .orElseThrow(() -> new EntityNotFoundException("식물을 찾을 수 없습니다."));
     }
 
     private User findActiveUser(Long userId) {

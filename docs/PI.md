@@ -850,7 +850,7 @@ from sensor_uploader import upload_sensor_data_safe
 
 def handle_water_command(command: dict):
     command_id = command.get("commandId")
-    duration_seconds = command.get("durationSeconds", 5)
+    duration_seconds = command.get("durationSeconds", 1)
 
     pump_channel = command.get("pumpChannel") or {}
     gpio_pin = pump_channel.get("gpioPin")

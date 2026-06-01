@@ -96,15 +96,15 @@ if __name__ == "__main__":
     try:
         all_off()
 
-        input("LED 테스트: 엔터를 누르면 LED가 2초 켜집니다.")
+        input("LED 수동 확인: 엔터를 누르면 LED가 2초 켜집니다.")
         led_on()
         sleep(2)
         led_off()
 
-        input("바질 펌프 테스트: 엔터를 누르면 바질 펌프가 1초 켜집니다.")
+        input("바질 펌프 수동 확인: 엔터를 누르면 바질 펌프가 1초 켜집니다.")
         pump_for_gpio(RELAY_BASIL_PUMP_GPIO, 1)
 
-        input("해바라기 펌프 테스트: 엔터를 누르면 해바라기 펌프가 1초 켜집니다.")
+        input("해바라기 펌프 수동 확인: 엔터를 누르면 해바라기 펌프가 1초 켜집니다.")
         pump_for_gpio(RELAY_SUNFLOWER_PUMP_GPIO, 1)
 
     finally:

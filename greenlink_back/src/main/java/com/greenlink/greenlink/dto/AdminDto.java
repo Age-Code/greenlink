@@ -239,7 +239,6 @@ public class AdminDto {
         private Long deviceId;
         private String deviceName;
         private com.greenlink.greenlink.domain.iot.DeviceType deviceType;
-        private String deviceKey;
         private Boolean active;
         private Long growSpaceId;
         private Long userPlantId;
@@ -252,7 +251,6 @@ public class AdminDto {
                     .deviceId(iotDevice.getId())
                     .deviceName(iotDevice.getDeviceName())
                     .deviceType(iotDevice.getDeviceType())
-                    .deviceKey(iotDevice.getDeviceKey())
                     .active(iotDevice.getActive())
                     .growSpaceId(growSpaceId)
                     .userPlantId(userPlantId)

@@ -144,6 +144,7 @@ public class UserPlantService {
         userPlant.harvest(LocalDateTime.now());
 
         questProgressService.increaseProgress(user, TargetType.HARVEST, 1);
+        questProgressService.increaseProgress(user, TargetType.GROW_PLANT, 1);
 
         return UserPlantDto.HarvestResDto.from(userPlant);
     }

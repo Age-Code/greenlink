@@ -68,7 +68,7 @@ public class IotAppController {
      *
      * Request Body 없음.
      *
-     * 서버에서 고정 급수 시간 5초로 DeviceCommand를 생성한다.
+     * 서버에서 고정 급수 시간 1초로 DeviceCommand를 생성한다.
      */
     @PostMapping("/water")
     public ApiResponse<IotAppDto.WaterCommandResDto> requestWater(
@@ -120,5 +120,24 @@ public class IotAppController {
                 );
 
         return ApiResponse.success("조명 끄기 명령이 요청되었습니다.", response);
+    }
+
+    /**
+     * 센서 새로고침 요청
+     *
+     * POST /api/user-plants/{userPlantId}/iot/refresh
+     */
+    @PostMapping("/refresh")
+    public ApiResponse<IotAppDto.DeviceCommandResDto> requestSensorRefresh(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long userPlantId
+    ) {
+        IotAppDto.DeviceCommandResDto response =
+                iotAppService.requestSensorRefresh(
+                        userPlantId,
+                        userDetails.getUserId()
+                );
+
+        return ApiResponse.success("센서 새로고침 명령이 요청되었습니다.", response);
     }
 }

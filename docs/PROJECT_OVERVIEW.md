@@ -263,7 +263,7 @@ Python 패키지 manifest, Pi/AI의 systemd unit, 백엔드 DB 자격 설정의 
 | ESP와 Pi 설정 코드에 Wi-Fi/장치 인증/접속 관련 고정값이 포함된다. | 장치 가장 또는 서버 노출 위험 | provisioning 및 환경 파일로 외부화, 키 회전 |
 | Flutter가 token 일부를 debug log에 출력하고 소셜 설정값을 소스에 둔다. | 로그/소스 배포 시 노출 위험 | token 로그 제거, build-time config 사용 |
 | Frontend의 센서 refresh 경로는 backend controller에서 확인되지 않고 Pi만 `SENSOR_REFRESH` 처리 로직을 가진다. | 화면 버튼 요청 실패 가능 | backend 명령 생성 endpoint 구현 또는 UI 제거 |
-| Backend 주석은 급수 5초이나 `DeviceCommand` 상수는 1초다. | 급수 기대량과 실제 동작 불일치 | 설정값 단일화 및 통합 테스트 |
+| WATER duration 기준은 `DeviceCommand` 상수, Backend 주석, Pi fallback 모두 1초다. | 급수 계약 유지 필요 | 통합 테스트 |
 | Pi `camera_snapshot_main.py`는 코드상 제공되지 않은 stream route를 요청한다. | 해당 대체 촬영 entrypoint 실패 | 라우트 추가 또는 현재 MJPEG 추출 방식으로 통일 |
 | Ubuntu `compose_pot.py` 첫 줄에 비정상 문자가 존재한다. | 파일 import/직접 실행 시 문법 오류 | 문자 제거 후 테스트 |
 | AI 결과 callback API가 공개 허용되어 있고 Worker 실패 callback이 없다. | 임의 결과 저장/처리 상태 불명확 | 서비스 간 인증과 실패 상태 저장 추가 |

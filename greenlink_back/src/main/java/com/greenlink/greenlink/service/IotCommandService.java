@@ -1,8 +1,10 @@
 package com.greenlink.greenlink.service;
 
 import com.greenlink.greenlink.domain.iot.CommandStatus;
+import com.greenlink.greenlink.domain.iot.CommandType;
 import com.greenlink.greenlink.domain.iot.DeviceCommand;
 import com.greenlink.greenlink.domain.iot.IotDevice;
+import com.greenlink.greenlink.domain.quest.TargetType;
 import com.greenlink.greenlink.dto.iot.IotDeviceDto;
 import com.greenlink.greenlink.repository.DeviceCommandRepository;
 import com.greenlink.greenlink.repository.IotDeviceRepository;
@@ -19,6 +21,7 @@ public class IotCommandService {
 
     private final IotDeviceRepository iotDeviceRepository;
     private final DeviceCommandRepository deviceCommandRepository;
+    private final QuestProgressService questProgressService;
 
     /**
      * 라즈베리파이 대기 명령 조회
@@ -95,6 +98,7 @@ public class IotCommandService {
                             ? "명령 처리 성공"
                             : resultMessage
             );
+            increaseWateringQuestProgressIfNeeded(command);
         } else {
             command.completeFailed(
                     resultMessage == null || resultMessage.isBlank()
@@ -104,6 +108,18 @@ public class IotCommandService {
         }
 
         return IotDeviceDto.CommandCompleteResDto.from(command);
+    }
+
+    private void increaseWateringQuestProgressIfNeeded(DeviceCommand command) {
+        if (command.getCommandType() != CommandType.WATER) {
+            return;
+        }
+
+        questProgressService.increaseProgress(
+                command.getUserPlant().getUser(),
+                TargetType.WATERING,
+                1
+        );
     }
 
     private DeviceCommand findCommandForDevice(

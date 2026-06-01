@@ -5,7 +5,6 @@ import 'home/home_page.dart';
 import 'inventory/inventory_page.dart';
 import 'collection/collection_page.dart';
 import 'quest/quest_page.dart';
-import '../widgets/debug_panel.dart';
 
 // ============================================================
 // MainPage — 하단 네비게이션 구조
@@ -85,14 +84,6 @@ class _MainPageState extends State<MainPage> {
       body: IndexedStack(
         index: _currentIndex,
         children: _pages,
-      ),
-      // 🔧 DEV: Debug 버튼 (출시 전 제거)
-      floatingActionButton: FloatingActionButton.small(
-        heroTag: 'debug_fab',
-        onPressed: () => showDebugPanel(context),
-        backgroundColor: AppColors.surfaceDark,
-        tooltip: 'Debug Panel',
-        child: const Icon(Icons.bug_report, color: AppColors.primaryOnDark, size: 18),
       ),
       bottomNavigationBar: _buildBottomNav(),
     );

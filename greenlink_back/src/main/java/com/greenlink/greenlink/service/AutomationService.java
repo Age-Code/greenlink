@@ -43,6 +43,7 @@ import java.util.List;
 public class AutomationService {
 
     private static final double MODEL_CONFIDENCE_THRESHOLD = 0.6;
+    private static final double WATERING_SAFETY_MARGIN_PERCENT = 10.0;
 
     private final AutomationSettingRepository automationSettingRepository;
     private final AutomationLogRepository automationLogRepository;
@@ -104,6 +105,10 @@ public class AutomationService {
                 request.getDecisionMode(),
                 request.getMinLearningDataCount()
         );
+
+        if (request.getWateringSafetyEnabled() != null) {
+            setting.updateWateringSafetyEnabled(request.getWateringSafetyEnabled());
+        }
 
         return AutomationDto.SettingResDto.from(setting);
     }
@@ -202,6 +207,25 @@ public class AutomationService {
                     "토양수분이 기준값보다 높아 자동 급수를 실행하지 않습니다."
             );
             return;
+        }
+
+        if (setting.isWateringSafetyEnabled()) {
+            double safetyThreshold = resolveWateringSafetyThreshold(setting);
+
+            if (soilMoisturePercent >= safetyThreshold) {
+                saveSkipLog(
+                        userPlant,
+                        AutomationType.SKIP_WATER,
+                        TriggerSensorType.SOIL_MOISTURE,
+                        soilMoisturePercent,
+                        safetyThreshold,
+                        String.format(
+                                "과습 안전 모드: 토양 수분 %.1f%%로 급수 차단",
+                                soilMoisturePercent
+                        )
+                );
+                return;
+            }
         }
 
         if (hasRunningCommand(userPlant, CommandType.WATER)) {
@@ -563,6 +587,16 @@ public class AutomationService {
         }
 
         return model.getRecommendedWaterThresholdPercent();
+    }
+
+    private double resolveWateringSafetyThreshold(AutomationSetting setting) {
+        Double waterThresholdPercent = setting.getWaterThresholdPercent();
+
+        if (waterThresholdPercent == null) {
+            waterThresholdPercent = 35.0;
+        }
+
+        return waterThresholdPercent + WATERING_SAFETY_MARGIN_PERCENT;
     }
 
     /**

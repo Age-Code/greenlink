@@ -52,6 +52,12 @@ public interface DeviceCommandRepository extends JpaRepository<DeviceCommand, Lo
             Collection<CommandStatus> commandStatuses
     );
 
+    boolean existsByIotDeviceAndCommandTypeAndCommandStatusInAndDeletedFalse(
+            IotDevice iotDevice,
+            CommandType commandType,
+            Collection<CommandStatus> commandStatuses
+    );
+
     boolean existsByPumpChannelAndCommandTypeAndCommandStatusInAndDeletedFalse(
             PumpChannel pumpChannel,
             CommandType commandType,

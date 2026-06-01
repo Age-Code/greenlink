@@ -11,6 +11,7 @@ import com.greenlink.greenlink.domain.ai.AiPlantImage;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class IotAppDto {
 
@@ -197,7 +198,7 @@ public class IotAppDto {
      * POST /api/user-plants/{userPlantId}/iot/water
      *
      * Request Body는 없다.
-     * 서버에서 고정 급수 시간 5초로 DeviceCommand를 생성한다.
+     * 서버에서 고정 급수 시간 1초로 DeviceCommand를 생성한다.
      */
     @Getter
     @Setter
@@ -263,6 +264,56 @@ public class IotAppDto {
                     .commandType(command.getCommandType())
                     .commandStatus(command.getCommandStatus())
                     .requestedAt(command.getRequestedAt())
+                    .build();
+        }
+    }
+
+    /**
+     * 공통 장치 명령 응답 DTO
+     *
+     * POST /api/user-plants/{userPlantId}/iot/refresh
+     */
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class DeviceCommandResDto {
+        private Long commandId;
+        private Long userPlantId;
+        private Long growSpaceId;
+        private Long deviceId;
+        private Long pumpChannelId;
+        private CommandType commandType;
+        private CommandStatus commandStatus;
+        private Integer durationSeconds;
+        private LocalDateTime requestedAt;
+        private String target;
+        private Boolean alreadyPending;
+        private String duplicateReason;
+        private List<String> refreshTargets;
+        private List<String> excludedTargets;
+
+        public static DeviceCommandResDto fromSensorRefresh(DeviceCommand command) {
+            Long pumpChannelId = command.getPumpChannel() == null
+                    ? null
+                    : command.getPumpChannel().getId();
+
+            return DeviceCommandResDto.builder()
+                    .commandId(command.getId())
+                    .userPlantId(command.getUserPlant().getId())
+                    .growSpaceId(command.getGrowSpace().getId())
+                    .deviceId(command.getIotDevice().getId())
+                    .pumpChannelId(pumpChannelId)
+                    .commandType(command.getCommandType())
+                    .commandStatus(command.getCommandStatus())
+                    .durationSeconds(command.getDurationSeconds())
+                    .requestedAt(command.getRequestedAt())
+                    .target("RASPBERRY_ENVIRONMENT")
+                    .alreadyPending(false)
+                    .duplicateReason(null)
+                    .refreshTargets(List.of("temperature", "humidity", "light"))
+                    .excludedTargets(List.of("soilMoisture"))
                     .build();
         }
     }

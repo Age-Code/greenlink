@@ -229,10 +229,10 @@ sequenceDiagram
 * 실행 흐름: 최종 PNG를 객체 저장소에 업로드하고 URL을 구성한 뒤 백엔드 결과 endpoint에 POST합니다.
 * 입력값: 최종 PNG, 저장 key, plant image ID.
 * 출력값: 최종 이미지 URL과 백엔드 연결 완료 결과.
-* 내부 처리 과정: boto3 client 구성, content type을 포함한 upload, callback JSON 전송.
+* 내부 처리 과정: boto3 client 구성, content type을 포함한 upload, `X-AI-Worker-Secret` header를 포함한 callback JSON 전송.
 * 예외 처리: 업로드 또는 callback 실패는 작업 예외가 되며 재시도/보상 트랜잭션은 확인되지 않습니다.
 * 다른 기능과의 연결: 백엔드 `AiPlantImage`, Flutter 표시.
-* 주의할 점: callback endpoint의 별도 서비스 인증 검증은 백엔드 코드에서 확인되지 않습니다.
+* 주의할 점: callback endpoint는 백엔드 shared secret header 검증을 통과해야 합니다.
 
 ## 핵심 Function / Class 상세 설명
 
@@ -318,11 +318,11 @@ sequenceDiagram
   1. 환경 변수 기반 저장소 client를 만듭니다.
   2. PNG content type과 함께 파일을 업로드합니다.
   3. 생성된 final URL로 백엔드 callback payload를 만듭니다.
-  4. 결과 endpoint에 POST하여 연결을 저장합니다.
+  4. `X-AI-Worker-Secret` header를 포함해 결과 endpoint에 POST하여 연결을 저장합니다.
 * 관련 데이터: 저장 key, final URL, plant image ID.
 * 의존하는 다른 함수/클래스: `boto3`, `requests`.
 * 에러 처리 방식: 저장 또는 callback 요청 실패가 단건 작업 실패로 처리됩니다.
-* 개선 가능성: 공개 URL 노출 정책, signed access 여부, callback 인증과 재시도/중복 방지 전략을 명시해야 합니다.
+* 개선 가능성: 공개 URL 노출 정책, signed access 여부, callback 재시도/중복 방지 전략을 명시해야 합니다.
 
 ## 모델 파일, 학습 파일 및 보조 코드
 
@@ -370,7 +370,7 @@ sequenceDiagram
 | 의존성/배포 정의 없음 | 패키지 선언, Docker, service 파일 미확인 | requirements lock, container 또는 systemd 정의 추가 |
 | 서버 주소 코드 포함 | `process_one.py`의 기본 backend 설정 | 환경 변수로 이동하고 환경별 설정 분리 |
 | worker 접근 인증 부재 | `/process`에 인증 검사 확인되지 않음 | Pi 전용 인증 또는 서명, 네트워크 제한 필요 |
-| backend callback 인증 부재 | 결과 POST는 URL만 전달 | 상호 서비스 인증 및 idempotency key 추가 |
+| backend callback secret 관리 | 결과 POST는 `X-AI-Worker-Secret` header 필요 | 운영 secret 외부화/회전 및 idempotency key 추가 |
 | 비영속 background task | FastAPI process 내부 작업 | Redis/DB queue 또는 작업 상태 저장으로 복구 가능하게 구성 |
 | 산출물 누적 | `inputs/`, `outputs/` 결과 파일 다수 | cleanup, 보존, 개인정보/이미지 접근 정책 필요 |
 | 화분 제거 품질 | 하단 비율을 단순 투명화 | 식물 손상 여부 테스트와 더 정교한 segmentation 검토 |

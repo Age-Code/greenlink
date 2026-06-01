@@ -28,9 +28,8 @@ public class SecurityConfig {
     }
 
     /**
-     * 나중에 Spring Security의 AuthenticationManager를 사용할 수 있도록 등록.
-     * 현재 로그인은 AuthService에서 직접 PasswordEncoder로 검증하므로 필수는 아니지만,
-     * 확장성을 위해 둔다.
+     * Spring Security AuthenticationManager Bean 등록.
+     * 현재 로그인은 AuthService에서 직접 PasswordEncoder로 검증한다.
      */
     @Bean
     public AuthenticationManager authenticationManager(

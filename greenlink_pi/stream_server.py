@@ -82,8 +82,8 @@ BASIL_CROP = (0.0, 0.0, 0.5, 1.0)
 # ==============================
 # 라벨 표시 여부
 # ==============================
-# 테스트할 때는 True가 좋습니다.
-# 프론트에 넣을 때 라벨이 거슬리면 False로 바꾸면 됩니다.
+# 화면에 식물 라벨을 표시할지 여부입니다.
+# 앱/공개 스트림에서 라벨이 거슬리면 False로 바꾸면 됩니다.
 
 SHOW_LABEL = True
 
@@ -101,7 +101,7 @@ camera_running = False
 
 
 # ==============================
-# HTML 테스트 페이지
+# 로컬 확인용 HTML 페이지
 # ==============================
 
 INDEX_HTML = """
@@ -469,9 +469,9 @@ def main():
 
     print(f"[STREAM] Server starting on {HOST}:{PORT}")
     print("[STREAM] Available streams:")
-    print("  - /stream.mjpg")
-    print("  - /stream/sunflower.mjpg")
-    print("  - /stream/basil.mjpg")
+    print("[STREAM] - /stream.mjpg")
+    print("[STREAM] - /stream/sunflower.mjpg")
+    print("[STREAM] - /stream/basil.mjpg")
 
     app.run(
         host=HOST,

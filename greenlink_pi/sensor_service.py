@@ -119,7 +119,7 @@ def cleanup_sensors():
 if __name__ == "__main__":
     try:
         sensor_data = read_all_sensors()
-        print(sensor_data)
+        print(f"[SENSOR_SERVICE] sensor_data = {sensor_data}")
 
     finally:
         cleanup_sensors()

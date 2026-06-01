@@ -1,7 +1,6 @@
 package com.greenlink.greenlink.service;
 
 import com.greenlink.greenlink.domain.automation.AutomationModel;
-import com.greenlink.greenlink.domain.automation.AutomationModelStatus;
 import com.greenlink.greenlink.domain.automation.AutomationSetting;
 import com.greenlink.greenlink.domain.iot.CommandType;
 import com.greenlink.greenlink.domain.iot.DeviceCommand;

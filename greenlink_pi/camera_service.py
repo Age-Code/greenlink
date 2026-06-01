@@ -1,3 +1,8 @@
+# LEGACY: 직접 Picamera2 still 캡처 방식.
+# 현재 active 경로는 stream_snapshot_service.py (MJPEG 프레임 추출 방식)이다.
+# 이 파일은 현재 cron, systemd, camera_main.py에서 호출되지 않는다.
+# 참조: camera_main.py → stream_snapshot_service.py → stream_server.py
+
 from datetime import datetime
 from pathlib import Path
 import time

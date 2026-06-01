@@ -38,7 +38,7 @@ public interface AutomationLogRepository extends JpaRepository<AutomationLog, Lo
     /**
      * 특정 시간 이후의 자동화 로그 조회
      *
-     * 나중에 학습/분석할 때 최근 7일, 최근 24시간 로그를 볼 수 있게 사용한다.
+     * 학습/분석에서 최근 7일, 최근 24시간 로그를 조회할 때 사용한다.
      */
     List<AutomationLog> findByUserPlantAndCreatedAtAfterAndDeletedFalseOrderByCreatedAtDesc(
             UserPlant userPlant,

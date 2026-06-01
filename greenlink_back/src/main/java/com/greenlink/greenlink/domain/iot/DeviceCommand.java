@@ -56,7 +56,7 @@ public class DeviceCommand {
 
     /**
      * 실제 라즈베리파이가 펌프를 작동시킬 시간
-     * 현재 MVP에서는 서버 고정값 5초를 사용한다.
+     * 현재 MVP에서는 서버 고정값 1초를 사용한다.
      */
     private Integer durationSeconds;
 
@@ -136,6 +136,21 @@ public class DeviceCommand {
                 .iotDevice(raspberryDevice)
                 .pumpChannel(null)
                 .commandType(commandType)
+                .durationSeconds(null)
+                .build();
+    }
+
+    public static DeviceCommand createSensorRefreshCommand(
+            GrowSpace growSpace,
+            UserPlant userPlant,
+            IotDevice raspberryDevice
+    ) {
+        return DeviceCommand.builder()
+                .growSpace(growSpace)
+                .userPlant(userPlant)
+                .iotDevice(raspberryDevice)
+                .pumpChannel(null)
+                .commandType(CommandType.SENSOR_REFRESH)
                 .durationSeconds(null)
                 .build();
     }

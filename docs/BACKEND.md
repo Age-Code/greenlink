@@ -520,7 +520,7 @@ flowchart LR
 | `AutomationSetting` | `lightOnThresholdLux`, `lightOffThresholdLux` | `Double` | `nullable = false` | 기본 `300.0`, `500.0` |
 | `AutomationSetting` | `lightStartTime`, `lightEndTime` | `LocalTime` | `nullable = false` | 기본 `08:00`, `18:00` |
 | `AutomationSetting` | `lightCooldownMinutes` | `Integer` | `nullable = false` | 기본 `10` |
-| `AutomationSetting` | `wateringSafetyEnabled` | - | 코드상 필드 없음 | Flutter model/UI에만 있음 |
+| `AutomationSetting` | `wateringSafetyEnabled` | `boolean` | `nullable = false` | 기본 `false`, 수동/자동 급수 safety 체크 |
 | `AutomationModel` | 추천 임계치 3종 | `Double` | nullable | READY 모델 생성 시 계산값 저장 |
 | `AutomationModel` | `soilDataCount`, `lightDataCount`, `waterCommandCount` | `Integer` | nullable | 학습/부족 데이터 모델 생성 시 저장 |
 | `AutomationModel` | `avgDryRatePerHour`, `avgWaterRecoveryPercent`, `confidenceScore` | `Double` | nullable | `confidenceScore`는 부족/실패 모델에서 `0.0` |
@@ -528,7 +528,7 @@ flowchart LR
 | `AutomationModel` | `trainedFrom`, `trainedTo`, `lastTrainedAt` | `LocalDateTime` | nullable | `lastTrainedAt`은 `@PrePersist`에서 없으면 `now` |
 | `AutomationSetting`, `AutomationModel` | `deleted`, `createdAt`, `modifiedAt` | `Boolean`, `LocalDateTime` | `deleted`, timestamp는 `nullable = false` | `deleted=false`, 생성/수정 시각은 lifecycle callback에서 설정 |
 
-주의할 점: `DeviceCommand` 코드 주석에는 “MVP 서버 고정값 5초”라고 적혀 있지만 실제 WATER 명령 생성 상수는 `1`초입니다. 또한 `AutomationSetting`에는 `wateringSafetyEnabled`가 없으므로 Flutter의 과습 안전 toggle은 현재 Backend 저장/판단에 반영되지 않습니다.
+주의할 점: WATER 명령 생성 상수, API 설명, Pi fallback의 급수 시간 기준은 `1`초입니다. `wateringSafetyEnabled`는 Backend 설정에 저장되며 토양수분이 기준값보다 충분히 높으면 수동/자동 급수를 차단합니다.
 
 ### 장치 명령 데이터 흐름
 
@@ -584,7 +584,7 @@ sequenceDiagram
 | 장치 인증 수준 | 장치 경로는 공개 허용 후 원문 장치 키로 검증 | HTTPS 강제, 키 해시 저장/회전, 장치별 권한 및 rate limit 필요 |
 | AI callback 인증 | AI 결과 등록 URL이 공개이며 추가 인증 로직 확인되지 않음 | 작업자 전용 서명 또는 서비스 자격 증명 검증 필요 |
 | SQL/스키마 운영 설정 | `ddl-auto: update`, SQL 출력 활성화 | 운영 DB에는 migration 도구와 로그 민감값 정책 적용 필요 |
-| 명령 지속시간 불일치 | 물주기 코드 기본값은 1초이나 주석/계약 일부는 5초로 설명 | API 문서, DTO 설명, Pi fallback을 하나의 기준으로 맞춰야 함 |
+| 명령 지속시간 기준 | WATER 기본값, API 설명, Pi fallback은 1초로 통일 | 통합 테스트로 계약 유지 필요 |
 | 프론트 계약 불일치 | 앱이 센서 refresh API를 호출하지만 Controller 없음 | API 추가 또는 프론트 호출 제거 후 통합 테스트 필요 |
 | 자동화 필드 불일치 | 앱의 안전 물주기 필드에 대응하는 Backend DTO/Entity 확인되지 않음 | 계약 스키마를 합의하고 저장/반환 테스트 추가 필요 |
 | 관리자 로그인 완결성 | 관리자 로그인 화면은 있으나 form login 비활성 및 대응 POST 경로 확인되지 않음 | 실제 인증 진입 방식을 정리하거나 화면/설정을 일치시켜야 함 |
@@ -1904,7 +1904,7 @@ public class IotAppController {
      *
      * Request Body 없음.
      *
-     * 서버에서 고정 급수 시간 5초로 DeviceCommand를 생성한다.
+     * 서버에서 고정 급수 시간 1초로 DeviceCommand를 생성한다.
      */
     @PostMapping("/water")
     public ApiResponse<IotAppDto.WaterCommandResDto> requestWater(
@@ -3861,7 +3861,7 @@ public class DeviceCommand {
 
     /**
      * 실제 라즈베리파이가 펌프를 작동시킬 시간
-     * 현재 MVP에서는 서버 고정값 5초를 사용한다.
+     * 현재 MVP에서는 서버 고정값 1초를 사용한다.
      */
     private Integer durationSeconds;
 
@@ -6030,7 +6030,6 @@ public class AdminDto {
         private Long deviceId;
         private String deviceName;
         private com.greenlink.greenlink.domain.iot.DeviceType deviceType;
-        private String deviceKey;
         private Boolean active;
         private Long growSpaceId;
         private Long userPlantId;
@@ -6043,7 +6042,6 @@ public class AdminDto {
                     .deviceId(iotDevice.getId())
                     .deviceName(iotDevice.getDeviceName())
                     .deviceType(iotDevice.getDeviceType())
-                    .deviceKey(iotDevice.getDeviceKey())
                     .active(iotDevice.getActive())
                     .growSpaceId(growSpaceId)
                     .userPlantId(userPlantId)
@@ -7953,7 +7951,7 @@ public class IotAppDto {
      * POST /api/user-plants/{userPlantId}/iot/water
      *
      * Request Body는 없다.
-     * 서버에서 고정 급수 시간 5초로 DeviceCommand를 생성한다.
+     * 서버에서 고정 급수 시간 1초로 DeviceCommand를 생성한다.
      */
     @Getter
     @Setter
@@ -8530,7 +8528,6 @@ public class IotSetupDto {
 
         private String deviceName;
         private DeviceType deviceType;
-        private String deviceKey;
 
         private Long growSpaceId;
         private String growSpaceName;
@@ -8568,7 +8565,6 @@ public class IotSetupDto {
                     .deviceId(device.getId())
                     .deviceName(device.getDeviceName())
                     .deviceType(device.getDeviceType())
-                    .deviceKey(device.getDeviceKey())
 
                     .growSpaceId(growSpaceId)
                     .growSpaceName(growSpaceName)
@@ -8642,7 +8638,6 @@ public class IotSetupDto {
 
         private Long raspberryDeviceId;
         private String raspberryDeviceName;
-        private String raspberryDeviceKey;
 
         private String channelName;
         private Integer gpioPin;
@@ -8664,7 +8659,6 @@ public class IotSetupDto {
 
                     .raspberryDeviceId(pumpChannel.getRaspberryDevice().getId())
                     .raspberryDeviceName(pumpChannel.getRaspberryDevice().getDeviceName())
-                    .raspberryDeviceKey(pumpChannel.getRaspberryDevice().getDeviceKey())
 
                     .channelName(pumpChannel.getChannelName())
                     .gpioPin(pumpChannel.getGpioPin())

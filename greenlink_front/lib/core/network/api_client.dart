@@ -19,7 +19,7 @@ class ApiClient {
     final headers = {'Content-Type': 'application/json'};
     if (token != null) {
       headers['Authorization'] = 'Bearer $token';
-      debugPrint('[ApiClient] 🔑 Authorization 헤더 포함됨 (token: ${token.substring(0, token.length.clamp(0, 20))}...)');
+      debugPrint('[ApiClient] 🔑 Authorization 헤더 포함됨');
     } else {
       debugPrint('[ApiClient] ⚠️ Authorization 헤더 없음 — 토큰 미저장 상태');
     }

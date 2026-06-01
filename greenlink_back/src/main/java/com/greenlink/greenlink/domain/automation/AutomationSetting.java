@@ -70,6 +70,16 @@ public class AutomationSetting {
     private Boolean autoOptimizeEnabled = false;
 
     /**
+     * 과습 안전 모드 사용 여부
+     *
+     * true:
+     * - 토양수분이 급수 기준보다 충분히 높으면 수동/자동 급수를 차단
+     */
+    @Column(name = "watering_safety_enabled", nullable = false)
+    @Builder.Default
+    private boolean wateringSafetyEnabled = false;
+
+    /**
      * 자동화 판단 방식
      *
      * RULE_BASED:
@@ -304,6 +314,10 @@ public class AutomationSetting {
         }
     }
 
+    public void updateWateringSafetyEnabled(boolean enabled) {
+        this.wateringSafetyEnabled = enabled;
+    }
+
     /**
      * 학습 결과를 자동 설정값에 반영
      *
@@ -337,6 +351,7 @@ public class AutomationSetting {
                 .autoWaterEnabled(false)
                 .autoLightEnabled(false)
                 .autoOptimizeEnabled(false)
+                .wateringSafetyEnabled(false)
                 .decisionMode(AutomationDecisionMode.HYBRID)
                 .minLearningDataCount(30)
                 .waterThresholdPercent(35.0)

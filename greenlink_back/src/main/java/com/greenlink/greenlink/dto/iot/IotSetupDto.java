@@ -171,7 +171,6 @@ public class IotSetupDto {
 
         private String deviceName;
         private DeviceType deviceType;
-        private String deviceKey;
 
         private Long growSpaceId;
         private String growSpaceName;
@@ -209,7 +208,6 @@ public class IotSetupDto {
                     .deviceId(device.getId())
                     .deviceName(device.getDeviceName())
                     .deviceType(device.getDeviceType())
-                    .deviceKey(device.getDeviceKey())
 
                     .growSpaceId(growSpaceId)
                     .growSpaceName(growSpaceName)
@@ -283,7 +281,6 @@ public class IotSetupDto {
 
         private Long raspberryDeviceId;
         private String raspberryDeviceName;
-        private String raspberryDeviceKey;
 
         private String channelName;
         private Integer gpioPin;
@@ -305,7 +302,6 @@ public class IotSetupDto {
 
                     .raspberryDeviceId(pumpChannel.getRaspberryDevice().getId())
                     .raspberryDeviceName(pumpChannel.getRaspberryDevice().getDeviceName())
-                    .raspberryDeviceKey(pumpChannel.getRaspberryDevice().getDeviceKey())
 
                     .channelName(pumpChannel.getChannelName())
                     .gpioPin(pumpChannel.getGpioPin())

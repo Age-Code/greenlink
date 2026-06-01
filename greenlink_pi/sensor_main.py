@@ -3,11 +3,9 @@ from sensor_uploader import upload_sensor_data_safe
 
 
 def print_sensor_data(sensor_data: dict):
-    print("===== Sensor Data =====")
-    print(f"lightLux: {sensor_data.get('lightLux')}")
-    print(f"temperatureC: {sensor_data.get('temperatureC')}")
-    print(f"humidityPercent: {sensor_data.get('humidityPercent')}")
-    print("=======================")
+    print(f"[SENSOR_MAIN] lightLux = {sensor_data.get('lightLux')}")
+    print(f"[SENSOR_MAIN] temperatureC = {sensor_data.get('temperatureC')}")
+    print(f"[SENSOR_MAIN] humidityPercent = {sensor_data.get('humidityPercent')}")
 
 
 def main():
@@ -16,7 +14,7 @@ def main():
 
         print_sensor_data(sensor_data)
 
-        print("센서 업로드 시작")
+        print("[SENSOR_MAIN] 센서 업로드 시작")
         upload_sensor_data_safe(sensor_data)
 
     finally:

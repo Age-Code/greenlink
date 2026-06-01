@@ -84,20 +84,27 @@ class _IotStatusPageState extends State<IotStatusPage> {
       final res = await _iotService.requestSensorRefresh(widget.userPlantId);
       if (!mounted) return;
 
-      _showSnack(
-        res.message.isNotEmpty ? res.message : '센서 새로고침을 요청했습니다.',
-        success: res.success,
-      );
+      if (res.success) {
+        _showSnack(
+          res.message.isNotEmpty ? res.message : '센서 새로고침을 요청했습니다.',
+          success: true,
+        );
 
-      await Future.delayed(const Duration(seconds: 2));
-      if (!mounted) return;
+        await Future.delayed(const Duration(milliseconds: 2500));
+        if (!mounted) return;
 
-      _hasShownWaterShortageNotice = false;
-      await _loadLatest(showLoading: false);
+        _hasShownWaterShortageNotice = false;
+        await _loadLatest(showLoading: false);
+        return;
+      }
+
+      final message = res.message == '이미 센서 새로고침이 진행 중입니다.'
+          ? '이미 센서 새로고침이 진행 중입니다.'
+          : '센서 새로고침 요청에 실패했습니다.';
+      _showSnack(message, success: false);
     } catch (e) {
       if (!mounted) return;
-      _showSnack('센서 새로고침 중 오류가 발생했습니다.', success: false);
-      await _loadLatest(showLoading: false);
+      _showSnack('센서 새로고침 요청에 실패했습니다.', success: false);
     } finally {
       if (mounted) {
         setState(() => _isSensorRefreshing = false);

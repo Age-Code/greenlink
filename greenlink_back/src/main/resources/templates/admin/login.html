@@ -77,8 +77,8 @@
                 }),
                 success: function(response) {
                     if(response.data && response.data.accessToken) {
-                        // Set cookie with SameSite=Lax and path=/
-                        document.cookie = "jwt_token=" + response.data.accessToken + "; path=/; max-age=86400; SameSite=Lax";
+                        // Set cookie with Secure, SameSite=Strict, and path=/
+                        document.cookie = "jwt_token=" + response.data.accessToken + "; path=/; max-age=86400; Secure; SameSite=Strict";
                         window.location.href = "/admin";
                     } else {
                         $('#errorMessage').show();

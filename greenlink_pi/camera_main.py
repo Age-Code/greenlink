@@ -48,11 +48,9 @@ def upload_snapshot(
     image_path,
     user_plant_id: int
 ):
-    print("====================================")
     print(f"[CAMERA_MAIN] {plant_name} 이미지 업로드 시작")
     print(f"[CAMERA_MAIN] imagePath = {image_path}")
     print(f"[CAMERA_MAIN] userPlantId = {user_plant_id}")
-    print("====================================")
 
     result = upload_image_and_delete_if_success(
         image_path=image_path,
@@ -137,12 +135,10 @@ def main():
     finally:
         delete_file_if_exists(original_frame_path)
 
-    print("====================================")
     print("[CAMERA_MAIN] 아침 스냅샷 업로드 결과")
     for plant_name, success in results:
         status = "성공" if success else "실패"
-        print(f"- {plant_name}: {status}")
-    print("====================================")
+        print(f"[CAMERA_MAIN] {plant_name}: {status}")
 
 
 if __name__ == "__main__":

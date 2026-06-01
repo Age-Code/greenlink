@@ -17,19 +17,17 @@ from sensor_uploader import upload_sensor_data_safe
 
 def handle_water_command(command: dict):
     command_id = command.get("commandId")
-    duration_seconds = command.get("durationSeconds", 5)
+    duration_seconds = command.get("durationSeconds", 1)
 
     pump_channel = command.get("pumpChannel") or {}
     gpio_pin = pump_channel.get("gpioPin")
     relay_channel = pump_channel.get("relayChannel")
 
-    print("====================================")
     print("[COMMAND] WATER 명령 수신")
     print(f"[COMMAND] commandId = {command_id}")
     print(f"[COMMAND] gpioPin = {gpio_pin}")
     print(f"[COMMAND] relayChannel = {relay_channel}")
     print(f"[COMMAND] durationSeconds = {duration_seconds}")
-    print("====================================")
 
     if command_id is None:
         print("[COMMAND] commandId가 없어 명령을 처리할 수 없습니다.")
@@ -89,11 +87,9 @@ def handle_light_command(command: dict):
     command_id = command.get("commandId")
     command_type = command.get("commandType")
 
-    print("====================================")
     print("[COMMAND] 조명 명령 수신")
     print(f"[COMMAND] commandId = {command_id}")
     print(f"[COMMAND] commandType = {command_type}")
-    print("====================================")
 
     if command_id is None:
         print("[COMMAND] commandId가 없어 조명 명령을 처리할 수 없습니다.")
@@ -144,12 +140,10 @@ def handle_light_command(command: dict):
 def handle_sensor_refresh_command(command: dict):
     command_id = command.get("commandId")
 
-    print("====================================")
     print("[COMMAND] SENSOR_REFRESH 명령 수신")
     print(f"[COMMAND] commandId = {command_id}")
     print("[COMMAND] 새로고침 대상: 온도 / 습도 / 조도")
     print("[COMMAND] 제외 대상: ESP32 토양수분")
-    print("====================================")
 
     if command_id is None:
         print("[COMMAND] commandId가 없어 센서 새로고침 명령을 처리할 수 없습니다.")
@@ -162,11 +156,9 @@ def handle_sensor_refresh_command(command: dict):
         print("[SENSOR_REFRESH] Raspberry Pi 센서 측정 시작")
         sensor_data = read_all_sensors()
 
-        print("===== SENSOR_REFRESH DATA =====")
-        print(f"lightLux: {sensor_data.get('lightLux')}")
-        print(f"temperatureC: {sensor_data.get('temperatureC')}")
-        print(f"humidityPercent: {sensor_data.get('humidityPercent')}")
-        print("===============================")
+        print(f"[SENSOR_REFRESH] lightLux = {sensor_data.get('lightLux')}")
+        print(f"[SENSOR_REFRESH] temperatureC = {sensor_data.get('temperatureC')}")
+        print(f"[SENSOR_REFRESH] humidityPercent = {sensor_data.get('humidityPercent')}")
 
         upload_success, upload_body = upload_sensor_data_safe(sensor_data)
 

@@ -34,7 +34,7 @@ GreenLink는 사용자가 앱에서 가상 육성 흐름과 실제 식물 재배
 | 관리자 | 마스터 데이터 생성, 관리자 웹 관리 화면 | ADMIN JWT 권한 전제 |
 | ESP32 센서 장치 | 토양 수분 전송 | 장치 키 |
 | Raspberry Pi 장치 | 환경값/이미지 전송, 명령 조회 및 결과 보고, 영상 stream 제공 | Backend 요청은 장치 키; stream 보호는 확인되지 않음 |
-| Ubuntu AI Worker | 이미지 처리 접수, 변환 결과 callback | Worker와 callback의 별도 서비스 인증은 확인되지 않음 |
+| Ubuntu AI Worker | 이미지 처리 접수, 변환 결과 callback | Backend callback은 `X-AI-Worker-Secret` shared secret header로 검증 |
 | 외부 OAuth 제공자 | 로그인 사용자 프로필 제공 | OAuth 설정 필요 |
 | 외부 이미지/객체 저장 서비스 | 원본/결과 이미지 저장 및 AI 변환 | 별도 자격 증명 필요 |
 
@@ -158,12 +158,12 @@ stateDiagram-v2
 2. 오늘 날짜 기준으로 수확 가능 상태를 갱신합니다.
 3. 아직 성장 중이거나 이미 수확된 식물은 거부합니다.
 4. 수확 시각과 `HARVESTED` 상태를 저장합니다.
-5. `TargetType.HARVEST` 퀘스트 진행도를 1 증가시킵니다.
+5. `TargetType.HARVEST`와 `TargetType.GROW_PLANT` 퀘스트 진행도를 1씩 증가시킵니다.
 6. 컬렉션 조회 시 수확 기록으로 표시됩니다.
 
 **코드상 제한**
 
-`TargetType.GROW_PLANT` enum은 존재하지만, 식재 처리에서 퀘스트 진행도를 증가시키는 호출은 확인되지 않습니다.
+현재 `GROW_PLANT` 진행도는 식재 시점이 아니라 수확 성공 시점에 증가합니다.
 
 ### F-ITEM-01 인벤토리와 아이템 사용
 
@@ -197,8 +197,8 @@ stateDiagram-v2
 | --- | --- | --- |
 | `ATTEND` | 오늘 출석 성공 시 `AttendService`에서 증가 | 구현됨 |
 | `HARVEST` | 식물 수확 성공 시 `UserPlantService`에서 증가 | 구현됨 |
-| `WATERING` | 수동/자동 급수 명령 또는 완료 시 호출 확인되지 않음 | 미연결 |
-| `GROW_PLANT` | 식재 성공 시 호출 확인되지 않음 | 미연결 |
+| `WATERING` | Pi가 WATER 명령 SUCCESS를 보고하면 `IotCommandService`에서 증가 | 구현됨 |
+| `GROW_PLANT` | 식물 수확 성공 시 `UserPlantService`에서 증가 | 구현됨 |
 
 ### F-ATTEND-01 출석
 
@@ -330,9 +330,9 @@ sequenceDiagram
 
 ### 현행 제어 제한과 불일치
 
-* 급수 duration의 실제 Entity 기본값은 1초이나 Controller/DTO 설명에는 5초가 기록되어 있습니다.
-* Pi worker는 응답에 duration이 없을 경우 5초를 fallback으로 사용합니다.
-* 수동 급수 완료 또는 자동 급수에서 `WATERING` 퀘스트 진행 증가 호출은 확인되지 않습니다.
+* 급수 duration은 Entity 기본값, Controller/DTO 설명, Pi fallback 모두 1초로 통일되어 있습니다.
+* Pi worker는 응답에 duration이 없을 경우 1초를 fallback으로 사용합니다.
+* 수동/자동 구분 없이 WATER 명령이 SUCCESS로 완료되면 `WATERING` 퀘스트 진행도가 증가합니다.
 
 ## 12. 자동화 기능
 
@@ -377,9 +377,9 @@ sequenceDiagram
 
 이 기능은 코드상 통계 규칙 기반 임계치 산출입니다. 별도 학습 파일 또는 외부 머신러닝 모델을 학습하는 기능은 확인되지 않습니다.
 
-### 자동화 설정 화면 계약 제한
+### 자동화 설정 화면 계약
 
-Flutter는 `wateringSafetyEnabled` 설정을 표시하고 전송하지만 Backend 설정 DTO와 Entity에는 해당 기능이 없습니다. 따라서 안전 물주기 toggle이 실제 서버 제어 동작에 반영되는 것은 코드상 확인되지 않습니다.
+Flutter의 `wateringSafetyEnabled` 설정은 Backend 설정 DTO와 Entity에 저장되며, 과습 안전 모드가 켜진 경우 수동/자동 급수에서 토양수분 안전 기준을 검사합니다.
 
 ## 13. 카메라 및 AI 이미지 기능
 
@@ -459,7 +459,7 @@ flowchart LR
 | Quest / Attend | 퀘스트/보상, 출석 달력/오늘 출석 | Quest, Attend API | 구현됨 |
 | Plant Detail | 식물 상세, 별명, 수확, IoT/자동화 진입 | UserPlant, IoT, Automation | 구현됨 |
 | IoT Status | 센서값, 이미지/영상, 수동 제어, 갱신 버튼 | IoT API, Pi MJPEG | 갱신 버튼 계약 불완전 |
-| Automation Section | 자동화 toggle/임계치, 학습 모델과 로그 | Automation API | safety 필드 계약 불완전 |
+| Automation Section | 자동화 toggle/임계치, 학습 모델과 로그 | Automation API | 구현됨 |
 | Settings | 로그아웃 중심 동작 | 로컬 토큰 처리 | 사용자 정보 연동 범위 확인 필요 |
 
 ## 16. 상태와 데이터 저장 규칙
@@ -470,7 +470,7 @@ flowchart LR
 | --- | --- | --- |
 | 사용자 식물 | `GROWING`, `HARVESTABLE`, `HARVESTED` | 조회 상태 갱신, 수확 |
 | 사용자 아이템 | `OWNED`, `EQUIPPED`, `USED` | 식재, 화분 장착/해제, 영양제 사용, 보상 |
-| 사용자 퀘스트 | `IN_PROGRESS`, `ACHIEVABLE`, `COMPLETED`, `EXPIRED` | 출석/수확 진행, 기간 만료, 보상 수령 |
+| 사용자 퀘스트 | `IN_PROGRESS`, `ACHIEVABLE`, `COMPLETED`, `EXPIRED` | 출석/수확/WATER 완료 진행, 기간 만료, 보상 수령 |
 | 장치 명령 | `PENDING`, `PROCESSING`, `SUCCESS`, `FAILED`, `CANCELLED` | 앱/자동화 생성, Pi 실행 보고 |
 | 자동화 모델 | `INSUFFICIENT_DATA`, `READY`, `FAILED` | 수동 학습 요청 |
 | AI 이미지 | 결과 상태 필드 포함 | AI callback 저장 |
@@ -492,9 +492,9 @@ flowchart LR
 | --- | --- | --- | --- |
 | GAP-01 | 앱의 IoT sensor refresh API 없음 | Flutter `iot_service.dart`에는 호출, Backend Controller에는 없음 | 갱신 버튼 실패 |
 | GAP-02 | Pi의 `SENSOR_REFRESH` 분기는 있으나 서버 명령 enum/생성 경로 없음 | `command_worker.py` 대 `CommandType.java` | Pi 기능이 도달 불가능 |
-| GAP-03 | `wateringSafetyEnabled`가 앱에만 존재 | Flutter model/service/UI 대 Backend DTO/Entity | toggle 설정이 실제 제어에 반영되지 않음 |
-| GAP-04 | 급수 시간이 설명과 실행 상수에서 다름 | Backend 주석/DTO 대 `DeviceCommand` | 실제 급수량 예상 오류 |
-| GAP-05 | `WATERING`, `GROW_PLANT` 퀘스트 목표 진행 연결 없음 | enum은 있으나 `increaseProgress` 호출은 출석/수확만 확인 | 특정 퀘스트 달성 불가 가능성 |
+| GAP-03 | `wateringSafetyEnabled` Backend 반영 | 자동화 설정 저장, 수동/자동 급수 safety 체크 | 해소됨 |
+| GAP-04 | 급수 시간 기준 1초로 통일됨 | Backend 주석/DTO, `DeviceCommand`, Pi fallback | 해소됨 |
+| GAP-05 | `WATERING`, `GROW_PLANT` 퀘스트 목표 진행 연결 | WATER SUCCESS와 수확 시점에 `increaseProgress` 호출 | 해소됨 |
 | GAP-06 | 관리자 웹 로그인 완료 흐름 확인 안 됨 | form login disabled, 대응 POST 없음 | 관리자 HTML 접근 곤란 |
 | GAP-07 | Pi snapshot 대안 경로가 존재하지 않는 route 사용 | Pi camera scripts | 해당 실행 진입점 실패 |
 
@@ -505,8 +505,8 @@ flowchart LR
 | 우선순위 | 요구사항 | 현재 코드 근거 |
 | --- | --- | --- |
 | 높음 | 장치 키, 서버 주소, JWT/SDK/클라우드 설정은 소스 밖에서 주입하고 기존 노출값은 회전해야 함 | 각 영역 코드에 민감 설정 종류 존재 |
-| 높음 | IoT 구성 응답에서 장치 키를 제거하고 목록 권한을 제한해야 함 | Backend DTO/Service가 credential과 전체 목록 반환 |
-| 높음 | AI worker 요청과 Backend callback에 서비스 인증을 적용해야 함 | 별도 인증 검사 확인되지 않음 |
+| 높음 | IoT 구성 목록 권한을 제한해야 함 | Backend Service가 전체 목록을 반환 |
+| 높음 | AI worker 요청과 Backend callback의 서비스 인증을 운영 secret으로 관리해야 함 | Backend callback은 shared secret header를 검증하며, Worker `/process` 접근 통제는 별도 운영 정책 필요 |
 | 높음 | 앱 로그에서 토큰을 출력하지 않아야 함 | Flutter `ApiClient` |
 | 중간 | 영상 stream 접근 통제를 정의해야 함 | Pi stream route 인증 없음 |
 | 중간 | Pi/AI 작업의 systemd/cron, 재시작, 로그 보존 및 실패 재시도 정책을 명시해야 함 | 실행 스크립트만 있고 운영 정의 없음 |
@@ -536,11 +536,11 @@ flowchart LR
 
 GreenLink는 계정과 육성 게임 기능에 물리 센서/제어 및 이미지 AI 처리를 결합한 시스템으로 구현되어 있습니다. 주요 정상 흐름은 회원가입과 식재, ESP/Pi 센서 저장, 앱 모니터링, 수동 또는 자동 명령 생성, Pi GPIO 실행, 사진 업로드와 AI 결과 표시입니다.
 
-현행 코드에서 제품 동작과 직접 충돌하는 부분은 센서 refresh, 자동화 안전 toggle, 급수 지속시간, 일부 퀘스트 trigger, 관리자 로그인 및 Pi snapshot 경로입니다. 운영 전에는 장치 키 노출과 AI/영상 접근 인증도 우선 수정 대상입니다.
+현행 코드에서 제품 동작과 직접 충돌하는 부분은 센서 refresh, 자동화 안전 toggle, 관리자 로그인 및 Pi snapshot 경로입니다. 운영 전에는 장치 키 소스 노출과 AI/영상 접근 인증도 우선 수정 대상입니다.
 
 ## 21. 추가로 확인하면 좋은 점
 
-* 미연결 퀘스트 목표(`WATERING`, `GROW_PLANT`)를 실제 기능으로 제공할지와 진행 시점.
+* `GROW_PLANT` 퀘스트를 현재처럼 수확 시점에 유지할지, 별도 식재 시점으로 분리할지.
 * sensor refresh를 Backend 명령으로 정식 추가할지 앱에서 제거할지.
 * 자동 물주기 안전 설정과 물리적 최대 작동 제한의 최종 요구사항.
 * 공간 공용 조명에 여러 식물 설정이 적용될 때의 우선순위 정책.
