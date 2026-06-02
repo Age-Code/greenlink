@@ -117,7 +117,7 @@ public class AutomationService {
         UserPlant userPlant = findMyUserPlant(userPlantId, user);
 
         return automationLogRepository
-                .findTop30ByUserPlantAndDeletedFalseOrderByCreatedAtDesc(userPlant)
+                .findTop5ByUserPlantAndDeletedFalseOrderByCreatedAtDesc(userPlant)
                 .stream()
                 .map(AutomationDto.LogResDto::from)
                 .toList();
@@ -127,24 +127,28 @@ public class AutomationService {
     @Transactional
     public void evaluateAutoWater(EspSensorData sensorData) {
         if (sensorData == null) {
+            System.out.println("[AUTO_WATER] SKIP — sensorData=null");
             return;
         }
 
         UserPlant userPlant = sensorData.getUserPlant();
 
         if (userPlant == null) {
+            System.out.println("[AUTO_WATER] SKIP — userPlant=null");
             return;
         }
 
         User user = userPlant.getUser();
 
         if (user == null) {
+            System.out.println("[AUTO_WATER] SKIP — user=null (userPlantId=" + userPlant.getId() + ")");
             return;
         }
 
         GrowSpace growSpace = sensorData.getGrowSpace();
 
         if (growSpace == null) {
+            System.out.println("[AUTO_WATER] SKIP — growSpace=null (userPlantId=" + userPlant.getId() + ")");
             saveSkipLog(
                     userPlant,
                     AutomationType.SKIP_WATER,
@@ -162,6 +166,7 @@ public class AutomationService {
         Double waterThreshold = resolveWaterThreshold(userPlant, setting);
 
         if (soilMoisturePercent == null) {
+            System.out.println("[AUTO_WATER] SKIP — soilMoisturePercent=null (userPlantId=" + userPlant.getId() + ")");
             saveSkipLog(
                     userPlant,
                     AutomationType.SKIP_WATER,
@@ -174,6 +179,7 @@ public class AutomationService {
         }
 
         if (!Boolean.TRUE.equals(setting.getAutoWaterEnabled())) {
+            System.out.println("[AUTO_WATER] SKIP — autoWaterEnabled=false (userPlantId=" + userPlant.getId() + ")");
             saveSkipLog(
                     userPlant,
                     AutomationType.SKIP_WATER,
@@ -185,7 +191,11 @@ public class AutomationService {
             return;
         }
 
+        System.out.println("[AUTO_WATER] autoWaterEnabled=true, 판단 시작 (userPlantId=" + userPlant.getId() + ")");
+        System.out.println("[AUTO_WATER] 수분=" + soilMoisturePercent + "%, 임계치=" + waterThreshold + "%");
+
         if (soilMoisturePercent > waterThreshold) {
+            System.out.println("[AUTO_WATER] SKIP — 수분이 임계치보다 높아 급수 불필요 (userPlantId=" + userPlant.getId() + ")");
             saveSkipLog(
                     userPlant,
                     AutomationType.SKIP_WATER,
@@ -200,7 +210,11 @@ public class AutomationService {
         if (setting.isWateringSafetyEnabled()) {
             double safetyThreshold = resolveWateringSafetyThreshold(setting);
 
+            System.out.println("[AUTO_WATER] 과습 안전 모드 체크: 수분=" + soilMoisturePercent
+                    + "%, safetyThreshold=" + safetyThreshold + "% (userPlantId=" + userPlant.getId() + ")");
+
             if (soilMoisturePercent >= safetyThreshold) {
+                System.out.println("[AUTO_WATER] SKIP — 과습 안전 모드로 급수 차단 (userPlantId=" + userPlant.getId() + ")");
                 saveSkipLog(
                         userPlant,
                         AutomationType.SKIP_WATER,
@@ -217,6 +231,7 @@ public class AutomationService {
         }
 
         if (hasRunningCommand(userPlant, CommandType.WATER)) {
+            System.out.println("[AUTO_WATER] SKIP — 진행 중 WATER 명령 존재 (userPlantId=" + userPlant.getId() + ")");
             saveSkipLog(
                     userPlant,
                     AutomationType.SKIP_WATER,
@@ -228,11 +243,14 @@ public class AutomationService {
             return;
         }
 
+        System.out.println("[AUTO_WATER] cooldown 체크: 마지막 급수 후 경과 시간 확인 (userPlantId=" + userPlant.getId() + ")");
+
         if (isRecentlyCommandCreated(
                 userPlant,
                 CommandType.WATER,
                 setting.getWaterCooldownMinutes()
         )) {
+            System.out.println("[AUTO_WATER] SKIP — cooldown 미경과 (userPlantId=" + userPlant.getId() + ")");
             saveSkipLog(
                     userPlant,
                     AutomationType.SKIP_WATER,
@@ -252,6 +270,7 @@ public class AutomationService {
                 .orElse(null);
 
         if (raspberryDevice == null) {
+            System.out.println("[AUTO_WATER] SKIP — 활성 Pi 없음 (userPlantId=" + userPlant.getId() + ")");
             saveSkipLog(
                     userPlant,
                     AutomationType.SKIP_WATER,
@@ -271,6 +290,7 @@ public class AutomationService {
                 .orElse(null);
 
         if (pumpChannel == null) {
+            System.out.println("[AUTO_WATER] SKIP — 펌프 채널 없음 (userPlantId=" + userPlant.getId() + ")");
             saveSkipLog(
                     userPlant,
                     AutomationType.SKIP_WATER,
@@ -291,6 +311,9 @@ public class AutomationService {
 
         DeviceCommand savedCommand = deviceCommandRepository.save(command);
 
+        System.out.println("[AUTO_WATER] WATER 명령 생성 완료 (commandId=" + savedCommand.getId()
+                + ", userPlantId=" + userPlant.getId() + ")");
+
         saveExecutedLog(
                 userPlant,
                 AutomationType.AUTO_WATER,
@@ -310,20 +333,25 @@ public class AutomationService {
     @Transactional
     public void evaluateAutoLight(RaspberrySensorData sensorData) {
         if (sensorData == null) {
+            System.out.println("[AUTO_LIGHT] SKIP — sensorData=null");
             return;
         }
 
         GrowSpace growSpace = sensorData.getGrowSpace();
 
         if (growSpace == null) {
+            System.out.println("[AUTO_LIGHT] SKIP — growSpace=null");
             return;
         }
 
         Double light = sensorData.getLight();
 
         if (light == null) {
+            System.out.println("[AUTO_LIGHT] SKIP — light=null (growSpaceId=" + growSpace.getId() + ")");
             return;
         }
+
+        System.out.println("[AUTO_LIGHT] 판단 시작: 조도=" + light + " lux (growSpaceId=" + growSpace.getId() + ")");
 
         IotDevice raspberryDevice = iotDeviceRepository
                 .findFirstByGrowSpaceAndDeviceTypeAndActiveTrueAndDeletedFalse(
@@ -333,6 +361,7 @@ public class AutomationService {
                 .orElse(null);
 
         if (raspberryDevice == null) {
+            System.out.println("[AUTO_LIGHT] SKIP — 활성 Pi 없음 (growSpaceId=" + growSpace.getId() + ")");
             return;
         }
 
@@ -340,6 +369,7 @@ public class AutomationService {
                 growSpacePlantRepository.findByGrowSpaceAndActiveTrueAndDeletedFalse(growSpace);
 
         if (growSpacePlants.isEmpty()) {
+            System.out.println("[AUTO_LIGHT] SKIP — growSpace에 활성 식물 없음 (growSpaceId=" + growSpace.getId() + ")");
             return;
         }
 
@@ -347,6 +377,7 @@ public class AutomationService {
             UserPlant userPlant = growSpacePlant.getUserPlant();
 
             if (userPlant == null || userPlant.getUser() == null) {
+                System.out.println("[AUTO_LIGHT] SKIP — userPlant 또는 user 없음 (growSpaceId=" + growSpace.getId() + ")");
                 continue;
             }
 
@@ -373,6 +404,7 @@ public class AutomationService {
         Double lightOffThreshold = resolveLightOffThreshold(userPlant, setting);
 
         if (!Boolean.TRUE.equals(setting.getAutoLightEnabled())) {
+            System.out.println("[AUTO_LIGHT] SKIP — autoLightEnabled=false (userPlantId=" + userPlant.getId() + ")");
             saveSkipLog(
                     userPlant,
                     AutomationType.SKIP_LIGHT,
@@ -384,6 +416,10 @@ public class AutomationService {
             return;
         }
 
+        System.out.println("[AUTO_LIGHT] autoLightEnabled=true, 판단 시작 (userPlantId=" + userPlant.getId() + ")");
+        System.out.println("[AUTO_LIGHT] 조도=" + light + ", ON임계치=" + lightOnThreshold
+                + ", OFF임계치=" + lightOffThreshold + " (userPlantId=" + userPlant.getId() + ")");
+
         LocalTime now = LocalTime.now();
 
         boolean inLightTime = isTimeWithinRange(
@@ -392,7 +428,12 @@ public class AutomationService {
                 setting.getLightEndTime()
         );
 
+        System.out.println("[AUTO_LIGHT] 시간대 체크: 현재=" + now
+                + ", 허용=" + setting.getLightStartTime() + "~" + setting.getLightEndTime()
+                + " (userPlantId=" + userPlant.getId() + ")");
+
         if (!inLightTime) {
+            System.out.println("[AUTO_LIGHT] 시간대 외 — LIGHT_OFF 판단 진행 (userPlantId=" + userPlant.getId() + ")");
             createLightCommandIfPossible(
                     userPlant,
                     growSpace,
@@ -409,6 +450,7 @@ public class AutomationService {
         }
 
         if (light <= lightOnThreshold) {
+            System.out.println("[AUTO_LIGHT] LIGHT_ON 조건 충족 (userPlantId=" + userPlant.getId() + ")");
             createLightCommandIfPossible(
                     userPlant,
                     growSpace,
@@ -429,6 +471,7 @@ public class AutomationService {
         }
 
         if (light >= lightOffThreshold) {
+            System.out.println("[AUTO_LIGHT] LIGHT_OFF 조건 충족 (userPlantId=" + userPlant.getId() + ")");
             createLightCommandIfPossible(
                     userPlant,
                     growSpace,
@@ -447,6 +490,8 @@ public class AutomationService {
             );
             return;
         }
+
+        System.out.println("[AUTO_LIGHT] SKIP — 조도값이 제어 구간 밖 (userPlantId=" + userPlant.getId() + ")");
 
         saveSkipLog(
                 userPlant,
@@ -473,6 +518,7 @@ public class AutomationService {
     ) {
         if (hasRunningCommand(userPlant, CommandType.LIGHT_ON)
                 || hasRunningCommand(userPlant, CommandType.LIGHT_OFF)) {
+            System.out.println("[AUTO_LIGHT] SKIP — 진행 중 조명 명령 존재 (userPlantId=" + userPlant.getId() + ")");
             saveSkipLog(
                     userPlant,
                     AutomationType.SKIP_LIGHT,
@@ -483,6 +529,9 @@ public class AutomationService {
             );
             return;
         }
+
+        System.out.println("[AUTO_LIGHT] cooldown 체크: 마지막 조명 명령 후 경과 시간 확인 (commandType="
+                + commandType + ", userPlantId=" + userPlant.getId() + ")");
 
         boolean recentlyLightOn = isRecentlyCommandCreated(
                 userPlant,
@@ -497,6 +546,8 @@ public class AutomationService {
         );
 
         if (recentlyLightOn || recentlyLightOff) {
+            System.out.println("[AUTO_LIGHT] SKIP — cooldown 미경과 (commandType="
+                    + commandType + ", userPlantId=" + userPlant.getId() + ")");
             saveSkipLog(
                     userPlant,
                     AutomationType.SKIP_LIGHT,
@@ -516,6 +567,9 @@ public class AutomationService {
         );
 
         DeviceCommand savedCommand = deviceCommandRepository.save(command);
+
+        System.out.println("[AUTO_LIGHT] " + commandType + " 명령 생성 완료 (commandId="
+                + savedCommand.getId() + ", userPlantId=" + userPlant.getId() + ")");
 
         saveExecutedLog(
                 userPlant,

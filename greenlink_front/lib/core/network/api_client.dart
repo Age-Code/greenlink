@@ -31,8 +31,11 @@ class ApiClient {
     final url = '$baseUrl$path';
     debugPrint('[ApiClient] → GET $url');
     try {
-      final response = await http.get(Uri.parse(url), headers: await _getHeaders());
-      return _processResponse('GET', url, response);
+      final response = await http.get(
+        Uri.parse(url),
+        headers: await _getHeaders(),
+      );
+      return await _processResponse('GET', url, response);
     } catch (e) {
       debugPrint('[ApiClient] ❌ GET $url 네트워크 오류: $e');
       return {'success': false, 'message': '네트워크 연결을 확인해주세요. ($e)'};
@@ -50,7 +53,7 @@ class ApiClient {
         headers: await _getHeaders(),
         body: body != null ? jsonEncode(body) : null,
       );
-      return _processResponse('POST', url, response);
+      return await _processResponse('POST', url, response);
     } catch (e) {
       debugPrint('[ApiClient] ❌ POST $url 네트워크 오류: $e');
       return {'success': false, 'message': '네트워크 연결을 확인해주세요. ($e)'};
@@ -68,38 +71,52 @@ class ApiClient {
         headers: await _getHeaders(),
         body: body != null ? jsonEncode(body) : null,
       );
-      return _processResponse('PATCH', url, response);
+      return await _processResponse('PATCH', url, response);
     } catch (e) {
       debugPrint('[ApiClient] ❌ PATCH $url 네트워크 오류: $e');
       return {'success': false, 'message': '네트워크 연결을 확인해주세요. ($e)'};
     }
   }
 
-  // HTTP 응답 처리 — 성공/401/오류 응답을 공통 형태로 변환
-  dynamic _processResponse(String method, String url, http.Response response) {
+  // HTTP 응답 처리 — 401이면 저장 토큰 삭제 후 로그인 이동 콜백 호출
+  Future<dynamic> _processResponse(
+    String method,
+    String url,
+    http.Response response,
+  ) async {
     debugPrint('[ApiClient] ← $method $url → ${response.statusCode}');
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isNotEmpty) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-        debugPrint('[ApiClient]   ✅ success=${decoded['success']} message=${decoded['message']}');
+        debugPrint(
+          '[ApiClient]   ✅ success=${decoded['success']} message=${decoded['message']}',
+        );
         return decoded;
       }
       return {'success': true, 'message': '요청 성공'};
     } else if (response.statusCode == 401) {
-      debugPrint('[ApiClient]   🔒 401 Unauthorized — 로그인 필요, onUnauthorized 콜백 호출');
+      debugPrint(
+        '[ApiClient]   🔒 401 Unauthorized — token 삭제 후 onUnauthorized 콜백 호출',
+      );
+      await _tokenStorage.clearAccessToken();
       onUnauthorized?.call();
       return {'success': false, 'message': '로그인이 필요합니다. 다시 로그인해주세요.'};
     } else {
       if (response.body.isNotEmpty) {
         try {
           final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-          debugPrint('[ApiClient]   ❌ ${response.statusCode} message=${decoded['message']}');
+          debugPrint(
+            '[ApiClient]   ❌ ${response.statusCode} message=${decoded['message']}',
+          );
           return decoded;
         } catch (_) {}
       }
       debugPrint('[ApiClient]   ❌ ${response.statusCode} — 서버 오류');
-      return {'success': false, 'message': '서버 오류가 발생했습니다. (${response.statusCode})'};
+      return {
+        'success': false,
+        'message': '서버 오류가 발생했습니다. (${response.statusCode})',
+      };
     }
   }
 }

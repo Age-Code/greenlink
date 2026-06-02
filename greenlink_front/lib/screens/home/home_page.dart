@@ -79,24 +79,26 @@ class HomePageState extends State<HomePage> {
       if (_userPlants.isEmpty && _homeData!.mainUserPlant != null) {
         final plant = _homeData!.mainUserPlant!;
         if (plant.status == 'GROWING' || plant.status == 'HARVESTABLE') {
-          _userPlants.add(UserPlantSummary(
-            userPlantId: plant.userPlantId,
-            plantId: plant.plantId,
-            plantName: plant.plantName,
-            nickname: plant.nickname,
-            status: plant.status,
-            imageUrl: plant.imageUrl,
-            daysAfterPlanting: plant.daysAfterPlanting,
-            remainingDays: plant.remainingDays,
-          ));
+          _userPlants.add(
+            UserPlantSummary(
+              userPlantId: plant.userPlantId,
+              plantId: plant.plantId,
+              plantName: plant.plantName,
+              nickname: plant.nickname,
+              status: plant.status,
+              imageUrl: plant.imageUrl,
+              daysAfterPlanting: plant.daysAfterPlanting,
+              remainingDays: plant.remainingDays,
+            ),
+          );
         }
       }
 
       if (_userPlants.isNotEmpty) {
         final futures = _userPlants.map(
-          (p) => _iotService.getLatestImageData(p.userPlantId).then(
-                (data) => MapEntry(p.userPlantId, data),
-              ),
+          (p) => _iotService
+              .getLatestImageData(p.userPlantId)
+              .then((data) => MapEntry(p.userPlantId, data)),
         );
         final results = await Future.wait(futures);
         if (!mounted) return;
@@ -115,13 +117,14 @@ class HomePageState extends State<HomePage> {
     if (!mounted) return;
 
     if (res.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('수확이 완료되었습니다!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('수확이 완료되었습니다!')));
       _loadData();
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(res.message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(res.message)));
     }
   }
 
@@ -135,7 +138,10 @@ class HomePageState extends State<HomePage> {
           child: SizedBox(
             width: 28,
             height: 28,
-            child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.primaryStrong),
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              color: AppColors.primaryStrong,
+            ),
           ),
         ),
       );
@@ -148,11 +154,32 @@ class HomePageState extends State<HomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.wifi_off_rounded, size: 48, color: AppColors.bodyMuted),
+              const Icon(
+                Icons.wifi_off_rounded,
+                size: 48,
+                color: AppColors.bodyMuted,
+              ),
               const SizedBox(height: 16),
-              const Text('데이터를 불러오지 못했습니다', style: TextStyle(color: AppColors.bodyMuted)),
+              const Text(
+                '데이터를 불러오지 못했습니다',
+                style: TextStyle(color: AppColors.bodyMuted),
+              ),
               const SizedBox(height: 24),
-              TextButton(onPressed: _loadData, child: const Text('다시 시도')),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(onPressed: _loadData, child: const Text('다시 시도')),
+                  const SizedBox(width: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SettingsPage()),
+                    ),
+                    icon: const Icon(Icons.person_outline_rounded, size: 18),
+                    label: const Text('계정 설정'),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -223,16 +250,25 @@ class HomePageState extends State<HomePage> {
           const SizedBox(width: 8),
           // Avatar / settings
           GestureDetector(
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsPage()),
+            ),
             child: user.profileImageUrl != null
                 ? CircleAvatar(
                     radius: 20,
                     backgroundImage: NetworkImage(user.profileImageUrl!),
                     backgroundColor: AppColors.canvasSoft,
                   )
-                : _IconBtn(icon: Icons.person_outline_rounded, onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
-                  }),
+                : _IconBtn(
+                    icon: Icons.person_outline_rounded,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SettingsPage()),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -253,20 +289,34 @@ class HomePageState extends State<HomePage> {
               decoration: BoxDecoration(
                 color: AppColors.canvasSoft,
                 borderRadius: BorderRadius.circular(36),
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                ),
               ),
-              child: const Icon(Icons.local_florist_outlined, size: 56, color: AppColors.primaryStrong),
+              child: const Icon(
+                Icons.local_florist_outlined,
+                size: 56,
+                color: AppColors.primaryStrong,
+              ),
             ),
             const SizedBox(height: 28),
             const Text(
               '아직 함께하는 식물이 없어요',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.ink),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ink,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             const Text(
               '씨앗을 심고 첫 식물 친구를 만나보세요',
-              style: TextStyle(fontSize: 15, color: AppColors.bodyMuted, height: 1.5),
+              style: TextStyle(
+                fontSize: 15,
+                color: AppColors.bodyMuted,
+                height: 1.5,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 36),
@@ -310,9 +360,12 @@ class HomePageState extends State<HomePage> {
                   }
                   return Center(
                     child: SizedBox(
-                      height: Curves.easeOut.transform(value) *
-                          MediaQuery.of(context).size.height * 0.65,
-                      width: Curves.easeOut.transform(value) *
+                      height:
+                          Curves.easeOut.transform(value) *
+                          MediaQuery.of(context).size.height *
+                          0.65,
+                      width:
+                          Curves.easeOut.transform(value) *
                           MediaQuery.of(context).size.width,
                       child: child,
                     ),
@@ -337,7 +390,9 @@ class HomePageState extends State<HomePage> {
                 height: 6,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(3),
-                  color: isActive ? AppColors.primaryStrong : AppColors.primarySoft,
+                  color: isActive
+                      ? AppColors.primaryStrong
+                      : AppColors.primarySoft,
                 ),
               );
             }),
@@ -377,7 +432,10 @@ class HomePageState extends State<HomePage> {
         onTap: () async {
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => UserPlantDetailPage(userPlantId: plant.userPlantId)),
+            MaterialPageRoute(
+              builder: (_) =>
+                  UserPlantDetailPage(userPlantId: plant.userPlantId),
+            ),
           );
           if (!mounted) return;
           if (result == true) _loadData();
@@ -391,41 +449,52 @@ class HomePageState extends State<HomePage> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: AppColors.canvasSoft,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(23)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(23),
+                  ),
                 ),
                 child: Stack(
                   children: [
                     // Plant image
                     Center(
-                      child: Builder(builder: (context) {
-                        final imgData = _latestImageData[plant.userPlantId];
-                        final displayUrl = getHomePlantImageUrl(
-                          aiImageUrl: imgData?.aiImageUrl,
-                          originalImageUrl: imgData?.imageUrl,
-                        );
-                        if (displayUrl != null) {
-                          return Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Image.network(
-                              displayUrl,
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.eco_rounded,
-                                size: 100,
-                                color: AppColors.primaryStrong,
-                              ),
-                            ),
+                      child: Builder(
+                        builder: (context) {
+                          final imgData = _latestImageData[plant.userPlantId];
+                          final displayUrl = getHomePlantImageUrl(
+                            aiImageUrl: imgData?.aiImageUrl,
+                            originalImageUrl: imgData?.imageUrl,
                           );
-                        }
-                        return const Icon(Icons.eco_rounded, size: 100, color: AppColors.primaryStrong);
-                      }),
+                          if (displayUrl != null) {
+                            return Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Image.network(
+                                displayUrl,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.eco_rounded,
+                                  size: 100,
+                                  color: AppColors.primaryStrong,
+                                ),
+                              ),
+                            );
+                          }
+                          return const Icon(
+                            Icons.eco_rounded,
+                            size: 100,
+                            color: AppColors.primaryStrong,
+                          );
+                        },
+                      ),
                     ),
                     // Image label
                     Positioned(
                       top: 16,
                       left: 16,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.canvas.withValues(alpha: 0.85),
                           borderRadius: BorderRadius.circular(20),
@@ -433,7 +502,11 @@ class HomePageState extends State<HomePage> {
                         ),
                         child: const Text(
                           'AI Growth Image',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.bodyMuted),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.bodyMuted,
+                          ),
                         ),
                       ),
                     ),
@@ -442,7 +515,10 @@ class HomePageState extends State<HomePage> {
                       top: 16,
                       right: 16,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: plant.status == 'HARVESTABLE'
                               ? AppColors.primarySoft
@@ -495,7 +571,10 @@ class HomePageState extends State<HomePage> {
                             const SizedBox(height: 2),
                             Text(
                               plant.plantName,
-                              style: const TextStyle(fontSize: 14, color: AppColors.bodyMuted),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppColors.bodyMuted,
+                              ),
                             ),
                           ],
                         ),
@@ -514,7 +593,10 @@ class HomePageState extends State<HomePage> {
                   const SizedBox(height: 12),
                   Text(
                     remainingText,
-                    style: const TextStyle(fontSize: 14, color: AppColors.bodyMuted),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.bodyMuted,
+                    ),
                   ),
                   if (canHarvest) ...[
                     const SizedBox(height: 16),
@@ -530,7 +612,11 @@ class HomePageState extends State<HomePage> {
                       onPressed: () async {
                         final result = await Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => UserPlantDetailPage(userPlantId: plant.userPlantId)),
+                          MaterialPageRoute(
+                            builder: (_) => UserPlantDetailPage(
+                              userPlantId: plant.userPlantId,
+                            ),
+                          ),
                         );
                         if (!mounted) return;
                         if (result == true) _loadData();

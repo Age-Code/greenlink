@@ -21,6 +21,11 @@ public interface AutomationLogRepository extends JpaRepository<AutomationLog, Lo
             UserPlant userPlant
     );
 
+    // 특정 식물의 자동화 로그 중 최근 5개 조회
+    List<AutomationLog> findTop5ByUserPlantAndDeletedFalseOrderByCreatedAtDesc(
+            UserPlant userPlant
+    );
+
     // 특정 식물의 특정 자동화 타입 로그 조회
     List<AutomationLog> findByUserPlantAndAutomationTypeAndDeletedFalseOrderByCreatedAtDesc(
             UserPlant userPlant,
