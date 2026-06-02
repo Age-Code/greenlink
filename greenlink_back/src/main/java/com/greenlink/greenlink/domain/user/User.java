@@ -44,6 +44,10 @@ public class User extends BaseEntity {
     @Column
     private String profileImageUrl;
 
+    // JWT 무효화용 토큰 버전 — 로그아웃/탈퇴/비밀번호 변경 시 증가
+    @Column(nullable = false)
+    private int tokenVersion = 0;
+
     // User 생성
     private User(
             String email,
@@ -112,5 +116,27 @@ public class User extends BaseEntity {
     // update Nickname 수정
     public void updateNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    // 토큰 버전 증가 — 기존 발급 JWT 무효화
+    public void incrementTokenVersion() {
+        this.tokenVersion++;
+    }
+
+    // 비밀번호 변경 — 기존 발급 JWT 무효화
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+        incrementTokenVersion();
+    }
+
+    // 회원 탈퇴 — soft delete 후 기존 발급 JWT 무효화
+    public void withdraw() {
+        delete();
+        incrementTokenVersion();
+    }
+
+    // 로그아웃 — 기존 발급 JWT 무효화
+    public void logout() {
+        incrementTokenVersion();
     }
 }

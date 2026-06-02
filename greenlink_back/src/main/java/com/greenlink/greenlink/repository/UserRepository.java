@@ -12,6 +12,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // find By Email And Deleted False 조회 — JPA query method
     Optional<User> findByEmailAndDeletedFalse(String email);
 
+    // find By Id And Deleted False 조회 — JPA query method
+    Optional<User> findByIdAndDeletedFalse(Long id);
+
     // exists By Email And Deleted False 존재 여부 조회 — JPA query method
     boolean existsByEmailAndDeletedFalse(String email);
 

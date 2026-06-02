@@ -100,12 +100,12 @@ greenlink_front/
 | `lib/main.dart` | 앱 시작, 테마와 초기 화면, Kakao SDK 초기화 | 높음 | Splash, 인증 |
 | `lib/screens/splash_page.dart` | 저장 토큰 확인 후 로그인 또는 메인으로 이동 | 높음 | `TokenStorage`, `ApiClient` |
 | `lib/screens/main_page.dart` | 하단 탭 기반 주요 화면 컨테이너 | 높음 | 홈, 인벤토리, 컬렉션, 퀘스트 |
-| `lib/core/network/api_client.dart` | 백엔드 HTTP 공통 클라이언트와 인증 헤더/401 처리 | 높음 | 모든 Service |
+| `lib/core/network/api_client.dart` | 백엔드 HTTP 공통 클라이언트와 인증 헤더/401 처리, DELETE 지원 | 높음 | 모든 Service |
 | `lib/core/network/token_storage.dart` | 접근 토큰 저장/조회/삭제 | 높음 | 인증, API |
 | `lib/core/constants/api_paths.dart` | REST 경로 조합 정의 | 높음 | Service |
 | `lib/core/constants/stream_urls.dart` | 카메라 스트림 주소 정의 | 중간 | MJPEG 화면 |
 | `lib/core/config/camera_config.dart` | 식물별 스트림 선택 매핑 | 중간 | IoT 영상 |
-| `lib/services/auth_service.dart` | 회원가입, 로그인, OAuth API 호출 | 높음 | 인증 화면 |
+| `lib/services/auth_service.dart` | 회원가입, 로그인, OAuth, 비밀번호 변경, 탈퇴, 서버 로그아웃 API 호출 | 높음 | 인증/설정 화면 |
 | `lib/services/iot_service.dart` | 최신 센서/사진과 수동 제어 API 호출 | 높음 | IoT 상태 화면 |
 | `lib/services/automation_service.dart` | 자동화 설정/학습/로그/모델 API 호출 | 높음 | 식물 상세 자동화 영역 |
 | `lib/screens/home/**` | 현재 식물 및 이미지 중심 홈 UI | 높음 | Home/Iot 서비스 |
@@ -184,7 +184,7 @@ flowchart TD
 | Planting | 인벤토리/목록에서 이동 | 씨앗으로 새 식물 생성 | user plant screens | `/api/user-plants` |
 | Plant Detail | 홈/목록에서 이동 | 성장/이미지/자동화/IoT 진입 | user plant screens, Automation UI | user plant, IoT, automation API |
 | IoT Status | 상세에서 이동 | 센서값, MJPEG, 물주기/조명 | `MjpegStreamView` | IoT API, Pi stream |
-| Settings | 화면 내 이동 | 사용자 설정/로그아웃 관련 UI | `SettingsPage` | 사용자/토큰 관련 |
+| Settings | 화면 내 이동 | 비밀번호 변경, 회원 탈퇴, 로그아웃 UI | `SettingsPage` | 사용자/토큰 관련 |
 
 ## 사용자 흐름과 운영 방식
 
@@ -229,11 +229,11 @@ sequenceDiagram
 
 ### 공통 클라이언트
 
-`ApiClient`가 GET/POST/PATCH 등 요청을 감싸며 `TokenStorage`에서 토큰을 읽어 Bearer 헤더를 추가합니다. HTTP 401 응답 시 등록된 callback으로 인증 화면 복귀를 유도합니다. 서비스 클래스는 이 클라이언트를 이용해 백엔드 API 경로를 호출하고 모델 객체로 파싱합니다.
+`ApiClient`가 GET/POST/PATCH/DELETE 등 요청을 감싸며 `TokenStorage`에서 토큰을 읽어 Bearer 헤더를 추가합니다. HTTP 401 응답 시 저장 토큰을 삭제하고 등록된 callback으로 인증 화면 복귀를 유도합니다. 서비스 클래스는 이 클라이언트를 이용해 백엔드 API 경로를 호출하고 모델 객체로 파싱합니다.
 
 | Service | 호출 기능 | 핵심 백엔드 경로 |
 | --- | --- | --- |
-| `AuthService` | 가입, 일반 및 소셜 로그인 | `/api/auth/**` |
+| `AuthService` | 가입, 일반 및 소셜 로그인, 비밀번호 변경, 회원 탈퇴, 서버 로그아웃 | `/api/auth/**`, `/api/users/me/**` |
 | `HomeService` | 홈 대표 식물/상태 | `/api/home` |
 | `UserPlantService` | 식재, 목록, 상세, 수정, 수확 | `/api/user-plants/**` |
 | `UserItemService` | 인벤토리와 아이템 사용 | `/api/user-items/**` |
@@ -255,12 +255,12 @@ sequenceDiagram
 ### 로그인 및 세션 유지
 
 * 목적: 사용자 인증 후 보호 API에 접근할 수 있도록 합니다.
-* 관련 파일: `main.dart`, `splash_page.dart`, `auth_service.dart`, 인증 화면, `api_client.dart`, `token_storage.dart`.
-* 실행 흐름: 앱 시작 시 SDK가 초기화되고 Splash가 저장 토큰을 검사합니다. 로그인 요청 성공 시 접근 토큰을 저장하고 메인 화면으로 전환합니다. 이후 요청마다 토큰을 Authorization 헤더에 포함합니다.
+* 관련 파일: `main.dart`, `splash_page.dart`, `settings_page.dart`, `auth_service.dart`, 인증 화면, `api_client.dart`, `token_storage.dart`.
+* 실행 흐름: 앱 시작 시 SDK가 초기화되고 Splash가 저장 토큰을 검사합니다. 로그인 요청 성공 시 접근 토큰을 저장하고 메인 화면으로 전환합니다. 이후 요청마다 토큰을 Authorization 헤더에 포함합니다. 설정 화면은 비밀번호 변경, 회원 탈퇴, 로그아웃 항목을 제공하며 성공 시 로그인 화면으로 이동합니다.
 * 입력값: 이메일/비밀번호 또는 소셜 로그인 인가 정보.
 * 출력값: 로그인 상태, 메인 화면 접근, API 인증 헤더.
-* 내부 처리 과정: JSON 요청, 응답 모델 파싱, SharedPreferences 저장, 401 callback 등록.
-* 예외 처리: API 실패 시 화면 메시지/상태 변경 경로가 있으며 401은 로그인으로 이동합니다.
+* 내부 처리 과정: JSON 요청, 응답 모델 파싱, SharedPreferences 저장/삭제, 401 callback 등록. `AuthService.changePassword()`와 `withdraw()`는 성공 시 로컬 토큰을 삭제합니다. `logout()`은 서버 로그아웃을 호출한 뒤 로컬 토큰을 삭제하며, 서버 호출 실패 시에도 로컬 삭제를 진행합니다.
+* 예외 처리: API 실패 시 화면 메시지/상태 변경 경로가 있으며 401은 토큰 삭제 후 로그인으로 이동합니다. OAuth 유저의 비밀번호 변경은 백엔드 오류 메시지를 스낵바로 표시합니다.
 * 다른 기능과의 연결: 로그인 후 모든 사용자, 식물, IoT, 퀘스트 기능.
 * 주의할 점: 접근 토큰은 보안 전용 저장소가 아닌 `SharedPreferences`에 저장됩니다. 공통 클라이언트의 token substring debug 로그는 제거되어 토큰 값은 출력하지 않습니다.
 
@@ -358,8 +358,8 @@ sequenceDiagram
 * 내부 동작 순서:
   1. 상수로 정의된 base URL과 API path를 결합합니다.
   2. 저장된 토큰이 있으면 Bearer 헤더를 구성합니다.
-  3. HTTP 요청을 수행하고 응답 코드를 평가합니다.
-  4. JSON을 파싱하며 401이면 공통 callback을 실행합니다.
+  3. GET/POST/PATCH/DELETE 요청을 수행하고 응답 코드를 평가합니다.
+  4. JSON을 파싱하며 401이면 저장 토큰을 삭제하고 공통 callback을 실행합니다.
 * 관련 데이터: 접근 토큰, 공통 API 응답 JSON.
 * 의존하는 다른 함수/클래스: `http`, `TokenStorage`, 서비스 객체.
 * 에러 처리 방식: 네트워크/상태 코드 오류를 예외 또는 공통 실패로 전달합니다.

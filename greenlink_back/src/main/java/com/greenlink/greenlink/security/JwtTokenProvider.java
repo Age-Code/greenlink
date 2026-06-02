@@ -29,8 +29,8 @@ public class JwtTokenProvider {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    // create Access Token 생성
-    public String createAccessToken(Long userId, String email, String role) {
+    // create Access Token 생성 — tokenVersion claim 포함
+    public String createAccessToken(Long userId, String email, String role, int tokenVersion) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessTokenValidityMs);
 
@@ -38,6 +38,7 @@ public class JwtTokenProvider {
                 .subject(email)
                 .claim("userId", userId)
                 .claim("role", role)
+                .claim("tokenVersion", tokenVersion)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(secretKey)
@@ -61,6 +62,11 @@ public class JwtTokenProvider {
     public Long getUserId(String token) {
         Claims claims = parseClaims(token);
         return claims.get("userId", Long.class);
+    }
+
+    public int getTokenVersion(String token) {
+        Integer tokenVersion = parseClaims(token).get("tokenVersion", Integer.class);
+        return tokenVersion == null ? -1 : tokenVersion;
     }
 
     // JWT claims 파싱

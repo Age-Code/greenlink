@@ -10,6 +10,9 @@ class ApiPaths {
 
   // User
   static const String userMe = '/users/me';
+  static const String changePassword = '/users/me/password';
+  static const String withdraw = '/users/me';
+  static const String logout = '/users/me/logout';
 
   // Home
   static const String home = '/home';

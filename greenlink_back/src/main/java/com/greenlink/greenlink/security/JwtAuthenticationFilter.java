@@ -1,5 +1,7 @@
 package com.greenlink.greenlink.security;
 
+import com.greenlink.greenlink.domain.user.User;
+import com.greenlink.greenlink.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +23,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserRepository userRepository;
 
     // JWT 인증 필터 처리 — 헤더 또는 cookie 토큰 인증
     @Override
@@ -34,9 +36,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = resolveToken(request);
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            String email = jwtTokenProvider.getEmail(token);
+            Long userId = jwtTokenProvider.getUserId(token);
+            int tokenVersionInJwt = jwtTokenProvider.getTokenVersion(token);
 
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+            User user = userId == null
+                    ? null
+                    : userRepository.findByIdAndDeletedFalse(userId).orElse(null);
+
+            if (user == null || user.getTokenVersion() != tokenVersionInJwt) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            UserDetails userDetails = new CustomUserDetails(user);
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(

@@ -78,6 +78,24 @@ class ApiClient {
     }
   }
 
+  // DELETE 요청 실행 — JSON body 전송 후 공통 응답 처리
+  Future<dynamic> delete(String path, {Map<String, dynamic>? body}) async {
+    final url = '$baseUrl$path';
+    debugPrint('[ApiClient] → DELETE $url');
+    if (body != null) debugPrint('[ApiClient]   body: ${jsonEncode(body)}');
+    try {
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: await _getHeaders(),
+        body: body != null ? jsonEncode(body) : null,
+      );
+      return await _processResponse('DELETE', url, response);
+    } catch (e) {
+      debugPrint('[ApiClient] ❌ DELETE $url 네트워크 오류: $e');
+      return {'success': false, 'message': '네트워크 연결을 확인해주세요. ($e)'};
+    }
+  }
+
   // HTTP 응답 처리 — 401이면 저장 토큰 삭제 후 로그인 이동 콜백 호출
   Future<dynamic> _processResponse(
     String method,

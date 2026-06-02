@@ -103,7 +103,7 @@ Flutter ──직접 MJPEG GET──► Pi Flask stream server(0.0.0.0:8000)
 | --- | --- | --- | --- |
 | F-AUTH-01 | 일반 회원가입/로그인 | 구현됨 | `AuthService`, 인증 화면 |
 | F-AUTH-02 | Kakao/Google OAuth 로그인 | 구현됨(운영 동작 확인) | OAuth service/client, Flutter auth |
-| F-USER-01 | 내 정보 및 닉네임 수정 | Backend 구현됨 | `UserController`, `UserService` |
+| F-USER-01 | 내 정보/닉네임 수정 + 비밀번호 변경 + 회원 탈퇴 + 서버 로그아웃 | 구현됨 | `UserController`, `UserService`, tokenVersion 기반 토큰 무효화 |
 | F-PLANT-01 | 식재, 성장 표시, 별명, 수확 | 구현됨 | `UserPlantService`, Flutter screens |
 | F-ITEM-01 | 인벤토리, 화분, 영양제 | 구현됨 | `UserItemService` |
 | F-QUEST-01 | 퀘스트 목록/상세/보상 | 구현됨(WATERING/GROW_PLANT 진행 연결) | `UserQuestService` |
@@ -416,15 +416,17 @@ greenlink_front/lib/
 
 ### C.1 로그인 / 회원가입 — 현재 기준 반영
 - 근거: FUNCTIONAL_SPEC F-AUTH-01, API_SPEC 6.1, `AuthController`/`AuthService`, Flutter `auth_service.dart`/`login_page`/`signup_page`
-- API: `POST /api/auth/signup`, `POST /api/auth/login`
+- API: `POST /api/auth/signup`, `POST /api/auth/login`, `PATCH /api/users/me/password`, `DELETE /api/users/me`, `POST /api/users/me/logout`
 - DB: `User`, `UserItem`(초기), `UserQuest`(업적)
-- 흐름: 가입 시 이메일 중복검사 → BCrypt → User 저장 → 기본 SEED+POT 지급 → 업적 퀘스트 생성. 로그인 시 BCrypt 검증 → JWT 발급 → shared_preferences 저장
+- 흐름: 가입 시 이메일 중복검사 → BCrypt → User 저장 → 기본 SEED+POT 지급 → 업적 퀘스트 생성. 로그인 시 BCrypt 검증 → tokenVersion claim 포함 JWT 발급 → shared_preferences 저장. 비밀번호 변경/탈퇴/로그아웃은 tokenVersion 증가로 기존 JWT 무효화
 - 주의: 기본 마스터 아이템(SEED/POT) 미생성 시 409
+- 비밀번호 변경: LOCAL 유저만 가능, 현재 비밀번호 검증 후 새 비밀번호(4자 이상) 저장. OAuth 유저는 차단
 
 ### C.2 JWT 인증 — 현재 기준 반영
 - 근거: BACKEND "JwtAuthenticationFilter/JwtTokenProvider", API_SPEC 3.4
 - 전달: `Authorization: Bearer <token>` 또는 `jwt_token` cookie
-- 흐름: 발급 → ApiClient가 헤더 부착 → 필터가 헤더/쿠키에서 추출 → 서명/만료 검증 → CustomUserDetailsService 로드 → SecurityContext
+- 흐름: 발급(tokenVersion claim 포함) → ApiClient가 헤더 부착 → 필터가 헤더/쿠키에서 추출 → 서명/만료 검증 → DB `User.tokenVersion`과 토큰 claim 비교 → 일치 시 SecurityContext 설정
+- 무효화: 로그아웃/탈퇴/비밀번호 변경 시 `User.tokenVersion`이 증가하며 기존 토큰은 불일치로 401 처리
 - 주의: secret이 현재 JAR 내부 application-keys.yaml에 포함 → 외부화 필요
 
 ### C.3 OAuth 로그인 (Kakao/Google) — 현재 기준 반영(운영 동작 확인)
@@ -552,6 +554,9 @@ greenlink_front/lib/
 | D.4 | POST | `/api/auth/oauth/google` | 공개 | `{code,redirectUri}` | D.2와 동일 | 반영 |
 | D.5 | GET | `/api/users/me` | JWT | - | `{userId,email,nickname,role,createdAt}` | 반영 |
 | D.6 | PATCH | `/api/users/me` | JWT | `{nickname}` (≤50) | `{userId,nickname}` | 반영 |
+| D.6a | PATCH | `/api/users/me/password` | JWT | `{currentPassword,newPassword}` | LOCAL만, currentPassword 검증, tokenVersion 증가 | 반영 |
+| D.6b | DELETE | `/api/users/me` | JWT | - | soft delete, tokenVersion 증가 | 반영 |
+| D.6c | POST | `/api/users/me/logout` | JWT | - | 서버측 로그아웃, tokenVersion 증가 | 반영 |
 | D.7 | GET | `/api/home` | JWT | - | `{user, mainUserPlant}` | 반영 |
 | D.8 | GET | `/api/plants` | 공개 | - | `[{plantId,name,category,imageUrl}]` | 반영 |
 | D.9 | GET | `/api/plants/{plantId}` | 공개 | path | +`description,growthDays` | 반영 |
@@ -753,8 +758,9 @@ automationLogId(PK), userPlantId(FK), automationType, triggerSensorType, trigger
 - `application.yaml` — JPA(ddl-auto:update, SQL로그), multipart 20MB, JWT/S3/keys import. 선택 import `yaml/application-keys.yaml`(운영은 JAR 내부 포함). JWT secret 하드코딩(외부화 필요)
 - `SecurityConfig.java` — 공개/JWT/장치/ADMIN 경로 정책. form login 비활성(GAP-06). 공개: auth, 마스터 조회, iot 장치경로, `/api/ai/**`
 - `AiWorkerAuthInterceptor`+`WebMvcConfig` — `/api/ai/**` callback에 `X-AI-Worker-Secret` shared secret header 검증 적용
-- `JwtAuthenticationFilter`/`JwtTokenProvider` — JWT 발급/검증. **Authorization 헤더 + `jwt_token` cookie 둘 다** 추출
+- `JwtAuthenticationFilter`/`JwtTokenProvider` — JWT 발급/검증. **Authorization 헤더 + `jwt_token` cookie 둘 다** 추출, tokenVersion claim과 DB 값 비교
 - `AuthController`+`AuthService` — 가입(이메일 중복/BCrypt/기본 SEED+POT/업적 퀘스트)/로그인/OAuth
+- `UserController`+`UserService` — 내 정보/닉네임, LOCAL 비밀번호 변경, soft delete 탈퇴, tokenVersion 서버 로그아웃
 - `IotDeviceController`+`IotDeviceDataService` — 장치 키 검증, 센서/이미지 저장, lastSeenAt 갱신, 자동화 평가 호출
 - `IotAppController`+`IotAppService` — 최신 IoT 조회, 수동 물/조명 명령 생성
 - `IotCommandService` — 명령 조회/상태 전환
@@ -991,7 +997,7 @@ DeviceCommand 기본값/Controller 주석/Pi fallback을 1초로 일치.
 1. JAR 내부 secret(DB/AWS/OAuth/JWT) 외부화 필요  2. DeviceResDto/PumpChannelResDto deviceKey 제거 완료
 3. /api/ai/** `X-AI-Worker-Secret` 인증 완료  4. Flutter token substring 로그 제거 완료  5. ESP/Pi 자격증명 외부화 필요
 6. Pi MJPEG 접근 통제 필요  7. Lightsail 3306/8080/9000 제한(Pi 경로 조정 후)  8. Backend systemd 등록 완료
-9. 관리자 jwt_token cookie Secure; SameSite=Strict 추가 완료(HttpOnly/CSRF는 별도 검토)
+9. 관리자 jwt_token cookie Secure; SameSite=Strict 추가 완료(HttpOnly/CSRF는 별도 검토)  10. 서버측 로그아웃/토큰 무효화는 User.tokenVersion 방식으로 구현됨
 ```
 
 ---
@@ -1054,13 +1060,13 @@ UFW inactive, AWS CLI 미설치.
 
 1. **핵심 목적**: 앱 식물 육성 + 실 재배 센서/제어 + AI 이미지 변환을 IoT로 연결
 2. **사용 기술**: Java17/Spring Boot 4.0.6/JPA/Security/JWT/BCrypt/S3, MySQL, Flutter(Dart^3.9.2)/Kakao/Google, ESP32(Arduino/PlatformIO), Pi(Python/Flask/Picamera2/gpiozero), Ubuntu AI(FastAPI/rembg u2netp/OpenAI gpt-image-1.5/boto3)
-3. **확정 기능**: 가입/로그인/OAuth/JWT, 식물(식재/조회/수확/별명), 인벤토리(화분/영양제), 퀘스트(ATTEND/HARVEST/WATERING/GROW_PLANT 진행), 출석, 도감, IoT 구성, ESP 토양/Pi 환경 수집, 이미지 업로드/S3, 수동 물주기/조명, 자동 급수/조명, 자동화 학습(통계), AI 변환, MJPEG, 관리자 REST+Thymeleaf
+3. **확정 기능**: 가입/로그인/OAuth/JWT, 회원 기능(비밀번호 변경/회원 탈퇴/서버 로그아웃), 식물(식재/조회/수확/별명), 인벤토리(화분/영양제), 퀘스트(ATTEND/HARVEST/WATERING/GROW_PLANT 진행), 출석, 도감, IoT 구성, ESP 토양/Pi 환경 수집, 이미지 업로드/S3, 수동 물주기/조명, 자동 급수/조명, 자동화 학습(통계), AI 변환, MJPEG, 관리자 REST+Thymeleaf
 4. **부분 확인**: 내 정보 화면 연계, IoT 구성 권한 범위, 물부족 UI 상수(Backend와 별개)
 5. **과거엔 있으나 현재 없음/정정**: FCM(미구현 확정), camera_main --plant(미지원), ESP 직접 펌프(없음), 자체 ML(없음), 친구/공유/그림판(없음), alpha/pot 합성(폐기)
 6. **보류/폐기**: alpha_composite/compose_pot/pot_base/ai_background_remove 삭제됨, camera_snapshot_main 삭제 완료(GAP-07 해소), 팬 제어(없음)
 7. **서버/DB/배포**: Lightsail / Cloudflare→Nginx(443,Certbot)→Spring Boot(127.0.0.1:8080, greenlink-back.service systemd) / MySQL(ddl-auto:update) / secret은 JAR 내부(외부화 필요) / CI/CD 미사용
-8. **프론트**: setState 중심(provider 선언만), ApiClient+JWT, MjpegStreamView. token 로그 제거 완료. GAP-01~05 해소. DebugPanel 삭제
-9. **백엔드**: ApiResponse<T>, JWT(헤더+jwt_token cookie), 자동화는 통계/규칙. 위험: JAR secret(외부화 필요). deviceKey 응답 제거 완료, AI callback 인증 완료
+8. **프론트**: setState 중심(provider 선언만), ApiClient+JWT+DELETE, Settings에서 비밀번호 변경/탈퇴/서버 로그아웃 연결. token 로그 제거 완료. GAP-01~05 해소. DebugPanel 삭제
+9. **백엔드**: ApiResponse<T>, JWT(헤더+jwt_token cookie, tokenVersion 무효화), 자동화는 통계/규칙. 위험: JAR secret(외부화 필요). deviceKey 응답 제거 완료, AI callback 인증 완료
 10. **Pi**: systemd 2개(Restart=always/5s)+cron(센서10분/카메라09·21시), stream 8000, polling 3초, GPIO(LED27/펌프22·23/DHT4/BH1750 0x23), Backend8080·AI9000 직접
 11. **ESP32**: GPIO34 ADC, 10분, soil-moisture POST, 펌프 제어 없음, Wi-Fi 60회 후 restart
 12. **Ubuntu AI**: greenlink-ai.service, uvicorn 0.0.0.0:9000, gpt-image-1.5 edit(image 2장/prompt/input_fidelity=high, 투명 파라미터 없음)

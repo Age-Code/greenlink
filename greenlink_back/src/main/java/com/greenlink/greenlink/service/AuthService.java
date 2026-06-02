@@ -74,7 +74,8 @@ public class AuthService {
         String accessToken = jwtTokenProvider.createAccessToken(
                 user.getId(),
                 user.getEmail(),
-                user.getRole().name()
+                user.getRole().name(),
+                user.getTokenVersion()
         );
 
         return AuthDto.LoginResDto.of(accessToken, user);
@@ -99,7 +100,8 @@ public class AuthService {
         String accessToken = jwtTokenProvider.createAccessToken(
                 user.getId(),
                 user.getEmail(),
-                user.getRole().name()
+                user.getRole().name(),
+                user.getTokenVersion()
         );
 
         return AuthDto.LoginResDto.of(accessToken, user);
